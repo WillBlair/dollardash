@@ -51,7 +51,11 @@ app.post("/api/tts", async (req, res) => {
         body: JSON.stringify({
           text,
           model_id: modelId,
-          voice_settings: { stability: 0.5, similarity_boost: 0.75 },
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.75,
+            speed: 1.18,
+          },
         }),
         signal: AbortSignal.timeout(8000),
       },
