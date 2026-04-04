@@ -13,6 +13,7 @@ import DurationPicker from "../components/DurationPicker.jsx";
 import TitleBadge from "../components/TitleBadge.jsx";
 import Mascot from "../components/Mascot.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
+import VoiceAgent from "../components/VoiceAgent.jsx";
 
 function getPortfolioValue(cash, holdings, prices) {
   let val = cash;
@@ -335,6 +336,14 @@ export default function SoloPage() {
             <NewsTicker events={newsEvents} />
           </div>
         </div>
+
+        <VoiceAgent
+          onTrade={handleTrade}
+          cash={cash}
+          holdings={holdings}
+          prices={prices}
+          onSelectStock={setSelectedStock}
+        />
       </div>
     );
   }
