@@ -2,12 +2,16 @@ import { useRef, useCallback, useEffect, useMemo } from "react";
 
 const AudioCtx = typeof window !== "undefined" ? (window.AudioContext || window.webkitAudioContext) : null;
 
+/** Multiply all SFX / ambient levels (0.7 ≈ 30% quieter than before). */
+const SFX_LEVEL = 0.7;
+
 function createOscSound(ctx, freq, duration, type = "sine", gain = 0.15) {
   const osc = ctx.createOscillator();
   const vol = ctx.createGain();
   osc.type = type;
   osc.frequency.setValueAtTime(freq, ctx.currentTime);
-  vol.gain.setValueAtTime(gain, ctx.currentTime);
+  const g = gain * SFX_LEVEL;
+  vol.gain.setValueAtTime(g, ctx.currentTime);
   vol.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
   osc.connect(vol);
   vol.connect(ctx.destination);
@@ -89,7 +93,7 @@ export default function useSoundEngine() {
     filter.frequency.setValueAtTime(200, ctx.currentTime);
 
     const vol = ctx.createGain();
-    vol.gain.setValueAtTime(0.08, ctx.currentTime);
+    vol.gain.setValueAtTime(0.08 * SFX_LEVEL, ctx.currentTime);
 
     noise.connect(filter);
     filter.connect(vol);

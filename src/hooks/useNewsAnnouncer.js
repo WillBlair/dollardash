@@ -2,6 +2,9 @@ import { useEffect, useRef, useCallback } from "react";
 
 const MAX_CHARS = 300;
 
+/** Linear gain for news TTS (HTML5 Audio.volume caps at 1; Web Audio can go higher). */
+const NEWS_VOICE_GAIN = 2;
+
 function announcementText(event) {
   if (!event?.headline) return "";
   return event.headline.slice(0, MAX_CHARS);
@@ -20,8 +23,20 @@ export function useNewsAnnouncer(events, enabled = true) {
   const queueRef = useRef([]);
   const abortRef = useRef(null);
   const audioRef = useRef(null);
+  const nodesRef = useRef(null);
+  const ctxRef = useRef(null);
   const enabledRef = useRef(enabled);
   enabledRef.current = enabled;
+
+  const disconnectVoiceNodes = useCallback(() => {
+    if (nodesRef.current) {
+      try {
+        nodesRef.current.src.disconnect();
+        nodesRef.current.gain.disconnect();
+      } catch { /* already disconnected */ }
+      nodesRef.current = null;
+    }
+  }, []);
 
   const playNext = useCallback(() => {
     if (!enabledRef.current) { busyRef.current = false; return; }
@@ -53,12 +68,32 @@ export function useNewsAnnouncer(events, enabled = true) {
         const audio = new Audio(objectUrl);
         audioRef.current = audio;
 
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          if (!ctxRef.current || ctxRef.current.state === "closed") {
+            ctxRef.current = new AudioCtx();
+          }
+          const actx = ctxRef.current;
+          await actx.resume().catch(() => {});
+          disconnectVoiceNodes();
+          const src = actx.createMediaElementSource(audio);
+          const gain = actx.createGain();
+          gain.gain.value = NEWS_VOICE_GAIN;
+          src.connect(gain);
+          gain.connect(actx.destination);
+          nodesRef.current = { src, gain };
+        } else {
+          audio.volume = 1;
+        }
+
         audio.addEventListener("ended", () => {
+          disconnectVoiceNodes();
           URL.revokeObjectURL(objectUrl);
           audioRef.current = null;
           playNext();
         });
         audio.addEventListener("error", () => {
+          disconnectVoiceNodes();
           URL.revokeObjectURL(objectUrl);
           audioRef.current = null;
           playNext();
@@ -66,13 +101,14 @@ export function useNewsAnnouncer(events, enabled = true) {
 
         await audio.play();
       } catch (e) {
+        disconnectVoiceNodes();
         if (objectUrl) URL.revokeObjectURL(objectUrl);
         if (e.name !== "AbortError") console.warn("[NewsAnnouncer]", e);
         busyRef.current = false;
         playNext();
       }
     })();
-  }, []);
+  }, [disconnectVoiceNodes]);
 
   useEffect(() => {
     if (!enabled || !events?.length) return;
@@ -100,12 +136,17 @@ export function useNewsAnnouncer(events, enabled = true) {
   useEffect(() => {
     return () => {
       abortRef.current?.abort();
+      disconnectVoiceNodes();
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
+      if (ctxRef.current) {
+        ctxRef.current.close().catch(() => {});
+        ctxRef.current = null;
+      }
       queueRef.current = [];
       busyRef.current = false;
     };
-  }, []);
+  }, [disconnectVoiceNodes]);
 }
