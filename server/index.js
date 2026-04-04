@@ -44,6 +44,10 @@ io.on("connection", (socket) => {
       io.to(room.code).emit("game:tick", { ...market, leaderboard });
     };
 
+    room.onNews = (event) => {
+      io.to(room.code).emit("game:news", event);
+    };
+
     room.onTimer = () => {
       io.to(room.code).emit("game:timer", { timeLeft: room.timeLeft });
     };

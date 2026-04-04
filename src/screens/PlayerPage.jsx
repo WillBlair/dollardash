@@ -8,6 +8,7 @@ import TradeControls from "../components/TradeControls.jsx";
 import FlashMessage from "../components/FlashMessage.jsx";
 import Timer from "../components/Timer.jsx";
 import Leaderboard from "../components/Leaderboard.jsx";
+import NewsTicker from "../components/NewsTicker.jsx";
 
 export default function PlayerPage() {
   const { code: urlCode } = useParams();
@@ -30,6 +31,7 @@ export default function PlayerPage() {
   const [flash, setFlash] = useState(null);
   const [results, setResults] = useState(null);
   const [myResult, setMyResult] = useState(null);
+  const [newsEvents, setNewsEvents] = useState([]);
 
   useEffect(() => {
     if (!socket) return;
@@ -44,12 +46,18 @@ export default function PlayerPage() {
     socket.on("game:tick", (data) => {
       setMarket({ prices: data.prices, histories: data.histories, timeLeft: data.timeLeft });
       setLeaderboard(data.leaderboard);
+      if (data.news?.recentEvents) {
+        setNewsEvents(data.news.recentEvents);
+      }
 
-      // Recalculate local portfolio from leaderboard
       const me = data.leaderboard.find((e) => e.id === socket.id);
       if (me) {
         setPortfolioValue(me.value);
       }
+    });
+
+    socket.on("game:news", (event) => {
+      setNewsEvents((prev) => [...prev.slice(-9), event]);
     });
 
     socket.on("game:timer", ({ timeLeft: t }) => setTimeLeft(t));
@@ -82,6 +90,7 @@ export default function PlayerPage() {
     return () => {
       socket.off("game:start");
       socket.off("game:tick");
+      socket.off("game:news");
       socket.off("game:timer");
       socket.off("game:end");
       socket.off("player:kicked");
@@ -272,6 +281,9 @@ export default function PlayerPage() {
         </div>
 
         <Timer timeLeft={timeLeft} total={GAME_DURATION} />
+
+        {/* News Ticker */}
+        <NewsTicker events={newsEvents} compact />
 
         {/* Cash / Portfolio */}
         <div

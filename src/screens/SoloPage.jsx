@@ -2,18 +2,13 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { STOCKS, STARTING_CASH, GAME_DURATION, TICK_MS, MAX_HISTORY, BADGES } from "../../shared/constants.js";
+import { NewsEngine } from "../../shared/newsEngine.js";
 import BigChart from "../components/BigChart.jsx";
 import StockCard from "../components/StockCard.jsx";
 import TradeControls from "../components/TradeControls.jsx";
 import FlashMessage from "../components/FlashMessage.jsx";
 import Timer from "../components/Timer.jsx";
-
-function generatePrice(prev, stock) {
-  const shock = (Math.random() - 0.5) * 2 * stock.volatility;
-  const crash = Math.random() < 0.005 ? (Math.random() > 0.5 ? 0.12 : -0.12) : 0;
-  const next = prev * (1 + shock + stock.drift + crash);
-  return Math.max(0.01, parseFloat(next.toFixed(2)));
-}
+import NewsTicker from "../components/NewsTicker.jsx";
 
 function getPortfolioValue(cash, holdings, prices) {
   let val = cash;
@@ -25,7 +20,7 @@ function getPortfolioValue(cash, holdings, prices) {
 
 export default function SoloPage() {
   const navigate = useNavigate();
-  const [phase, setPhase] = useState("menu"); // menu | playing | results
+  const [phase, setPhase] = useState("menu");
   const [cash, setCash] = useState(STARTING_CASH);
   const [holdings, setHoldings] = useState({});
   const [prices, setPrices] = useState(STOCKS.map((s) => s.basePrice));
@@ -34,6 +29,7 @@ export default function SoloPage() {
   const [selectedStock, setSelectedStock] = useState(0);
   const [flash, setFlash] = useState(null);
   const [stats, setStats] = useState(null);
+  const [newsEvents, setNewsEvents] = useState([]);
 
   const gameRef = useRef({
     cash: STARTING_CASH,
@@ -45,6 +41,7 @@ export default function SoloPage() {
     longestHold: 0,
     biggestPosition: 0,
   });
+  const newsRef = useRef(null);
   const timerRef = useRef(null);
   const tickRef = useRef(null);
 
@@ -58,6 +55,8 @@ export default function SoloPage() {
     setSelectedStock(0);
     setFlash(null);
     setStats(null);
+    setNewsEvents([]);
+    newsRef.current = new NewsEngine();
     gameRef.current = {
       cash: STARTING_CASH,
       holdings: {},
@@ -70,11 +69,6 @@ export default function SoloPage() {
     };
     setPhase("playing");
   }, []);
-
-  const getPortfolioVal = useCallback(
-    (c, h, p) => getPortfolioValue(c, h, p),
-    [],
-  );
 
   useEffect(() => {
     if (phase !== "playing") {
@@ -89,17 +83,16 @@ export default function SoloPage() {
           clearInterval(timerRef.current);
           clearInterval(tickRef.current);
           const g = gameRef.current;
-          const fv = getPortfolioVal(g.cash, g.holdings, g.prices);
+          const fv = getPortfolioValue(g.cash, g.holdings, g.prices);
           const returnPct = ((fv - STARTING_CASH) / STARTING_CASH) * 100;
-          const s = {
+          setStats({
             finalValue: fv,
             totalTrades: g.trades,
             uniqueStocks: g.uniqueStocks.size,
             longestHold: g.longestHold,
             biggestPosition: g.biggestPosition,
             returnPct: parseFloat(returnPct.toFixed(1)),
-          };
-          setStats(s);
+          });
           setPhase("results");
           confetti({
             particleCount: 150,
@@ -114,8 +107,11 @@ export default function SoloPage() {
     }, 1000);
 
     tickRef.current = setInterval(() => {
+      const engine = newsRef.current;
+      const newEvent = engine.tick();
+
       setPrices((prev) => {
-        const next = prev.map((p, i) => generatePrice(p, STOCKS[i]));
+        const next = prev.map((p, i) => engine.generatePrice(p, i));
         gameRef.current.prices = next;
         return next;
       });
@@ -125,6 +121,11 @@ export default function SoloPage() {
           return newH.length > MAX_HISTORY ? newH.slice(-MAX_HISTORY) : newH;
         }),
       );
+
+      if (newEvent) {
+        setNewsEvents((prev) => [...prev.slice(-9), newEvent]);
+      }
+
       const g = gameRef.current;
       for (const idx of Object.keys(g.holdings)) {
         g.holdTicks[idx] = (g.holdTicks[idx] || 0) + 1;
@@ -136,7 +137,7 @@ export default function SoloPage() {
       clearInterval(timerRef.current);
       clearInterval(tickRef.current);
     };
-  }, [phase, getPortfolioVal]);
+  }, [phase]);
 
   const handleTrade = useCallback(
     ({ stockIdx, qty, type }) => {
@@ -191,7 +192,7 @@ export default function SoloPage() {
     setTimeout(() => setFlash(null), 1200);
   };
 
-  const portfolioValue = getPortfolioVal(cash, holdings, prices);
+  const portfolioValue = getPortfolioValue(cash, holdings, prices);
   const pnl = portfolioValue - STARTING_CASH;
 
   // ─── Menu ───────────────────────────────────────────────────
@@ -218,7 +219,7 @@ export default function SoloPage() {
           You have <span className="font-bold" style={{ color: "#76FF03" }}>$10,000</span> and{" "}
           <span className="font-bold" style={{ color: "#FF3D71" }}>60 seconds</span>.
           <br />
-          Buy low. Sell high. Don't get REKT.
+          Watch the news. React fast. Don't get REKT.
         </div>
 
         <div className="flex flex-wrap gap-2 justify-center mb-8">
@@ -284,6 +285,9 @@ export default function SoloPage() {
         </div>
 
         <Timer timeLeft={timeLeft} total={GAME_DURATION} />
+
+        {/* News Ticker */}
+        <NewsTicker events={newsEvents} compact />
 
         <div
           className="flex justify-between items-center rounded-lg px-3 py-2 text-sm"
@@ -416,22 +420,14 @@ export default function SoloPage() {
           <button
             onClick={startGame}
             className="rounded-xl py-3 px-8 font-bold text-sm cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
-            style={{
-              fontFamily: "var(--font-pixel)",
-              background: "#76FF03",
-              color: "#0a0e1a",
-            }}
+            style={{ fontFamily: "var(--font-pixel)", background: "#76FF03", color: "#0a0e1a" }}
           >
             PLAY AGAIN
           </button>
           <button
             onClick={() => navigate("/")}
             className="rounded-xl py-3 px-8 font-bold text-sm cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
-            style={{
-              fontFamily: "var(--font-pixel)",
-              background: "#FFD600",
-              color: "#0a0e1a",
-            }}
+            style={{ fontFamily: "var(--font-pixel)", background: "#FFD600", color: "#0a0e1a" }}
           >
             HOME
           </button>

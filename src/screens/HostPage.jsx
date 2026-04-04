@@ -7,6 +7,7 @@ import { STOCKS, STARTING_CASH, GAME_DURATION } from "../../shared/constants.js"
 import BigChart from "../components/BigChart.jsx";
 import Leaderboard from "../components/Leaderboard.jsx";
 import Timer from "../components/Timer.jsx";
+import NewsTicker from "../components/NewsTicker.jsx";
 
 export default function HostPage() {
   const { socket, connected } = useSocket();
@@ -20,6 +21,7 @@ export default function HostPage() {
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
   const [results, setResults] = useState(null);
   const [selectedStock, setSelectedStock] = useState(0);
+  const [newsEvents, setNewsEvents] = useState([]);
 
   const joinUrl = typeof window !== "undefined" ? `${window.location.origin}/play/${roomCode}` : "";
 
@@ -43,6 +45,13 @@ export default function HostPage() {
     socket.on("game:tick", (data) => {
       setMarket({ prices: data.prices, histories: data.histories, timeLeft: data.timeLeft });
       setLeaderboard(data.leaderboard);
+      if (data.news?.recentEvents) {
+        setNewsEvents(data.news.recentEvents);
+      }
+    });
+
+    socket.on("game:news", (event) => {
+      setNewsEvents((prev) => [...prev.slice(-9), event]);
     });
 
     socket.on("game:timer", ({ timeLeft: t }) => setTimeLeft(t));
@@ -62,6 +71,7 @@ export default function HostPage() {
       socket.off("lobby:update");
       socket.off("game:start");
       socket.off("game:tick");
+      socket.off("game:news");
       socket.off("game:timer");
       socket.off("game:end");
     };
@@ -190,6 +200,9 @@ export default function HostPage() {
         </div>
 
         <Timer timeLeft={timeLeft} total={GAME_DURATION} />
+
+        {/* News Ticker */}
+        <NewsTicker events={newsEvents} />
 
         {/* Main content: chart + leaderboard side by side on desktop */}
         <div className="flex flex-col lg:flex-row gap-3 flex-1">

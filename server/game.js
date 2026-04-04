@@ -1,11 +1,5 @@
 import { STOCKS, STARTING_CASH, GAME_DURATION, TICK_MS, MAX_HISTORY, BADGES } from "../shared/constants.js";
-
-function generatePrice(prev, stock) {
-  const shock = (Math.random() - 0.5) * 2 * stock.volatility;
-  const crash = Math.random() < 0.005 ? (Math.random() > 0.5 ? 0.12 : -0.12) : 0;
-  const next = prev * (1 + shock + stock.drift + crash);
-  return Math.max(0.01, parseFloat(next.toFixed(2)));
-}
+import { NewsEngine } from "../shared/newsEngine.js";
 
 function generateRoomCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -26,16 +20,18 @@ export class GameRoom {
   constructor(hostSocketId) {
     this.code = generateRoomCode();
     this.hostId = hostSocketId;
-    this.state = "lobby"; // lobby | playing | results
+    this.state = "lobby";
     this.players = new Map();
     this.prices = STOCKS.map((s) => s.basePrice);
     this.histories = STOCKS.map((s) => [s.basePrice]);
     this.timeLeft = GAME_DURATION;
+    this.newsEngine = null;
     this.tickInterval = null;
     this.timerInterval = null;
     this.onTick = null;
     this.onTimer = null;
     this.onEnd = null;
+    this.onNews = null;
   }
 
   addPlayer(socketId, name) {
@@ -73,6 +69,7 @@ export class GameRoom {
     this.timeLeft = GAME_DURATION;
     this.prices = STOCKS.map((s) => s.basePrice);
     this.histories = STOCKS.map((s) => [s.basePrice]);
+    this.newsEngine = new NewsEngine();
 
     for (const player of this.players.values()) {
       player.cash = STARTING_CASH;
@@ -91,7 +88,9 @@ export class GameRoom {
   }
 
   _tick() {
-    this.prices = this.prices.map((p, i) => generatePrice(p, STOCKS[i]));
+    const newEvent = this.newsEngine.tick();
+
+    this.prices = this.prices.map((p, i) => this.newsEngine.generatePrice(p, i));
     this.histories = this.histories.map((h, i) => {
       const next = [...h, this.prices[i]];
       return next.length > MAX_HISTORY ? next.slice(-MAX_HISTORY) : next;
@@ -104,6 +103,9 @@ export class GameRoom {
       }
     }
 
+    if (newEvent) {
+      this.onNews?.(newEvent);
+    }
     this.onTick?.();
   }
 
@@ -234,6 +236,7 @@ export class GameRoom {
       prices: [...this.prices],
       histories: this.histories.map((h) => [...h]),
       timeLeft: this.timeLeft,
+      news: this.newsEngine ? this.newsEngine.serialize() : { recentEvents: [], activeModifiers: [] },
     };
   }
 
@@ -255,7 +258,6 @@ export class RoomManager {
 
   createRoom(hostSocketId) {
     const room = new GameRoom(hostSocketId);
-    // Ensure unique code
     while (this.rooms.has(room.code)) {
       room.code = generateRoomCode();
     }
@@ -288,18 +290,13 @@ export class RoomManager {
       const room = this.rooms.get(code);
       if (room) {
         room.removePlayer(socketId);
-        if (room.players.size === 0 && room.hostId !== socketId) {
-          // Keep room alive if host is still connected
-        }
       }
       this.playerRooms.delete(socketId);
     }
 
-    // Check if disconnected socket is a host
     for (const [roomCode, room] of this.rooms) {
       if (room.hostId === socketId) {
         room.destroy();
-        // Clean up all players in this room
         for (const playerId of room.players.keys()) {
           this.playerRooms.delete(playerId);
         }
