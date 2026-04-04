@@ -129,10 +129,19 @@ body {
   }
 }
 
+/* Taller track so ~4× coin clears the viewport when flying */
+@keyframes edge-fly-up-large {
+  from {
+    transform: translate3d(0, calc(100vh + 160px), 0);
+  }
+  to {
+    transform: translate3d(0, -160px, 0);
+  }
+}
+
 .home-money-fly,
 .home-briefcase-fly,
-.home-coffee-fly,
-.home-coin-fly {
+.home-coffee-fly {
   position: fixed;
   width: clamp(24px, 6vw, 36px);
   max-width: 36px;
@@ -178,13 +187,24 @@ body {
   animation-delay: -11s;
 }
 
-/* Right edge → bottom to top */
+/* Right edge → bottom to top (~4× size vs other flyers) */
 .home-coin-fly {
+  position: fixed;
+  width: clamp(82px, 20vw, 122px);
+  max-width: 122px;
+  height: auto;
+  z-index: 15;
+  pointer-events: none;
+  image-rendering: pixelated;
+  opacity: 0.82;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
   right: max(8px, env(safe-area-inset-right, 0px));
   left: auto;
   top: 0;
   bottom: auto;
-  animation-name: edge-fly-up;
+  animation-name: edge-fly-up-large;
   animation-duration: 22s;
   animation-delay: -15s;
 }
@@ -211,7 +231,7 @@ body {
   }
 
   .home-coin-fly {
-    animation-name: edge-fly-up;
+    animation-name: edge-fly-up-large;
     animation-duration: 66s;
     animation-delay: -18s;
     opacity: 0.76;

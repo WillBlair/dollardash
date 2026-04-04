@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { STOCKS } from "../../shared/constants.js";
+import ArcadeTitle from "../components/ArcadeTitle.jsx";
 
 const STEPS = [
   { num: "1", icon: "📰", title: "Watch the News", desc: "Headlines move prices. Bullish news pushes stocks up, bearish drags them down." },
@@ -51,8 +52,8 @@ export default function HomeScreen() {
         src={publicAsset("coinnobg.gif")}
         alt=""
         className="home-coin-fly"
-        width={36}
-        height={36}
+        width={122}
+        height={122}
         decoding="async"
         loading="eager"
       />
@@ -63,18 +64,9 @@ export default function HomeScreen() {
             className="flex-1 flex flex-col items-center justify-center text-center min-h-0
               pt-[clamp(3rem,12vh,6rem)] pb-4"
           >
-            <div
-              className="mb-2"
-              style={{
-                fontFamily: "var(--font-pixel)",
-                fontSize: "clamp(24px, 6vw, 48px)",
-                color: "#FFD600",
-                lineHeight: 1.4,
-                textShadow: "0 0 40px rgba(255,214,0,0.25)",
-              }}
-            >
-              DOLLAR DASH
-            </div>
+            <h1 className="mb-2 mt-0 text-center font-normal">
+              <ArcadeTitle>DOLLAR DASH</ArcadeTitle>
+            </h1>
 
             <div className="flex items-end justify-center gap-1.5 my-1.5">
               <span className="text-base select-none opacity-90 pb-0.5" aria-hidden>💰</span>

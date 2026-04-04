@@ -2,7 +2,7 @@ import { GAME_DURATIONS } from "../../shared/constants.js";
 
 export default function DurationPicker({ value, onChange }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center justify-center gap-2">
       <span className="text-xs font-bold tracking-wider" style={{ color: "#666" }}>
         DURATION:
       </span>

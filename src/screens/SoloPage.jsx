@@ -17,6 +17,13 @@ import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
 import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
 import VoiceAgent from "../components/VoiceAgent.jsx";
+import ArcadeTitle from "../components/ArcadeTitle.jsx";
+
+function publicAsset(filename) {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "") || "";
+  const name = filename.replace(/^\//, "");
+  return base ? `${base}/${name}` : `/${name}`;
+}
 
 function getPortfolioValue(cash, holdings, prices) {
   let val = cash;
@@ -218,65 +225,96 @@ export default function SoloPage() {
     else if (pnlPct < -10) setMascotMood("losing");
   }, [phase, portfolioValue]);
 
-  // ─── Menu ───────────────────────────────────────────────────
+  // ─── Menu — same hero shell as HomeScreen (no max-w-lg; chips full width, CTAs max-w-sm) ───
   if (phase === "menu") {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12 text-center">
-        <div
-          className="mb-2"
-          style={{
-            fontFamily: "var(--font-pixel)",
-            fontSize: "clamp(20px, 5vw, 36px)",
-            color: "#FFD600",
-            lineHeight: 1.5,
-            textShadow: "0 0 30px rgba(255,214,0,0.25)",
-          }}
-        >
-          DOLLAR DASH
-        </div>
-        <div className="text-sm mb-1" style={{ fontFamily: "var(--font-pixel)", color: "#76FF03" }}>
-          SOLO MODE
-        </div>
-        <div className="text-4xl my-3">💰📈</div>
-        <div className="text-sm max-w-md leading-relaxed mb-6" style={{ color: "#aaa" }}>
-          You have <span className="font-bold" style={{ color: "#76FF03" }}>$10,000</span>.
-          <br />
-          Watch the news. React fast. Don't get REKT.
-        </div>
-
-        <div className="mb-6">
-          <DurationPicker value={duration} onChange={setDuration} />
-        </div>
-
-        <div className="flex flex-wrap gap-2 justify-center mb-8">
-          {STOCKS.map((s) => (
+      <div className="relative isolate min-h-dvh">
+        <div className="relative z-20">
+          <section className="min-h-dvh flex flex-col px-6">
             <div
-              key={s.symbol}
-              className="rounded-lg px-3 py-2 text-xs"
-              style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${s.color}33`, fontFamily: "var(--font-mono)" }}
+              className="flex-1 flex flex-col items-center justify-center text-center min-h-0
+                pt-[clamp(3rem,12vh,6rem)] pb-4"
             >
-              <span className="font-bold" style={{ color: s.color }}>{s.symbol}</span>
-              <span className="ml-2" style={{ color: "#666" }}>
-                {s.volatility > 0.04 ? "🔥 High Risk" : s.volatility > 0.02 ? "⚡ Medium" : "🛡️ Safe"}
-              </span>
-            </div>
-          ))}
-        </div>
+              <h1 className="mb-2 mt-0 text-center font-normal">
+                <ArcadeTitle>DOLLAR DASH</ArcadeTitle>
+              </h1>
+              <div
+                className="text-[10px] sm:text-xs mb-1 tracking-widest -mt-1"
+                style={{ fontFamily: "var(--font-pixel)", color: "#76FF03" }}
+              >
+                SOLO MODE
+              </div>
 
-        <button
-          onClick={startGame}
-          className="rounded-xl py-4 px-12 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
-          style={{ fontFamily: "var(--font-pixel)", background: "#76FF03", color: "#0a0e1a", boxShadow: "0 0 30px rgba(118,255,3,0.25)" }}
-        >
-          START TRADING
-        </button>
-        <button
-          onClick={() => navigate("/")}
-          className="mt-6 text-xs border-none bg-transparent cursor-pointer"
-          style={{ color: "#444" }}
-        >
-          ← Back to home
-        </button>
+              <div className="flex items-end justify-center gap-1.5 my-1.5">
+                <span className="text-base select-none opacity-90 pb-0.5" aria-hidden>💰</span>
+                <img
+                  src={publicAsset("rocket-to-the-moon.gif")}
+                  alt=""
+                  width={30}
+                  height={30}
+                  className="shrink-0 w-auto"
+                  style={{
+                    width: "30px",
+                    maxWidth: "30px",
+                    height: "auto",
+                    imageRendering: "pixelated",
+                    filter: "drop-shadow(0 0 4px rgba(255,214,0,0.18))",
+                  }}
+                  decoding="async"
+                />
+                <span className="text-base select-none opacity-90 pb-0.5" aria-hidden>💸</span>
+              </div>
+
+              <p className="text-sm max-w-md leading-relaxed mb-6" style={{ color: "#aaa" }}>
+                You have <span className="font-bold" style={{ color: "#76FF03" }}>$10,000</span>.
+                <br />
+                Watch the news. React fast. Don’t get REKT.
+              </p>
+
+              <div className="flex flex-wrap gap-2 justify-center mb-8 w-full">
+                {STOCKS.map((s) => (
+                  <div
+                    key={s.symbol}
+                    className="rounded-lg px-3 py-2 text-xs"
+                    style={{
+                      background: "rgba(255,255,255,0.05)",
+                      border: `1px solid ${s.color}33`,
+                      fontFamily: "var(--font-mono)",
+                    }}
+                  >
+                    <span className="font-bold" style={{ color: s.color }}>{s.symbol}</span>
+                    <span className="ml-2" style={{ color: "#555" }}>
+                      {s.volatility > 0.04 ? "⚡ Volatile" : s.volatility > 0.02 ? "⚡ Medium" : "🛡️ Steady"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-3 w-full max-w-sm">
+                <DurationPicker value={duration} onChange={setDuration} />
+                <button
+                  onClick={startGame}
+                  className="w-full rounded-xl py-4 px-6 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
+                  style={{
+                    fontFamily: "var(--font-pixel)",
+                    background: "#76FF03",
+                    color: "#0a0e1a",
+                    boxShadow: "0 0 30px rgba(118,255,3,0.25)",
+                  }}
+                >
+                  START TRADING
+                </button>
+                <button
+                  onClick={() => navigate("/")}
+                  className="text-xs border-none bg-transparent cursor-pointer py-2"
+                  style={{ color: "#444" }}
+                >
+                  ← Back to home
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     );
   }
@@ -284,7 +322,7 @@ export default function SoloPage() {
   // ─── Playing ──────────────────────────────────────────────
   if (phase === "playing") {
     return (
-      <div className="min-h-dvh flex flex-col px-3 py-3 gap-2 max-w-6xl mx-auto pb-28">
+      <div className="min-h-dvh flex flex-col px-6 py-3 gap-2 max-w-6xl mx-auto pb-28">
         <UrgencyOverlay timeLeft={timeLeft} />
         <FlashMessage message={flash?.msg} color={flash?.color} />
         <Mascot mood={mascotMood} latestEvent={mascotTrigger} />
