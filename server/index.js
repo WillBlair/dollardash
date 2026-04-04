@@ -17,7 +17,6 @@ const io = new Server(httpServer, {
   cors: { origin: "*" },
 });
 
-// Serve built frontend in production
 if (existsSync(distPath)) {
   app.use(express.static(distPath));
   app.get("*", (req, res, next) => {
@@ -30,8 +29,6 @@ const rooms = new RoomManager();
 
 io.on("connection", (socket) => {
   console.log(`[connect] ${socket.id}`);
-
-  // ─── Host events ─────────────────────────────────────────
 
   socket.on("host:create", (callback) => {
     const room = rooms.createRoom(socket.id);
@@ -61,6 +58,13 @@ io.on("connection", (socket) => {
     callback({ ok: true, code: room.code });
   });
 
+  socket.on("host:setDuration", ({ seconds }, callback) => {
+    const room = findHostRoom(socket.id);
+    if (!room) return callback({ ok: false, error: "Room not found" });
+    room.setDuration(seconds);
+    callback({ ok: true, duration: room.duration });
+  });
+
   socket.on("host:start", (callback) => {
     const room = findHostRoom(socket.id);
     if (!room) return callback({ ok: false, error: "Room not found" });
@@ -68,9 +72,9 @@ io.on("connection", (socket) => {
     room.start();
     io.to(room.code).emit("game:start", {
       market: room.getMarketState(),
-      stocks: room.getPlayerList(),
+      duration: room.duration,
     });
-    console.log(`[game:start] ${room.code} with ${room.players.size} players`);
+    console.log(`[game:start] ${room.code} with ${room.players.size} players, ${room.duration}s`);
     callback({ ok: true });
   });
 
@@ -83,8 +87,6 @@ io.on("connection", (socket) => {
     io.to(room.code).emit("lobby:update", { players: room.getPlayerList() });
     callback({ ok: true });
   });
-
-  // ─── Player events ───────────────────────────────────────
 
   socket.on("player:join", ({ code, name }, callback) => {
     const trimmedName = (name || "").trim().slice(0, 20);
@@ -112,8 +114,6 @@ io.on("connection", (socket) => {
     callback({ ok: true, ...result, ...playerState });
   });
 
-  // ─── Disconnect ──────────────────────────────────────────
-
   socket.on("disconnect", () => {
     const { wasHost, roomCode } = rooms.handleDisconnect(socket.id);
     if (wasHost && roomCode) {
@@ -137,7 +137,7 @@ function findHostRoom(hostSocketId) {
 }
 
 httpServer.listen(PORT, "0.0.0.0", () => {
-  console.log(`💰 Dollar Dash server running on http://localhost:${PORT}`);
+  console.log(`Dollar Dash server running on http://localhost:${PORT}`);
   import("os").then(({ networkInterfaces }) => {
     const nets = networkInterfaces();
     for (const iface of Object.values(nets)) {

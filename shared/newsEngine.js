@@ -4,23 +4,20 @@ import { STOCKS, NEWS_EVENTS, TICK_MS } from "./constants.js";
  * NewsEngine manages event scheduling, active modifiers, and price generation.
  * Shared between server (multiplayer) and client (solo) — pure logic, no I/O.
  *
- * Events fire on a schedule: first at ~5s, then every 6–12s.
+ * Events fire on a schedule: first at ~8s, then every 10–18s.
  * Each event temporarily adds a drift modifier to the affected stock(s).
  * Active modifiers decay and expire after their duration.
  */
 export class NewsEngine {
   constructor() {
-    this.activeModifiers = []; // { stockIdx, driftMod, ticksLeft, id }
-    this.firedEvents = [];     // { headline, sentiment, stockIdx, timestamp }
+    this.activeModifiers = [];
+    this.firedEvents = [];
     this.usedIndices = new Set();
     this.tickCount = 0;
-    this.nextEventTick = this._randomTickBetween(16, 24); // first event at ~4-6s
+    this.nextEventTick = this._randomTickBetween(28, 40); // first event at ~7-10s
     this._modIdCounter = 0;
   }
 
-  /**
-   * Call every TICK_MS. Returns a new event if one fired this tick, or null.
-   */
   tick() {
     this.tickCount++;
     this._decayModifiers();
@@ -45,16 +42,14 @@ export class NewsEngine {
         };
         this.firedEvents.push(firedEvent);
 
-        this.nextEventTick = this.tickCount + this._randomTickBetween(24, 48); // 6-12s gap
+        // 10–18 second gap between events
+        this.nextEventTick = this.tickCount + this._randomTickBetween(40, 72);
         return firedEvent;
       }
     }
     return null;
   }
 
-  /**
-   * Generate a price for a given stock, applying any active news modifiers.
-   */
   generatePrice(prevPrice, stockIdx) {
     const stock = STOCKS[stockIdx];
     const shock = (Math.random() - 0.5) * 2 * stock.volatility;
@@ -66,22 +61,15 @@ export class NewsEngine {
       }
     }
 
-    // Rare random crash/spike still possible but much less likely
     const crash = Math.random() < 0.002 ? (Math.random() > 0.5 ? 0.08 : -0.08) : 0;
     const next = prevPrice * (1 + shock + stock.drift + newsDrift + crash);
     return Math.max(0.01, parseFloat(next.toFixed(2)));
   }
 
-  /**
-   * Get the most recent N events for the UI ticker.
-   */
   getRecentEvents(count = 5) {
     return this.firedEvents.slice(-count);
   }
 
-  /**
-   * Get all active modifiers (for debugging / UI hints).
-   */
   getActiveModifiers() {
     return this.activeModifiers.map((m) => ({
       stockIdx: m.stockIdx,
@@ -91,8 +79,6 @@ export class NewsEngine {
       ticksLeft: m.ticksLeft,
     }));
   }
-
-  // ─── Internal ─────────────────────────────────────────────
 
   _decayModifiers() {
     for (const mod of this.activeModifiers) {
@@ -117,9 +103,6 @@ export class NewsEngine {
     return minTicks + Math.floor(Math.random() * (maxTicks - minTicks));
   }
 
-  /**
-   * Serialize state for sending over the wire (multiplayer).
-   */
   serialize() {
     return {
       recentEvents: this.getRecentEvents(5),

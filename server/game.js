@@ -1,4 +1,4 @@
-import { STOCKS, STARTING_CASH, GAME_DURATION, TICK_MS, MAX_HISTORY, BADGES } from "../shared/constants.js";
+import { STOCKS, STARTING_CASH, DEFAULT_DURATION, TICK_MS, MAX_HISTORY, BADGES } from "../shared/constants.js";
 import { NewsEngine } from "../shared/newsEngine.js";
 
 function generateRoomCode() {
@@ -24,7 +24,8 @@ export class GameRoom {
     this.players = new Map();
     this.prices = STOCKS.map((s) => s.basePrice);
     this.histories = STOCKS.map((s) => [s.basePrice]);
-    this.timeLeft = GAME_DURATION;
+    this.duration = DEFAULT_DURATION;
+    this.timeLeft = DEFAULT_DURATION;
     this.newsEngine = null;
     this.tickInterval = null;
     this.timerInterval = null;
@@ -32,6 +33,14 @@ export class GameRoom {
     this.onTimer = null;
     this.onEnd = null;
     this.onNews = null;
+  }
+
+  setDuration(seconds) {
+    const allowed = [60, 180, 300];
+    if (allowed.includes(seconds)) {
+      this.duration = seconds;
+      this.timeLeft = seconds;
+    }
   }
 
   addPlayer(socketId, name) {
@@ -66,7 +75,7 @@ export class GameRoom {
   start() {
     if (this.state !== "lobby") return;
     this.state = "playing";
-    this.timeLeft = GAME_DURATION;
+    this.timeLeft = this.duration;
     this.prices = STOCKS.map((s) => s.basePrice);
     this.histories = STOCKS.map((s) => [s.basePrice]);
     this.newsEngine = new NewsEngine();
@@ -192,7 +201,7 @@ export class GameRoom {
 
   getFinalResults() {
     const leaderboard = this.getLeaderboard();
-    const results = leaderboard.map((entry) => {
+    return leaderboard.map((entry) => {
       const player = this.players.get(entry.id);
       const earnedBadges = BADGES.filter((b) => {
         const stats = {
@@ -209,17 +218,11 @@ export class GameRoom {
       });
 
       const grade =
-        entry.value >= STARTING_CASH * 2
-          ? "S"
-          : entry.value >= STARTING_CASH * 1.5
-            ? "A"
-            : entry.value >= STARTING_CASH * 1.2
-              ? "B"
-              : entry.value >= STARTING_CASH
-                ? "C"
-                : entry.value >= STARTING_CASH * 0.7
-                  ? "D"
-                  : "F";
+        entry.value >= STARTING_CASH * 2 ? "S" :
+        entry.value >= STARTING_CASH * 1.5 ? "A" :
+        entry.value >= STARTING_CASH * 1.2 ? "B" :
+        entry.value >= STARTING_CASH ? "C" :
+        entry.value >= STARTING_CASH * 0.7 ? "D" : "F";
 
       return {
         ...entry,
@@ -227,8 +230,6 @@ export class GameRoom {
         badges: earnedBadges.map((b) => ({ id: b.id, label: b.label, icon: b.icon })),
       };
     });
-
-    return results;
   }
 
   getMarketState() {
@@ -236,6 +237,7 @@ export class GameRoom {
       prices: [...this.prices],
       histories: this.histories.map((h) => [...h]),
       timeLeft: this.timeLeft,
+      duration: this.duration,
       news: this.newsEngine ? this.newsEngine.serialize() : { recentEvents: [], activeModifiers: [] },
     };
   }

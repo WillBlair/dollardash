@@ -3,22 +3,24 @@ import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import confetti from "canvas-confetti";
 import { useSocket } from "../hooks/useSocket.js";
-import { STOCKS, STARTING_CASH, GAME_DURATION } from "../../shared/constants.js";
+import { STOCKS, STARTING_CASH, DEFAULT_DURATION } from "../../shared/constants.js";
 import BigChart from "../components/BigChart.jsx";
 import Leaderboard from "../components/Leaderboard.jsx";
 import Timer from "../components/Timer.jsx";
 import NewsTicker from "../components/NewsTicker.jsx";
+import DurationPicker from "../components/DurationPicker.jsx";
 
 export default function HostPage() {
   const { socket, connected } = useSocket();
   const navigate = useNavigate();
 
-  const [phase, setPhase] = useState("creating"); // creating | lobby | playing | results
+  const [phase, setPhase] = useState("creating");
   const [roomCode, setRoomCode] = useState("");
   const [players, setPlayers] = useState([]);
   const [market, setMarket] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
-  const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
+  const [timeLeft, setTimeLeft] = useState(DEFAULT_DURATION);
+  const [duration, setDuration] = useState(DEFAULT_DURATION);
   const [results, setResults] = useState(null);
   const [selectedStock, setSelectedStock] = useState(0);
   const [newsEvents, setNewsEvents] = useState([]);
@@ -37,8 +39,9 @@ export default function HostPage() {
 
     socket.on("lobby:update", ({ players: p }) => setPlayers(p));
 
-    socket.on("game:start", ({ market: m }) => {
+    socket.on("game:start", ({ market: m, duration: d }) => {
       setMarket(m);
+      if (d) setDuration(d);
       setPhase("playing");
     });
 
@@ -59,12 +62,7 @@ export default function HostPage() {
     socket.on("game:end", ({ results: r }) => {
       setResults(r);
       setPhase("results");
-      confetti({
-        particleCount: 200,
-        spread: 100,
-        origin: { y: 0.3 },
-        colors: ["#FFD600", "#76FF03", "#00E5FF", "#FF3D71"],
-      });
+      confetti({ particleCount: 200, spread: 100, origin: { y: 0.3 }, colors: ["#FFD600", "#76FF03", "#00E5FF", "#FF3D71"] });
     });
 
     return () => {
@@ -76,6 +74,13 @@ export default function HostPage() {
       socket.off("game:end");
     };
   }, [socket, connected]);
+
+  const handleDurationChange = useCallback((seconds) => {
+    setDuration(seconds);
+    if (socket) {
+      socket.emit("host:setDuration", { seconds }, () => {});
+    }
+  }, [socket]);
 
   const startGame = useCallback(() => {
     if (!socket) return;
@@ -100,33 +105,25 @@ export default function HostPage() {
           <div style={{ color: "#aaa" }}>Creating room...</div>
         ) : (
           <>
-            <div
-              className="text-sm mb-2 tracking-widest"
-              style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}
-            >
+            <div className="text-sm mb-2 tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}>
               ROOM CODE
             </div>
             <div
               className="text-6xl sm:text-8xl font-bold mb-6 tracking-[0.2em] animate-pulse-border border-4 rounded-2xl px-8 py-4"
-              style={{
-                fontFamily: "var(--font-pixel)",
-                color: "#FFD600",
-                textShadow: "0 0 40px rgba(255,214,0,0.3)",
-                borderColor: "rgba(255,214,0,0.3)",
-              }}
+              style={{ fontFamily: "var(--font-pixel)", color: "#FFD600", textShadow: "0 0 40px rgba(255,214,0,0.3)", borderColor: "rgba(255,214,0,0.3)" }}
             >
               {roomCode}
             </div>
 
             <div className="mb-6 p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.05)" }}>
               <QRCodeSVG value={joinUrl} size={160} bgColor="transparent" fgColor="#ffffff" />
-              <div className="text-xs mt-2" style={{ color: "#666" }}>
-                Scan to join
-              </div>
+              <div className="text-xs mt-2" style={{ color: "#666" }}>Scan to join</div>
             </div>
 
-            <div className="text-xs mb-2" style={{ color: "#666" }}>
-              {joinUrl}
+            <div className="text-xs mb-4" style={{ color: "#666" }}>{joinUrl}</div>
+
+            <div className="mb-6">
+              <DurationPicker value={duration} onChange={handleDurationChange} />
             </div>
 
             <div className="mb-6 w-full max-w-md">
@@ -134,29 +131,17 @@ export default function HostPage() {
                 Players ({players.length})
               </div>
               {players.length === 0 ? (
-                <div className="text-sm py-4" style={{ color: "#444" }}>
-                  Waiting for players to join...
-                </div>
+                <div className="text-sm py-4" style={{ color: "#444" }}>Waiting for players to join...</div>
               ) : (
                 <div className="flex flex-wrap gap-2 justify-center">
                   {players.map((p, i) => (
                     <div
                       key={p.id}
                       className="animate-slide-up rounded-lg px-4 py-2 flex items-center gap-2"
-                      style={{
-                        background: "rgba(255,255,255,0.06)",
-                        animationDelay: `${i * 0.05}s`,
-                      }}
+                      style={{ background: "rgba(255,255,255,0.06)", animationDelay: `${i * 0.05}s` }}
                     >
                       <span className="font-semibold text-sm">{p.name}</span>
-                      <button
-                        onClick={() => kickPlayer(p.id)}
-                        className="text-xs cursor-pointer border-none bg-transparent"
-                        style={{ color: "#FF3D71" }}
-                        title="Kick player"
-                      >
-                        ✕
-                      </button>
+                      <button onClick={() => kickPlayer(p.id)} className="text-xs cursor-pointer border-none bg-transparent" style={{ color: "#FF3D71" }} title="Kick player">✕</button>
                     </div>
                   ))}
                 </div>
@@ -167,12 +152,7 @@ export default function HostPage() {
               onClick={startGame}
               disabled={players.length === 0}
               className="rounded-xl py-4 px-12 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{
-                fontFamily: "var(--font-pixel)",
-                background: "#76FF03",
-                color: "#0a0e1a",
-                boxShadow: players.length > 0 ? "0 0 30px rgba(118,255,3,0.25)" : "none",
-              }}
+              style={{ fontFamily: "var(--font-pixel)", background: "#76FF03", color: "#0a0e1a", boxShadow: players.length > 0 ? "0 0 30px rgba(118,255,3,0.25)" : "none" }}
             >
               START GAME
             </button>
@@ -185,13 +165,9 @@ export default function HostPage() {
   // ─── Playing ──────────────────────────────────────────────
   if (phase === "playing") {
     return (
-      <div className="min-h-dvh flex flex-col px-4 py-3 gap-3 max-w-5xl mx-auto">
-        {/* Header */}
+      <div className="min-h-dvh flex flex-col px-4 py-3 gap-3 max-w-6xl mx-auto">
         <div className="flex justify-between items-center flex-wrap gap-2">
-          <div
-            className="text-sm tracking-widest"
-            style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
-          >
+          <div className="text-sm tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
             DOLLAR DASH
           </div>
           <div className="text-xs px-3 py-1 rounded-md" style={{ background: "rgba(255,214,0,0.1)", color: "#FFD600" }}>
@@ -199,19 +175,12 @@ export default function HostPage() {
           </div>
         </div>
 
-        <Timer timeLeft={timeLeft} total={GAME_DURATION} />
+        <Timer timeLeft={timeLeft} total={duration} />
 
-        {/* News Ticker */}
-        <NewsTicker events={newsEvents} />
-
-        {/* Main content: chart + leaderboard side by side on desktop */}
+        {/* Two-column: chart+stocks left, news+leaderboard right */}
         <div className="flex flex-col lg:flex-row gap-3 flex-1">
-          <div className="flex-1 flex flex-col gap-3">
-            <BigChart
-              histories={market?.histories}
-              selectedIdx={selectedStock}
-            />
-            {/* Stock tabs */}
+          <div className="flex-1 flex flex-col gap-3 min-w-0">
+            <BigChart histories={market?.histories} selectedIdx={selectedStock} />
             <div className="flex gap-2">
               {STOCKS.map((stock, i) => {
                 const price = market?.prices?.[i];
@@ -219,15 +188,13 @@ export default function HostPage() {
                   <button
                     key={stock.symbol}
                     onClick={() => setSelectedStock(i)}
-                    className="flex-1 rounded-lg px-3 py-2 cursor-pointer border-2 transition-all text-center"
+                    className="flex-1 rounded-lg px-3 py-2.5 cursor-pointer border-2 transition-all text-center"
                     style={{
                       background: selectedStock === i ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.03)",
                       borderColor: selectedStock === i ? stock.color : "transparent",
                     }}
                   >
-                    <div className="font-bold text-xs" style={{ color: stock.color }}>
-                      {stock.symbol}
-                    </div>
+                    <div className="font-bold text-xs" style={{ color: stock.color }}>{stock.symbol}</div>
                     <div className="font-bold text-sm">${price?.toFixed(2)}</div>
                   </button>
                 );
@@ -235,15 +202,16 @@ export default function HostPage() {
             </div>
           </div>
 
-          {/* Leaderboard */}
-          <div className="lg:w-80 shrink-0">
-            <div
-              className="text-xs mb-2 tracking-widest"
-              style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}
-            >
-              LEADERBOARD
+          {/* Right column: news + leaderboard */}
+          <div className="lg:w-80 xl:w-96 shrink-0 flex flex-col gap-3">
+            <NewsTicker events={newsEvents} />
+
+            <div>
+              <div className="text-xs mb-2 tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}>
+                LEADERBOARD
+              </div>
+              <Leaderboard entries={leaderboard} />
             </div>
-            <Leaderboard entries={leaderboard} />
           </div>
         </div>
       </div>
@@ -253,45 +221,29 @@ export default function HostPage() {
   // ─── Results ──────────────────────────────────────────────
   if (phase === "results" && results) {
     const winner = results[0];
-    const gradeColor = {
-      S: "#FFD600", A: "#76FF03", B: "#00E5FF", C: "#fff", D: "#FF9100", F: "#FF3D71",
-    };
+    const gradeColor = { S: "#FFD600", A: "#76FF03", B: "#00E5FF", C: "#fff", D: "#FF9100", F: "#FF3D71" };
 
     return (
       <div className="min-h-dvh flex flex-col items-center px-6 py-12">
-        <div
-          className="text-sm tracking-widest mb-4"
-          style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}
-        >
+        <div className="text-sm tracking-widest mb-4" style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}>
           MARKET CLOSED
         </div>
 
         {winner && (
           <div className="text-center mb-8 animate-slide-up">
             <div className="text-5xl mb-2">👑</div>
-            <div
-              className="text-2xl font-bold mb-1"
-              style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
-            >
+            <div className="text-2xl font-bold mb-1" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
               {winner.name}
             </div>
-            <div
-              className="text-xl font-bold"
-              style={{ color: winner.returnPct >= 0 ? "#76FF03" : "#FF3D71" }}
-            >
+            <div className="text-xl font-bold" style={{ color: winner.returnPct >= 0 ? "#76FF03" : "#FF3D71" }}>
               {winner.returnPct >= 0 ? "+" : ""}{winner.returnPct}% return
             </div>
-            <div className="text-sm mt-1" style={{ color: "#aaa" }}>
-              ${winner.value?.toLocaleString()}
-            </div>
+            <div className="text-sm mt-1" style={{ color: "#aaa" }}>${winner.value?.toLocaleString()}</div>
           </div>
         )}
 
         <div className="w-full max-w-lg mb-8">
-          <div
-            className="text-xs mb-3 tracking-widest"
-            style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}
-          >
+          <div className="text-xs mb-3 tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}>
             FINAL RANKINGS
           </div>
           {results.map((r, i) => (
@@ -308,38 +260,22 @@ export default function HostPage() {
                 {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${r.rank}`}
               </span>
               <span className="flex-1 font-semibold">{r.name}</span>
-              <span
-                className="text-3xl font-bold"
-                style={{ fontFamily: "var(--font-pixel)", color: gradeColor[r.grade] || "#fff" }}
-              >
+              <span className="text-3xl font-bold" style={{ fontFamily: "var(--font-pixel)", color: gradeColor[r.grade] || "#fff" }}>
                 {r.grade}
               </span>
-              <span
-                className="font-bold text-sm w-16 text-right"
-                style={{ color: r.returnPct >= 0 ? "#76FF03" : "#FF3D71" }}
-              >
+              <span className="font-bold text-sm w-16 text-right" style={{ color: r.returnPct >= 0 ? "#76FF03" : "#FF3D71" }}>
                 {r.returnPct >= 0 ? "+" : ""}{r.returnPct}%
               </span>
             </div>
           ))}
         </div>
 
-        {/* Badges for winner */}
         {winner?.badges?.length > 0 && (
           <div className="mb-8 text-center">
-            <div className="text-xs mb-2" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>
-              WINNER BADGES
-            </div>
+            <div className="text-xs mb-2" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>WINNER BADGES</div>
             <div className="flex gap-2 flex-wrap justify-center">
               {winner.badges.map((b) => (
-                <div
-                  key={b.id}
-                  className="rounded-lg px-3 py-1.5 text-sm"
-                  style={{
-                    background: "rgba(255,214,0,0.1)",
-                    border: "1px solid rgba(255,214,0,0.2)",
-                  }}
-                >
+                <div key={b.id} className="rounded-lg px-3 py-1.5 text-sm" style={{ background: "rgba(255,214,0,0.1)", border: "1px solid rgba(255,214,0,0.2)" }}>
                   {b.icon} {b.label}
                 </div>
               ))}
@@ -350,11 +286,7 @@ export default function HostPage() {
         <button
           onClick={() => navigate("/")}
           className="rounded-xl py-3 px-8 font-bold text-sm cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
-          style={{
-            fontFamily: "var(--font-pixel)",
-            background: "#FFD600",
-            color: "#0a0e1a",
-          }}
+          style={{ fontFamily: "var(--font-pixel)", background: "#FFD600", color: "#0a0e1a" }}
         >
           NEW GAME
         </button>

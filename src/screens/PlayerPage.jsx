@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { useSocket } from "../hooks/useSocket.js";
-import { STOCKS, STARTING_CASH, GAME_DURATION } from "../../shared/constants.js";
+import { STOCKS, STARTING_CASH, DEFAULT_DURATION } from "../../shared/constants.js";
 import StockCard from "../components/StockCard.jsx";
 import TradeControls from "../components/TradeControls.jsx";
 import FlashMessage from "../components/FlashMessage.jsx";
@@ -15,7 +15,7 @@ export default function PlayerPage() {
   const navigate = useNavigate();
   const { socket, connected } = useSocket();
 
-  const [phase, setPhase] = useState("join"); // join | lobby | playing | results
+  const [phase, setPhase] = useState("join");
   const [roomCode, setRoomCode] = useState(urlCode?.toUpperCase() || "");
   const [playerName, setPlayerName] = useState("");
   const [error, setError] = useState("");
@@ -25,7 +25,8 @@ export default function PlayerPage() {
   const [cash, setCash] = useState(STARTING_CASH);
   const [holdings, setHoldings] = useState({});
   const [portfolioValue, setPortfolioValue] = useState(STARTING_CASH);
-  const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
+  const [timeLeft, setTimeLeft] = useState(DEFAULT_DURATION);
+  const [duration, setDuration] = useState(DEFAULT_DURATION);
   const [leaderboard, setLeaderboard] = useState([]);
   const [selectedStock, setSelectedStock] = useState(0);
   const [flash, setFlash] = useState(null);
@@ -36,11 +37,12 @@ export default function PlayerPage() {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("game:start", () => {
+    socket.on("game:start", ({ duration: d }) => {
       setPhase("playing");
       setCash(STARTING_CASH);
       setHoldings({});
       setPortfolioValue(STARTING_CASH);
+      if (d) { setDuration(d); setTimeLeft(d); }
     });
 
     socket.on("game:tick", (data) => {
@@ -49,11 +51,8 @@ export default function PlayerPage() {
       if (data.news?.recentEvents) {
         setNewsEvents(data.news.recentEvents);
       }
-
       const me = data.leaderboard.find((e) => e.id === socket.id);
-      if (me) {
-        setPortfolioValue(me.value);
-      }
+      if (me) setPortfolioValue(me.value);
     });
 
     socket.on("game:news", (event) => {
@@ -68,12 +67,7 @@ export default function PlayerPage() {
       setMyResult(me);
       setPhase("results");
       if (me?.rank === 1) {
-        confetti({
-          particleCount: 200,
-          spread: 100,
-          origin: { y: 0.4 },
-          colors: ["#FFD600", "#76FF03", "#00E5FF"],
-        });
+        confetti({ particleCount: 200, spread: 100, origin: { y: 0.4 }, colors: ["#FFD600", "#76FF03", "#00E5FF"] });
       }
     });
 
@@ -102,19 +96,11 @@ export default function PlayerPage() {
     if (!socket || !connected) return;
     const code = roomCode.trim().toUpperCase();
     const name = playerName.trim();
-    if (!code || !name) {
-      setError("Enter a room code and your name");
-      return;
-    }
+    if (!code || !name) { setError("Enter a room code and your name"); return; }
     setError("");
-
     socket.emit("player:join", { code, name }, (res) => {
-      if (res.ok) {
-        setJoinedCode(res.roomCode);
-        setPhase("lobby");
-      } else {
-        setError(res.error);
-      }
+      if (res.ok) { setJoinedCode(res.roomCode); setPhase("lobby"); }
+      else setError(res.error);
     });
   }, [socket, connected, roomCode, playerName]);
 
@@ -127,8 +113,7 @@ export default function PlayerPage() {
           setHoldings(res.holdings || {});
           setPortfolioValue(res.portfolioValue);
           const color = type === "buy" ? "#76FF03" : "#FFD600";
-          const msg = `${type === "buy" ? "BOUGHT" : "SOLD"} ${qty} ${res.symbol}`;
-          showFlash(msg, color);
+          showFlash(`${type === "buy" ? "BOUGHT" : "SOLD"} ${qty} ${res.symbol}`, color);
         } else {
           showFlash(res.error || "Trade failed", "#FF3D71");
         }
@@ -148,18 +133,12 @@ export default function PlayerPage() {
   if (phase === "join") {
     return (
       <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12">
-        <div
-          className="text-lg mb-8 tracking-widest"
-          style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
-        >
+        <div className="text-lg mb-8 tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
           JOIN GAME
         </div>
-
         <div className="w-full max-w-xs flex flex-col gap-4">
           <div>
-            <label className="text-xs block mb-1" style={{ color: "#aaa" }}>
-              ROOM CODE
-            </label>
+            <label className="text-xs block mb-1" style={{ color: "#aaa" }}>ROOM CODE</label>
             <input
               type="text"
               value={roomCode}
@@ -167,19 +146,12 @@ export default function PlayerPage() {
               placeholder="ABCD"
               maxLength={4}
               className="w-full rounded-lg px-4 py-3 text-2xl text-center font-bold tracking-[0.3em] border-2 outline-none"
-              style={{
-                background: "rgba(255,255,255,0.06)",
-                borderColor: "rgba(255,255,255,0.1)",
-                color: "#FFD600",
-                fontFamily: "var(--font-pixel)",
-              }}
+              style={{ background: "rgba(255,255,255,0.06)", borderColor: "rgba(255,255,255,0.1)", color: "#FFD600", fontFamily: "var(--font-pixel)" }}
               autoFocus
             />
           </div>
           <div>
-            <label className="text-xs block mb-1" style={{ color: "#aaa" }}>
-              YOUR NAME
-            </label>
+            <label className="text-xs block mb-1" style={{ color: "#aaa" }}>YOUR NAME</label>
             <input
               type="text"
               value={playerName}
@@ -187,41 +159,23 @@ export default function PlayerPage() {
               placeholder="Enter your name"
               maxLength={20}
               className="w-full rounded-lg px-4 py-3 text-base font-semibold border-2 outline-none"
-              style={{
-                background: "rgba(255,255,255,0.06)",
-                borderColor: "rgba(255,255,255,0.1)",
-                color: "#fff",
-                fontFamily: "var(--font-mono)",
-              }}
+              style={{ background: "rgba(255,255,255,0.06)", borderColor: "rgba(255,255,255,0.1)", color: "#fff", fontFamily: "var(--font-mono)" }}
               onKeyDown={(e) => e.key === "Enter" && joinGame()}
             />
           </div>
-
           {error && (
-            <div className="text-sm text-center py-2 rounded-lg" style={{ color: "#FF3D71", background: "rgba(255,61,113,0.1)" }}>
-              {error}
-            </div>
+            <div className="text-sm text-center py-2 rounded-lg" style={{ color: "#FF3D71", background: "rgba(255,61,113,0.1)" }}>{error}</div>
           )}
-
           <button
             onClick={joinGame}
             disabled={!connected}
             className="w-full rounded-xl py-4 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105 disabled:opacity-40"
-            style={{
-              fontFamily: "var(--font-pixel)",
-              background: "#76FF03",
-              color: "#0a0e1a",
-            }}
+            style={{ fontFamily: "var(--font-pixel)", background: "#76FF03", color: "#0a0e1a" }}
           >
             {connected ? "JOIN" : "CONNECTING..."}
           </button>
         </div>
-
-        <button
-          onClick={() => navigate("/")}
-          className="mt-8 text-xs border-none bg-transparent cursor-pointer"
-          style={{ color: "#444" }}
-        >
+        <button onClick={() => navigate("/")} className="mt-8 text-xs border-none bg-transparent cursor-pointer" style={{ color: "#444" }}>
           ← Back to home
         </button>
       </div>
@@ -233,23 +187,13 @@ export default function PlayerPage() {
     return (
       <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12 text-center">
         <div className="text-4xl mb-4">🎮</div>
-        <div
-          className="text-base mb-2"
-          style={{ fontFamily: "var(--font-pixel)", color: "#76FF03" }}
-        >
-          YOU'RE IN!
-        </div>
+        <div className="text-base mb-2" style={{ fontFamily: "var(--font-pixel)", color: "#76FF03" }}>YOU'RE IN!</div>
         <div className="text-sm mb-2" style={{ color: "#aaa" }}>
           Room <span className="font-bold" style={{ color: "#FFD600" }}>{joinedCode}</span>
         </div>
-        <div className="text-sm" style={{ color: "#666" }}>
-          Waiting for the host to start the game...
-        </div>
+        <div className="text-sm" style={{ color: "#666" }}>Waiting for the host to start the game...</div>
         <div className="mt-8">
-          <div
-            className="w-6 h-6 border-2 rounded-full animate-spin"
-            style={{ borderColor: "#FFD600 transparent #FFD600 transparent" }}
-          />
+          <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "#FFD600 transparent #FFD600 transparent" }} />
         </div>
       </div>
     );
@@ -261,121 +205,90 @@ export default function PlayerPage() {
     const histories = market?.histories || STOCKS.map((s) => [s.basePrice]);
 
     return (
-      <div className="min-h-dvh flex flex-col px-3 py-3 gap-2.5 max-w-lg mx-auto">
+      <div className="min-h-dvh flex flex-col px-3 py-3 gap-2 max-w-6xl mx-auto">
         <FlashMessage message={flash?.msg} color={flash?.color} />
 
-        {/* Header */}
         <div className="flex justify-between items-center">
-          <span
-            className="text-xs tracking-wider"
-            style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
-          >
+          <span className="text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
             TRADING
           </span>
-          <span
-            className="font-bold text-sm"
-            style={{ color: pnl >= 0 ? "#76FF03" : "#FF3D71" }}
-          >
+          <span className="font-bold text-sm" style={{ color: pnl >= 0 ? "#76FF03" : "#FF3D71" }}>
             P&L: {pnl >= 0 ? "+" : ""}${pnl.toFixed(2)}
           </span>
         </div>
 
-        <Timer timeLeft={timeLeft} total={GAME_DURATION} />
-
-        {/* News Ticker */}
-        <NewsTicker events={newsEvents} compact />
+        <Timer timeLeft={timeLeft} total={duration} />
 
         {/* Cash / Portfolio */}
-        <div
-          className="flex justify-between items-center rounded-lg px-3 py-2 text-sm"
-          style={{ background: "rgba(255,255,255,0.04)" }}
-        >
-          <span>
-            💵 <b style={{ color: "#76FF03" }}>${cash.toFixed(2)}</b>
-          </span>
-          <span>
-            📊 <b style={{ color: "#00E5FF" }}>${portfolioValue.toFixed(2)}</b>
-          </span>
+        <div className="flex justify-between items-center rounded-lg px-4 py-2.5 text-sm" style={{ background: "rgba(255,255,255,0.04)" }}>
+          <span>💵 <b style={{ color: "#76FF03" }}>${cash.toFixed(2)}</b></span>
+          <span>📊 <b style={{ color: "#00E5FF" }}>${portfolioValue.toFixed(2)}</b></span>
         </div>
 
-        {/* Stock cards */}
-        <div className="grid grid-cols-2 gap-2">
-          {STOCKS.map((stock, i) => (
-            <StockCard
-              key={stock.symbol}
-              index={i}
-              price={prices[i]}
-              history={histories[i]}
-              holdings={holdings[i] || 0}
-              selected={selectedStock === i}
-              onSelect={setSelectedStock}
-            />
-          ))}
-        </div>
-
-        {/* Trade controls */}
-        <TradeControls
-          selectedStock={selectedStock}
-          price={prices[selectedStock]}
-          cash={cash}
-          onTrade={handleTrade}
-          disabled={false}
-        />
-
-        {/* Mini leaderboard */}
-        {leaderboard.length > 0 && (
-          <div>
-            <div className="text-xs mb-1" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>
-              STANDINGS
+        {/* Two-column: stocks+controls left, news right */}
+        <div className="flex flex-col lg:flex-row gap-3 flex-1">
+          <div className="flex-1 flex flex-col gap-2 min-w-0">
+            <div className="grid grid-cols-2 gap-2">
+              {STOCKS.map((stock, i) => (
+                <StockCard
+                  key={stock.symbol}
+                  index={i}
+                  price={prices[i]}
+                  history={histories[i]}
+                  holdings={holdings[i] || 0}
+                  selected={selectedStock === i}
+                  onSelect={setSelectedStock}
+                />
+              ))}
             </div>
-            <Leaderboard entries={leaderboard.slice(0, 5)} highlightId={socket?.id} compact />
+
+            <TradeControls
+              selectedStock={selectedStock}
+              price={prices[selectedStock]}
+              cash={cash}
+              onTrade={handleTrade}
+              disabled={false}
+            />
+
+            {leaderboard.length > 0 && (
+              <div>
+                <div className="text-xs mb-1" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>STANDINGS</div>
+                <Leaderboard entries={leaderboard.slice(0, 5)} highlightId={socket?.id} compact />
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Right: news feed */}
+          <div className="lg:w-80 xl:w-96 shrink-0 flex flex-col">
+            <NewsTicker events={newsEvents} />
+          </div>
+        </div>
       </div>
     );
   }
 
   // ─── Results ──────────────────────────────────────────────
   if (phase === "results" && myResult) {
-    const gradeColor = {
-      S: "#FFD600", A: "#76FF03", B: "#00E5FF", C: "#fff", D: "#FF9100", F: "#FF3D71",
-    };
+    const gradeColor = { S: "#FFD600", A: "#76FF03", B: "#00E5FF", C: "#fff", D: "#FF9100", F: "#FF3D71" };
 
     return (
       <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12 text-center">
-        <div
-          className="text-sm mb-2 tracking-widest"
-          style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}
-        >
+        <div className="text-sm mb-2 tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}>
           MARKET CLOSED
         </div>
-
         <div
           className="text-7xl font-bold mb-2"
-          style={{
-            fontFamily: "var(--font-pixel)",
-            color: gradeColor[myResult.grade] || "#fff",
-            textShadow: `0 0 40px ${gradeColor[myResult.grade]}66`,
-          }}
+          style={{ fontFamily: "var(--font-pixel)", color: gradeColor[myResult.grade] || "#fff", textShadow: `0 0 40px ${gradeColor[myResult.grade]}66` }}
         >
           {myResult.grade}
         </div>
-
         <div className="text-lg font-bold mb-1" style={{ color: "#aaa" }}>
           #{myResult.rank} of {results.length}
         </div>
-
-        <div
-          className="text-2xl font-bold mb-6"
-          style={{ color: myResult.returnPct >= 0 ? "#76FF03" : "#FF3D71" }}
-        >
+        <div className="text-2xl font-bold mb-6" style={{ color: myResult.returnPct >= 0 ? "#76FF03" : "#FF3D71" }}>
           {myResult.returnPct >= 0 ? "+" : ""}{myResult.returnPct}% return
         </div>
-
-        <div
-          className="rounded-xl p-5 w-full max-w-xs mb-6"
-          style={{ background: "rgba(255,255,255,0.04)" }}
-        >
+        <div className="rounded-xl p-5 w-full max-w-xs mb-6" style={{ background: "rgba(255,255,255,0.04)" }}>
           <div className="flex justify-between text-sm mb-2">
             <span style={{ color: "#aaa" }}>Final Value</span>
             <span className="font-bold">${myResult.value?.toLocaleString()}</span>
@@ -385,47 +298,25 @@ export default function PlayerPage() {
             <span className="font-bold">{myResult.trades}</span>
           </div>
         </div>
-
         {myResult.badges?.length > 0 && (
           <div className="mb-6">
-            <div className="text-xs mb-2" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>
-              BADGES
-            </div>
+            <div className="text-xs mb-2" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>BADGES</div>
             <div className="flex gap-2 flex-wrap justify-center">
               {myResult.badges.map((b) => (
-                <div
-                  key={b.id}
-                  className="rounded-lg px-3 py-1.5 text-sm"
-                  style={{
-                    background: "rgba(255,214,0,0.1)",
-                    border: "1px solid rgba(255,214,0,0.2)",
-                  }}
-                >
+                <div key={b.id} className="rounded-lg px-3 py-1.5 text-sm" style={{ background: "rgba(255,214,0,0.1)", border: "1px solid rgba(255,214,0,0.2)" }}>
                   {b.icon} {b.label}
                 </div>
               ))}
             </div>
           </div>
         )}
-
-        {/* Full leaderboard */}
         <div className="w-full max-w-sm mb-6">
           <Leaderboard entries={results} highlightId={socket?.id} compact />
         </div>
-
         <button
-          onClick={() => {
-            setPhase("join");
-            setRoomCode("");
-            setPlayerName("");
-            navigate("/play");
-          }}
+          onClick={() => { setPhase("join"); setRoomCode(""); setPlayerName(""); navigate("/play"); }}
           className="rounded-xl py-3 px-8 font-bold text-sm cursor-pointer border-none tracking-wider"
-          style={{
-            fontFamily: "var(--font-pixel)",
-            background: "#FFD600",
-            color: "#0a0e1a",
-          }}
+          style={{ fontFamily: "var(--font-pixel)", background: "#FFD600", color: "#0a0e1a" }}
         >
           PLAY AGAIN
         </button>
