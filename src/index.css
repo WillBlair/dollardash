@@ -109,10 +109,11 @@ body {
   width: 30px;
   max-width: 30px;
   height: auto;
-  z-index: 0;
+  /* Above page background, below interactive UI (see HomeScreen z-20 wrapper) */
+  z-index: 15;
   pointer-events: none;
   image-rendering: pixelated;
-  opacity: 0.9;
+  opacity: 0.92;
   animation: money-fly-across 26s linear infinite;
   will-change: transform;
 }
@@ -120,7 +121,8 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .home-money-fly {
     animation: none;
-    opacity: 0;
-    visibility: hidden;
+    /* Keep visible — many devices default to reduced motion */
+    transform: translate3d(20vw, 0, 0);
+    opacity: 0.88;
   }
 }
