@@ -24,8 +24,8 @@ export default function HomeScreen() {
         src={publicAsset("moneyflynobackground.gif")}
         alt=""
         className="home-money-fly"
-        width={30}
-        height={30}
+        width={72}
+        height={72}
         decoding="async"
         loading="eager"
       />

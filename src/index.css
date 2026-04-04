@@ -104,25 +104,30 @@ body {
 
 .home-money-fly {
   position: fixed;
-  top: min(20vh, 140px);
+  top: min(18vh, 120px);
   left: 0;
-  width: 30px;
-  max-width: 30px;
+  width: clamp(52px, 14vw, 72px);
+  max-width: 72px;
   height: auto;
   /* Above page background, below interactive UI (see HomeScreen z-20 wrapper) */
   z-index: 15;
   pointer-events: none;
   image-rendering: pixelated;
   opacity: 0.92;
-  animation: money-fly-across 26s linear infinite;
+  animation-name: money-fly-across;
+  animation-duration: 24s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
   will-change: transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Still move, but much slower (static transform was freezing it for many users) */
   .home-money-fly {
-    animation: none;
-    /* Keep visible — many devices default to reduced motion */
-    transform: translate3d(20vw, 0, 0);
+    animation-name: money-fly-across;
+    animation-duration: 90s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
     opacity: 0.88;
   }
 }
