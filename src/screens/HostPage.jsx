@@ -11,6 +11,7 @@ import NewsTicker from "../components/NewsTicker.jsx";
 import DurationPicker from "../components/DurationPicker.jsx";
 import Mascot from "../components/Mascot.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
+import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
 
 export default function HostPage() {
   const { socket, connected } = useSocket();
@@ -30,6 +31,8 @@ export default function HostPage() {
   const [mascotMood, setMascotMood] = useState("idle");
   const [mascotTrigger, setMascotTrigger] = useState(0);
   const hostCreateDoneRef = useRef(false);
+
+  useNewsAnnouncer(phase === "playing" ? newsEvents : [], phase === "playing");
 
   const joinUrl = typeof window !== "undefined" ? `${window.location.origin}/play/${roomCode}` : "";
 

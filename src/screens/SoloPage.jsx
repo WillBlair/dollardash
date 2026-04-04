@@ -13,6 +13,7 @@ import DurationPicker from "../components/DurationPicker.jsx";
 import TitleBadge from "../components/TitleBadge.jsx";
 import Mascot from "../components/Mascot.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
+import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
 import VoiceAgent from "../components/VoiceAgent.jsx";
 
 function getPortfolioValue(cash, holdings, prices) {
@@ -39,6 +40,8 @@ export default function SoloPage() {
   const [newsEvents, setNewsEvents] = useState([]);
   const [mascotMood, setMascotMood] = useState("idle");
   const [mascotTrigger, setMascotTrigger] = useState(0);
+
+  useNewsAnnouncer(phase === "playing" ? newsEvents : [], phase === "playing");
 
   const gameRef = useRef(null);
   const newsRef = useRef(null);

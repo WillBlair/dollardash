@@ -6,7 +6,6 @@ import { STOCKS } from "../../shared/constants.js";
 function VoiceAgentInner({ onTradeRef, cashRef, holdingsRef, pricesRef, onSelectStockRef }) {
   const [isOpen, setIsOpen] = useState(false);
   const { startSession, endSession, status, isSpeaking } = useConversation();
-  const hasAutoStarted = useRef(false);
 
   const buildSessionConfig = useCallback((overrides = {}) => ({
     agentId: import.meta.env.VITE_ELEVENLABS_AGENT_ID,
@@ -59,22 +58,6 @@ function VoiceAgentInner({ onTradeRef, cashRef, holdingsRef, pricesRef, onSelect
       },
     },
   }), [onTradeRef, cashRef, holdingsRef, pricesRef, onSelectStockRef]);
-
-  // Auto-start when the game begins (component mounts during "playing" phase)
-  useEffect(() => {
-    if (hasAutoStarted.current) return;
-    hasAutoStarted.current = true;
-
-    (async () => {
-      try {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        startSession(buildSessionConfig());
-        console.log("[VoiceAgent] Auto-started on game start");
-      } catch (err) {
-        console.error("[VoiceAgent] Auto-start failed:", err);
-      }
-    })();
-  }, [startSession, buildSessionConfig]);
 
   const startConversation = useCallback(async () => {
     try {

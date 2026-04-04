@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -16,6 +17,55 @@ const app = express();
 app.use((req, res, next) => {
   res.setHeader("Permissions-Policy", "microphone=(), camera=(), geolocation=()");
   next();
+});
+
+app.use(express.json({ limit: "8kb" }));
+
+app.post("/api/tts", async (req, res) => {
+  const apiKey = process.env.ELEVENLABS_API_KEY;
+  const voiceId = process.env.ELEVENLABS_VOICE_ID;
+  if (!apiKey?.trim() || !voiceId?.trim()) {
+    return res.status(503).json({ error: "TTS not configured" });
+  }
+
+  const text = String(req.body?.text ?? "").trim().slice(0, 500);
+  if (!text) {
+    return res.status(400).json({ error: "text required" });
+  }
+
+  const modelId = process.env.ELEVENLABS_MODEL_ID || "eleven_turbo_v2_5";
+
+  try {
+    const elRes = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}`,
+      {
+        method: "POST",
+        headers: {
+          "xi-api-key": apiKey,
+          "Content-Type": "application/json",
+          Accept: "audio/mpeg",
+        },
+        body: JSON.stringify({
+          text,
+          model_id: modelId,
+        }),
+      },
+    );
+
+    if (!elRes.ok) {
+      const errText = await elRes.text();
+      console.error("[tts] ElevenLabs", elRes.status, errText.slice(0, 300));
+      return res.status(502).json({ error: "upstream TTS failed" });
+    }
+
+    const buf = Buffer.from(await elRes.arrayBuffer());
+    res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader("Cache-Control", "no-store");
+    res.send(buf);
+  } catch (e) {
+    console.error("[tts]", e);
+    res.status(500).json({ error: "TTS error" });
+  }
 });
 
 const httpServer = createServer(app);
