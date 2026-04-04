@@ -11,6 +11,7 @@ import Timer from "../components/Timer.jsx";
 import NewsTicker from "../components/NewsTicker.jsx";
 import DurationPicker from "../components/DurationPicker.jsx";
 import TitleBadge from "../components/TitleBadge.jsx";
+import BadgeChip from "../components/BadgeChip.jsx";
 import Mascot from "../components/Mascot.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
 import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
@@ -396,9 +397,7 @@ export default function SoloPage() {
             <div className="text-xs mb-2" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>BADGES EARNED</div>
             <div className="flex gap-2 flex-wrap justify-center">
               {earned.map((b) => (
-                <div key={b.id} className="rounded-lg px-3 py-1.5 text-sm" style={{ background: "rgba(255,214,0,0.1)", border: "1px solid rgba(255,214,0,0.2)" }}>
-                  {b.icon} {b.label}
-                </div>
+                <BadgeChip key={b.id} badge={b} />
               ))}
             </div>
           </div>

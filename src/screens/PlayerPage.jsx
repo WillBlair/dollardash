@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { useSocket } from "../hooks/useSocket.js";
-import { STOCKS, STARTING_CASH, DEFAULT_DURATION } from "../../shared/constants.js";
+import { STOCKS, STARTING_CASH, DEFAULT_DURATION, BADGES } from "../../shared/constants.js";
+import BadgeChip from "../components/BadgeChip.jsx";
 import StockCard from "../components/StockCard.jsx";
 import TradeControls from "../components/TradeControls.jsx";
 import FlashMessage from "../components/FlashMessage.jsx";
@@ -328,11 +329,10 @@ export default function PlayerPage() {
           <div className="mb-6">
             <div className="text-xs mb-2" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>BADGES</div>
             <div className="flex gap-2 flex-wrap justify-center">
-              {myResult.badges.map((b) => (
-                <div key={b.id} className="rounded-lg px-3 py-1.5 text-sm" style={{ background: "rgba(255,214,0,0.1)", border: "1px solid rgba(255,214,0,0.2)" }}>
-                  {b.icon} {b.label}
-                </div>
-              ))}
+              {myResult.badges.map((b) => {
+                const full = BADGES.find((x) => x.id === b.id) || b;
+                return <BadgeChip key={b.id} badge={{ ...b, desc: full.desc, threshold: full.threshold }} />;
+              })}
             </div>
           </div>
         )}

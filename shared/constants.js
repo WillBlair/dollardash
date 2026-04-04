@@ -17,14 +17,14 @@ export const STOCKS = [
 ];
 
 export const BADGES = [
-  { id: "first_trade", label: "First Trade", icon: "🏁", key: "totalTrades", min: 1 },
-  { id: "profit", label: "In The Green", icon: "💚", key: "returnPct", min: 0.01 },
-  { id: "double", label: "Doubled Up", icon: "🚀", key: "returnPct", min: 100 },
-  { id: "diamond", label: "Diamond Hands", icon: "💎", key: "longestHold", min: 20 },
-  { id: "trader", label: "Day Trader", icon: "📈", key: "totalTrades", min: 15 },
-  { id: "diversified", label: "Diversified", icon: "🎯", key: "uniqueStocks", min: 3 },
-  { id: "whale", label: "Whale", icon: "🐋", key: "biggestPosition", min: 5000 },
-  { id: "rekt", label: "Got REKT", icon: "💀", key: "returnPct", max: -50 },
+  { id: "first_trade", label: "First Trade", icon: "🏁", key: "totalTrades", min: 1, desc: "Execute your first trade", threshold: "1 trade" },
+  { id: "profit", label: "In The Green", icon: "💚", key: "returnPct", min: 0.01, desc: "Finish with a positive return", threshold: "> 0% return" },
+  { id: "double", label: "Doubled Up", icon: "🚀", key: "returnPct", min: 100, desc: "Double your starting cash", threshold: "+100% return" },
+  { id: "diamond", label: "Diamond Hands", icon: "💎", key: "longestHold", min: 20, desc: "Hold a position through volatility", threshold: "Hold 20+ ticks" },
+  { id: "trader", label: "Day Trader", icon: "📈", key: "totalTrades", min: 15, desc: "Trade at high frequency", threshold: "15+ trades" },
+  { id: "diversified", label: "Diversified", icon: "🎯", key: "uniqueStocks", min: 3, desc: "Trade at least 3 different stocks", threshold: "3+ stocks traded" },
+  { id: "whale", label: "Whale", icon: "🐋", key: "biggestPosition", min: 5000, desc: "Build a massive single position", threshold: "$5,000+ position" },
+  { id: "rekt", label: "Got REKT", icon: "💀", key: "returnPct", max: -50, desc: "Lose more than half your money", threshold: "-50% return" },
 ];
 
 export const TRADER_TITLES = [

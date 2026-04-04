@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import confetti from "canvas-confetti";
 import { useSocket } from "../hooks/useSocket.js";
-import { STOCKS, STARTING_CASH, DEFAULT_DURATION } from "../../shared/constants.js";
+import { STOCKS, STARTING_CASH, DEFAULT_DURATION, BADGES } from "../../shared/constants.js";
+import BadgeChip from "../components/BadgeChip.jsx";
 import BigChart from "../components/BigChart.jsx";
 import Leaderboard from "../components/Leaderboard.jsx";
 import Timer from "../components/Timer.jsx";
@@ -283,11 +284,10 @@ export default function HostPage() {
           <div className="mb-8 text-center">
             <div className="text-xs mb-2" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>WINNER BADGES</div>
             <div className="flex gap-2 flex-wrap justify-center">
-              {winner.badges.map((b) => (
-                <div key={b.id} className="rounded-lg px-3 py-1.5 text-sm" style={{ background: "rgba(255,214,0,0.1)", border: "1px solid rgba(255,214,0,0.2)" }}>
-                  {b.icon} {b.label}
-                </div>
-              ))}
+              {winner.badges.map((b) => {
+                const full = BADGES.find((x) => x.id === b.id) || b;
+                return <BadgeChip key={b.id} badge={{ ...b, desc: full.desc, threshold: full.threshold }} />;
+              })}
             </div>
           </div>
         )}
