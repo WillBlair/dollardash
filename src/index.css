@@ -106,8 +106,8 @@ body {
   position: fixed;
   top: min(18vh, 120px);
   left: 0;
-  width: clamp(52px, 14vw, 72px);
-  max-width: 72px;
+  width: clamp(28px, 8vw, 40px);
+  max-width: 40px;
   height: auto;
   /* Above page background, below interactive UI (see HomeScreen z-20 wrapper) */
   z-index: 15;
@@ -115,19 +115,106 @@ body {
   image-rendering: pixelated;
   opacity: 0.92;
   animation-name: money-fly-across;
-  animation-duration: 24s;
+  animation-duration: 14s;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
   will-change: transform;
 }
 
+/* Second decorative fly-by (briefcase) — different lane + speed so it doesn’t sync with money */
+.home-briefcase-fly {
+  position: fixed;
+  top: min(34vh, 240px);
+  left: 0;
+  width: clamp(28px, 8vw, 40px);
+  max-width: 40px;
+  height: auto;
+  z-index: 15;
+  pointer-events: none;
+  image-rendering: pixelated;
+  opacity: 0.9;
+  animation-name: money-fly-across;
+  animation-duration: 19s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-delay: -8s;
+  will-change: transform;
+}
+
+/* Third fly-by (coffee) */
+.home-coffee-fly {
+  position: fixed;
+  top: min(48vh, 320px);
+  left: 0;
+  width: clamp(28px, 8vw, 40px);
+  max-width: 40px;
+  height: auto;
+  z-index: 15;
+  pointer-events: none;
+  image-rendering: pixelated;
+  opacity: 0.9;
+  animation-name: money-fly-across;
+  animation-duration: 16s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-delay: -13s;
+  will-change: transform;
+}
+
+/* Fourth fly-by (coin) */
+.home-coin-fly {
+  position: fixed;
+  top: min(10vh, 72px);
+  left: 0;
+  width: clamp(28px, 8vw, 40px);
+  max-width: 40px;
+  height: auto;
+  z-index: 15;
+  pointer-events: none;
+  image-rendering: pixelated;
+  opacity: 0.9;
+  animation-name: money-fly-across;
+  animation-duration: 21s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-delay: -17s;
+  will-change: transform;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  /* Still move, but much slower (static transform was freezing it for many users) */
+  /* Still move, but slower than default */
   .home-money-fly {
     animation-name: money-fly-across;
-    animation-duration: 90s;
+    animation-duration: 48s;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
     opacity: 0.88;
+  }
+
+  .home-briefcase-fly {
+    animation-name: money-fly-across;
+    animation-duration: 58s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-delay: -25s;
+    opacity: 0.85;
+  }
+
+  .home-coffee-fly {
+    animation-name: money-fly-across;
+    animation-duration: 52s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-delay: -38s;
+    opacity: 0.85;
+  }
+
+  .home-coin-fly {
+    animation-name: money-fly-across;
+    animation-duration: 62s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-delay: -12s;
+    opacity: 0.85;
   }
 }

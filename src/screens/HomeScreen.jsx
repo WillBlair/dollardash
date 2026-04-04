@@ -24,8 +24,35 @@ export default function HomeScreen() {
         src={publicAsset("moneyflynobackground.gif")}
         alt=""
         className="home-money-fly"
-        width={72}
-        height={72}
+        width={40}
+        height={40}
+        decoding="async"
+        loading="eager"
+      />
+      <img
+        src={publicAsset("breifcasenobg.gif")}
+        alt=""
+        className="home-briefcase-fly"
+        width={40}
+        height={40}
+        decoding="async"
+        loading="eager"
+      />
+      <img
+        src={publicAsset("coffee.gif")}
+        alt=""
+        className="home-coffee-fly"
+        width={40}
+        height={40}
+        decoding="async"
+        loading="eager"
+      />
+      <img
+        src={publicAsset("coinnobg.gif")}
+        alt=""
+        className="home-coin-fly"
+        width={40}
+        height={40}
         decoding="async"
         loading="eager"
       />
