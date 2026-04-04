@@ -89,16 +89,18 @@ export default function HostPage() {
   }, [socket, connected, sound]);
 
   const handleDurationChange = useCallback((seconds) => {
+    sound.unlock();
     setDuration(seconds);
     if (socket) socket.emit("host:setDuration", { seconds }, () => {});
-  }, [socket]);
+  }, [socket, sound]);
 
   const startGame = useCallback(() => {
+    sound.unlock();
     if (!socket) return;
     socket.emit("host:start", (res) => {
       if (!res.ok) alert(res.error);
     });
-  }, [socket]);
+  }, [socket, sound]);
 
   const kickPlayer = useCallback(
     (playerId) => {

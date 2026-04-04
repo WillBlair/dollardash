@@ -12,6 +12,12 @@ const distPath = join(__dirname, "..", "dist");
 
 const PORT = process.env.PORT || 3001;
 const app = express();
+
+app.use((req, res, next) => {
+  res.setHeader("Permissions-Policy", "microphone=(), camera=(), geolocation=()");
+  next();
+});
+
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: { origin: "*" },

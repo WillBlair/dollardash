@@ -48,6 +48,7 @@ export default function SoloPage() {
   const prevPricesRef = useRef(null);
 
   const startGame = useCallback(() => {
+    sound.unlock();
     durationRef.current = duration;
     const initPrices = STOCKS.map((s) => s.basePrice);
     setCash(STARTING_CASH);

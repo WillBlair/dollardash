@@ -109,6 +109,7 @@ export default function PlayerPage() {
   }, [socket, sound]);
 
   const joinGame = useCallback(() => {
+    sound.unlock();
     if (!socket || !connected) return;
     const code = roomCode.trim().toUpperCase();
     const name = playerName.trim();
@@ -118,7 +119,7 @@ export default function PlayerPage() {
       if (res.ok) { setJoinedCode(res.roomCode); setPhase("lobby"); }
       else setError(res.error);
     });
-  }, [socket, connected, roomCode, playerName]);
+  }, [socket, connected, roomCode, playerName, sound]);
 
   const handleTrade = useCallback(
     ({ stockIdx, qty, type }) => {

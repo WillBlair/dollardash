@@ -52,15 +52,22 @@ export default function useSoundEngine() {
   const ctxRef = useRef(null);
   const ambientRef = useRef(null);
 
-  const getCtx = useCallback(() => {
-    if (!AudioCtx) return null;
+  /** Call once from a click/tap handler so Web Audio runs under user activation (no spurious permission prompts). */
+  const unlock = useCallback(() => {
+    if (!AudioCtx) return;
     if (!ctxRef.current) {
       ctxRef.current = new AudioCtx();
     }
-    if (ctxRef.current.state === "suspended") {
-      ctxRef.current.resume();
+    const ctx = ctxRef.current;
+    if (ctx.state === "suspended") {
+      ctx.resume().catch(() => {});
     }
-    return ctxRef.current;
+  }, []);
+
+  const getCtx = useCallback(() => {
+    const ctx = ctxRef.current;
+    if (!ctx || ctx.state === "closed") return null;
+    return ctx;
   }, []);
 
   const startAmbient = useCallback(() => {
@@ -140,7 +147,7 @@ export default function useSoundEngine() {
   }, [stopAmbient]);
 
   return useMemo(
-    () => ({ startAmbient, stopAmbient, bell, buy, sell, news, bigMove, error }),
-    [startAmbient, stopAmbient, bell, buy, sell, news, bigMove, error],
+    () => ({ unlock, startAmbient, stopAmbient, bell, buy, sell, news, bigMove, error }),
+    [unlock, startAmbient, stopAmbient, bell, buy, sell, news, bigMove, error],
   );
 }
