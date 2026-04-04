@@ -10,6 +10,9 @@ import FlashMessage from "../components/FlashMessage.jsx";
 import Timer from "../components/Timer.jsx";
 import NewsTicker from "../components/NewsTicker.jsx";
 import DurationPicker from "../components/DurationPicker.jsx";
+import TitleBadge from "../components/TitleBadge.jsx";
+import Mascot from "../components/Mascot.jsx";
+import useSoundEngine from "../hooks/useSoundEngine.js";
 
 function getPortfolioValue(cash, holdings, prices) {
   let val = cash;
@@ -21,6 +24,7 @@ function getPortfolioValue(cash, holdings, prices) {
 
 export default function SoloPage() {
   const navigate = useNavigate();
+  const sound = useSoundEngine();
   const [phase, setPhase] = useState("menu");
   const [duration, setDuration] = useState(DEFAULT_DURATION);
   const [cash, setCash] = useState(STARTING_CASH);
@@ -32,12 +36,15 @@ export default function SoloPage() {
   const [flash, setFlash] = useState(null);
   const [stats, setStats] = useState(null);
   const [newsEvents, setNewsEvents] = useState([]);
+  const [mascotMood, setMascotMood] = useState("idle");
+  const [mascotTrigger, setMascotTrigger] = useState(0);
 
   const gameRef = useRef(null);
   const newsRef = useRef(null);
   const timerRef = useRef(null);
   const tickRef = useRef(null);
   const durationRef = useRef(duration);
+  const prevPricesRef = useRef(null);
 
   const startGame = useCallback(() => {
     durationRef.current = duration;
@@ -51,7 +58,9 @@ export default function SoloPage() {
     setFlash(null);
     setStats(null);
     setNewsEvents([]);
+    setMascotMood("idle");
     newsRef.current = new NewsEngine();
+    prevPricesRef.current = [...initPrices];
     gameRef.current = {
       cash: STARTING_CASH,
       holdings: {},
@@ -63,7 +72,9 @@ export default function SoloPage() {
       biggestPosition: 0,
     };
     setPhase("playing");
-  }, [duration]);
+    sound.bell();
+    sound.startAmbient();
+  }, [duration, sound]);
 
   useEffect(() => {
     if (phase !== "playing") {
@@ -77,6 +88,8 @@ export default function SoloPage() {
         if (t <= 1) {
           clearInterval(timerRef.current);
           clearInterval(tickRef.current);
+          sound.stopAmbient();
+          sound.bell();
           const g = gameRef.current;
           const fv = getPortfolioValue(g.cash, g.holdings, g.prices);
           const returnPct = ((fv - STARTING_CASH) / STARTING_CASH) * 100;
@@ -103,6 +116,19 @@ export default function SoloPage() {
       setPrices((prev) => {
         const next = prev.map((p, i) => engine.generatePrice(p, i));
         gameRef.current.prices = next;
+
+        // Detect big moves (>5% swing on any stock)
+        if (prevPricesRef.current) {
+          for (let i = 0; i < next.length; i++) {
+            const pctChange = Math.abs((next[i] - prevPricesRef.current[i]) / prevPricesRef.current[i]);
+            if (pctChange > 0.05) {
+              sound.bigMove();
+              break;
+            }
+          }
+        }
+        prevPricesRef.current = [...next];
+
         return next;
       });
       setHistories((prev) =>
@@ -114,6 +140,9 @@ export default function SoloPage() {
 
       if (newEvent) {
         setNewsEvents((prev) => [...prev.slice(-9), newEvent]);
+        sound.news();
+        setMascotMood(newEvent.sentiment === "bullish" ? "bullish" : "bearish");
+        setMascotTrigger((n) => n + 1);
       }
 
       const g = gameRef.current;
@@ -127,7 +156,7 @@ export default function SoloPage() {
       clearInterval(timerRef.current);
       clearInterval(tickRef.current);
     };
-  }, [phase]);
+  }, [phase, sound]);
 
   const handleTrade = useCallback(
     ({ stockIdx, qty, type }) => {
@@ -136,7 +165,7 @@ export default function SoloPage() {
 
       if (type === "buy") {
         const cost = price * qty;
-        if (cost > cash) { showFlash("NOT ENOUGH CASH", "#FF3D71"); return; }
+        if (cost > cash) { showFlash("NOT ENOUGH CASH", "#FF3D71"); sound.error(); return; }
         const newCash = cash - cost;
         const newHoldings = { ...holdings, [stockIdx]: (holdings[stockIdx] || 0) + qty };
         setCash(newCash); setHoldings(newHoldings);
@@ -145,9 +174,12 @@ export default function SoloPage() {
         g.biggestPosition = Math.max(g.biggestPosition, newHoldings[stockIdx] * price);
         if (!g.holdTicks[stockIdx]) g.holdTicks[stockIdx] = 0;
         showFlash(`BOUGHT ${qty} ${STOCKS[stockIdx].symbol}`, "#76FF03");
+        sound.buy();
+        setMascotMood("buy");
+        setMascotTrigger((n) => n + 1);
       } else {
         const held = holdings[stockIdx] || 0;
-        if (held < qty) { showFlash("NOT ENOUGH SHARES", "#FF3D71"); return; }
+        if (held < qty) { showFlash("NOT ENOUGH SHARES", "#FF3D71"); sound.error(); return; }
         const newCash = cash + price * qty;
         const newHoldings = { ...holdings };
         newHoldings[stockIdx] = held - qty;
@@ -155,9 +187,12 @@ export default function SoloPage() {
         setCash(newCash); setHoldings(newHoldings);
         g.cash = newCash; g.holdings = newHoldings; g.trades++;
         showFlash(`SOLD ${qty} ${STOCKS[stockIdx].symbol}`, "#FFD600");
+        sound.sell();
+        setMascotMood("sell");
+        setMascotTrigger((n) => n + 1);
       }
     },
-    [cash, holdings, prices],
+    [cash, holdings, prices, sound],
   );
 
   const showFlash = (msg, color) => {
@@ -167,6 +202,14 @@ export default function SoloPage() {
 
   const portfolioValue = getPortfolioValue(cash, holdings, prices);
   const pnl = portfolioValue - STARTING_CASH;
+
+  // Update mascot based on P&L periodically
+  useEffect(() => {
+    if (phase !== "playing") return;
+    const pnlPct = ((portfolioValue - STARTING_CASH) / STARTING_CASH) * 100;
+    if (pnlPct > 10) setMascotMood("winning");
+    else if (pnlPct < -10) setMascotMood("losing");
+  }, [phase, portfolioValue]);
 
   // ─── Menu ───────────────────────────────────────────────────
   if (phase === "menu") {
@@ -234,19 +277,21 @@ export default function SoloPage() {
   // ─── Playing ──────────────────────────────────────────────
   if (phase === "playing") {
     return (
-      <div className="min-h-dvh flex flex-col px-3 py-3 gap-2 max-w-6xl mx-auto">
+      <div className="min-h-dvh flex flex-col px-3 py-3 gap-2 max-w-6xl mx-auto pb-28">
         <FlashMessage message={flash?.msg} color={flash?.color} />
+        <Mascot mood={mascotMood} latestEvent={mascotTrigger} />
 
         {/* Header bar */}
         <div className="flex justify-between items-center flex-wrap gap-2">
-          <span className="text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
-            DOLLAR DASH
-          </span>
-          <div className="flex items-center gap-4">
-            <span className="font-bold text-sm" style={{ color: pnl >= 0 ? "#76FF03" : "#FF3D71" }}>
-              P&L: {pnl >= 0 ? "+" : ""}${pnl.toFixed(2)}
+          <div className="flex items-center gap-2">
+            <span className="text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
+              DOLLAR DASH
             </span>
+            <TitleBadge portfolioValue={portfolioValue} />
           </div>
+          <span className="font-bold text-sm" style={{ color: pnl >= 0 ? "#76FF03" : "#FF3D71" }}>
+            P&L: {pnl >= 0 ? "+" : ""}${pnl.toFixed(2)}
+          </span>
         </div>
 
         <Timer timeLeft={timeLeft} total={durationRef.current} />
@@ -259,7 +304,6 @@ export default function SoloPage() {
 
         {/* Two-column: trading left, news right */}
         <div className="flex flex-col lg:flex-row gap-3 flex-1">
-          {/* LEFT: chart, stocks, trade controls */}
           <div className="flex-1 flex flex-col gap-2 min-w-0">
             <BigChart histories={histories} selectedIdx={selectedStock} />
 

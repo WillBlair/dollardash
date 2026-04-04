@@ -27,6 +27,16 @@ export const BADGES = [
   { id: "rekt", label: "Got REKT", icon: "💀", key: "returnPct", max: -50 },
 ];
 
+export const TRADER_TITLES = [
+  { minReturn: -Infinity, title: "INTERN", icon: "📋", color: "#666" },
+  { minReturn: 0, title: "ANALYST", icon: "📊", color: "#aaa" },
+  { minReturn: 5, title: "ASSOCIATE", icon: "💼", color: "#00E5FF" },
+  { minReturn: 15, title: "VP", icon: "📈", color: "#76FF03" },
+  { minReturn: 30, title: "DIRECTOR", icon: "🏦", color: "#FFD600" },
+  { minReturn: 50, title: "MANAGING DIR.", icon: "👔", color: "#FF9100" },
+  { minReturn: 100, title: "PARTNER", icon: "👑", color: "#FF3D71" },
+];
+
 export const NEWS_EVENTS = [
   { stockIdx: 0, headline: "Banana Inc. smashes earnings — revenue up 40%", sentiment: "bullish", driftMod: 0.035, durationSec: 8 },
   { stockIdx: 0, headline: "FDA approves high-potassium superfruit patent for BNNA", sentiment: "bullish", driftMod: 0.025, durationSec: 7 },

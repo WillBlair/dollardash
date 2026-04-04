@@ -9,10 +9,13 @@ import Leaderboard from "../components/Leaderboard.jsx";
 import Timer from "../components/Timer.jsx";
 import NewsTicker from "../components/NewsTicker.jsx";
 import DurationPicker from "../components/DurationPicker.jsx";
+import Mascot from "../components/Mascot.jsx";
+import useSoundEngine from "../hooks/useSoundEngine.js";
 
 export default function HostPage() {
   const { socket, connected } = useSocket();
   const navigate = useNavigate();
+  const sound = useSoundEngine();
 
   const [phase, setPhase] = useState("creating");
   const [roomCode, setRoomCode] = useState("");
@@ -24,6 +27,8 @@ export default function HostPage() {
   const [results, setResults] = useState(null);
   const [selectedStock, setSelectedStock] = useState(0);
   const [newsEvents, setNewsEvents] = useState([]);
+  const [mascotMood, setMascotMood] = useState("idle");
+  const [mascotTrigger, setMascotTrigger] = useState(0);
 
   const joinUrl = typeof window !== "undefined" ? `${window.location.origin}/play/${roomCode}` : "";
 
@@ -31,10 +36,7 @@ export default function HostPage() {
     if (!socket || !connected) return;
 
     socket.emit("host:create", (res) => {
-      if (res.ok) {
-        setRoomCode(res.code);
-        setPhase("lobby");
-      }
+      if (res.ok) { setRoomCode(res.code); setPhase("lobby"); }
     });
 
     socket.on("lobby:update", ({ players: p }) => setPlayers(p));
@@ -43,6 +45,8 @@ export default function HostPage() {
       setMarket(m);
       if (d) setDuration(d);
       setPhase("playing");
+      sound.bell();
+      sound.startAmbient();
     });
 
     socket.on("game:tick", (data) => {
@@ -55,6 +59,9 @@ export default function HostPage() {
 
     socket.on("game:news", (event) => {
       setNewsEvents((prev) => [...prev.slice(-9), event]);
+      sound.news();
+      setMascotMood(event.sentiment === "bullish" ? "bullish" : "bearish");
+      setMascotTrigger((n) => n + 1);
     });
 
     socket.on("game:timer", ({ timeLeft: t }) => setTimeLeft(t));
@@ -62,6 +69,8 @@ export default function HostPage() {
     socket.on("game:end", ({ results: r }) => {
       setResults(r);
       setPhase("results");
+      sound.stopAmbient();
+      sound.bell();
       confetti({ particleCount: 200, spread: 100, origin: { y: 0.3 }, colors: ["#FFD600", "#76FF03", "#00E5FF", "#FF3D71"] });
     });
 
@@ -73,13 +82,11 @@ export default function HostPage() {
       socket.off("game:timer");
       socket.off("game:end");
     };
-  }, [socket, connected]);
+  }, [socket, connected, sound]);
 
   const handleDurationChange = useCallback((seconds) => {
     setDuration(seconds);
-    if (socket) {
-      socket.emit("host:setDuration", { seconds }, () => {});
-    }
+    if (socket) socket.emit("host:setDuration", { seconds }, () => {});
   }, [socket]);
 
   const startGame = useCallback(() => {
@@ -127,9 +134,7 @@ export default function HostPage() {
             </div>
 
             <div className="mb-6 w-full max-w-md">
-              <div className="text-sm mb-3" style={{ color: "#aaa" }}>
-                Players ({players.length})
-              </div>
+              <div className="text-sm mb-3" style={{ color: "#aaa" }}>Players ({players.length})</div>
               {players.length === 0 ? (
                 <div className="text-sm py-4" style={{ color: "#444" }}>Waiting for players to join...</div>
               ) : (
@@ -149,8 +154,7 @@ export default function HostPage() {
             </div>
 
             <button
-              onClick={startGame}
-              disabled={players.length === 0}
+              onClick={startGame} disabled={players.length === 0}
               className="rounded-xl py-4 px-12 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ fontFamily: "var(--font-pixel)", background: "#76FF03", color: "#0a0e1a", boxShadow: players.length > 0 ? "0 0 30px rgba(118,255,3,0.25)" : "none" }}
             >
@@ -165,7 +169,9 @@ export default function HostPage() {
   // ─── Playing ──────────────────────────────────────────────
   if (phase === "playing") {
     return (
-      <div className="min-h-dvh flex flex-col px-4 py-3 gap-3 max-w-6xl mx-auto">
+      <div className="min-h-dvh flex flex-col px-4 py-3 gap-3 max-w-6xl mx-auto pb-28">
+        <Mascot mood={mascotMood} latestEvent={mascotTrigger} />
+
         <div className="flex justify-between items-center flex-wrap gap-2">
           <div className="text-sm tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
             DOLLAR DASH
@@ -177,7 +183,6 @@ export default function HostPage() {
 
         <Timer timeLeft={timeLeft} total={duration} />
 
-        {/* Two-column: chart+stocks left, news+leaderboard right */}
         <div className="flex flex-col lg:flex-row gap-3 flex-1">
           <div className="flex-1 flex flex-col gap-3 min-w-0">
             <BigChart histories={market?.histories} selectedIdx={selectedStock} />
@@ -202,10 +207,8 @@ export default function HostPage() {
             </div>
           </div>
 
-          {/* Right column: news + leaderboard */}
           <div className="lg:w-80 xl:w-96 shrink-0 flex flex-col gap-3">
             <NewsTicker events={newsEvents} />
-
             <div>
               <div className="text-xs mb-2 tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}>
                 LEADERBOARD

@@ -9,11 +9,15 @@ import FlashMessage from "../components/FlashMessage.jsx";
 import Timer from "../components/Timer.jsx";
 import Leaderboard from "../components/Leaderboard.jsx";
 import NewsTicker from "../components/NewsTicker.jsx";
+import TitleBadge from "../components/TitleBadge.jsx";
+import Mascot from "../components/Mascot.jsx";
+import useSoundEngine from "../hooks/useSoundEngine.js";
 
 export default function PlayerPage() {
   const { code: urlCode } = useParams();
   const navigate = useNavigate();
   const { socket, connected } = useSocket();
+  const sound = useSoundEngine();
 
   const [phase, setPhase] = useState("join");
   const [roomCode, setRoomCode] = useState(urlCode?.toUpperCase() || "");
@@ -33,6 +37,8 @@ export default function PlayerPage() {
   const [results, setResults] = useState(null);
   const [myResult, setMyResult] = useState(null);
   const [newsEvents, setNewsEvents] = useState([]);
+  const [mascotMood, setMascotMood] = useState("idle");
+  const [mascotTrigger, setMascotTrigger] = useState(0);
 
   useEffect(() => {
     if (!socket) return;
@@ -43,6 +49,8 @@ export default function PlayerPage() {
       setHoldings({});
       setPortfolioValue(STARTING_CASH);
       if (d) { setDuration(d); setTimeLeft(d); }
+      sound.bell();
+      sound.startAmbient();
     });
 
     socket.on("game:tick", (data) => {
@@ -57,6 +65,9 @@ export default function PlayerPage() {
 
     socket.on("game:news", (event) => {
       setNewsEvents((prev) => [...prev.slice(-9), event]);
+      sound.news();
+      setMascotMood(event.sentiment === "bullish" ? "bullish" : "bearish");
+      setMascotTrigger((n) => n + 1);
     });
 
     socket.on("game:timer", ({ timeLeft: t }) => setTimeLeft(t));
@@ -66,6 +77,8 @@ export default function PlayerPage() {
       const me = r.find((e) => e.id === socket.id);
       setMyResult(me);
       setPhase("results");
+      sound.stopAmbient();
+      sound.bell();
       if (me?.rank === 1) {
         confetti({ particleCount: 200, spread: 100, origin: { y: 0.4 }, colors: ["#FFD600", "#76FF03", "#00E5FF"] });
       }
@@ -74,11 +87,13 @@ export default function PlayerPage() {
     socket.on("player:kicked", () => {
       setPhase("join");
       setError("You were kicked from the room");
+      sound.stopAmbient();
     });
 
     socket.on("room:closed", () => {
       setPhase("join");
       setError("Host disconnected. Room closed.");
+      sound.stopAmbient();
     });
 
     return () => {
@@ -90,7 +105,7 @@ export default function PlayerPage() {
       socket.off("player:kicked");
       socket.off("room:closed");
     };
-  }, [socket]);
+  }, [socket, sound]);
 
   const joinGame = useCallback(() => {
     if (!socket || !connected) return;
@@ -114,12 +129,16 @@ export default function PlayerPage() {
           setPortfolioValue(res.portfolioValue);
           const color = type === "buy" ? "#76FF03" : "#FFD600";
           showFlash(`${type === "buy" ? "BOUGHT" : "SOLD"} ${qty} ${res.symbol}`, color);
+          if (type === "buy") { sound.buy(); setMascotMood("buy"); }
+          else { sound.sell(); setMascotMood("sell"); }
+          setMascotTrigger((n) => n + 1);
         } else {
           showFlash(res.error || "Trade failed", "#FF3D71");
+          sound.error();
         }
       });
     },
-    [socket],
+    [socket, sound],
   );
 
   const showFlash = (msg, color) => {
@@ -128,6 +147,14 @@ export default function PlayerPage() {
   };
 
   const pnl = portfolioValue - STARTING_CASH;
+
+  // Mascot P&L mood
+  useEffect(() => {
+    if (phase !== "playing") return;
+    const pnlPct = ((portfolioValue - STARTING_CASH) / STARTING_CASH) * 100;
+    if (pnlPct > 10) setMascotMood("winning");
+    else if (pnlPct < -10) setMascotMood("losing");
+  }, [phase, portfolioValue]);
 
   // ─── Join Screen ──────────────────────────────────────────
   if (phase === "join") {
@@ -140,11 +167,9 @@ export default function PlayerPage() {
           <div>
             <label className="text-xs block mb-1" style={{ color: "#aaa" }}>ROOM CODE</label>
             <input
-              type="text"
-              value={roomCode}
+              type="text" value={roomCode}
               onChange={(e) => setRoomCode(e.target.value.toUpperCase().slice(0, 4))}
-              placeholder="ABCD"
-              maxLength={4}
+              placeholder="ABCD" maxLength={4}
               className="w-full rounded-lg px-4 py-3 text-2xl text-center font-bold tracking-[0.3em] border-2 outline-none"
               style={{ background: "rgba(255,255,255,0.06)", borderColor: "rgba(255,255,255,0.1)", color: "#FFD600", fontFamily: "var(--font-pixel)" }}
               autoFocus
@@ -153,11 +178,9 @@ export default function PlayerPage() {
           <div>
             <label className="text-xs block mb-1" style={{ color: "#aaa" }}>YOUR NAME</label>
             <input
-              type="text"
-              value={playerName}
+              type="text" value={playerName}
               onChange={(e) => setPlayerName(e.target.value.slice(0, 20))}
-              placeholder="Enter your name"
-              maxLength={20}
+              placeholder="Enter your name" maxLength={20}
               className="w-full rounded-lg px-4 py-3 text-base font-semibold border-2 outline-none"
               style={{ background: "rgba(255,255,255,0.06)", borderColor: "rgba(255,255,255,0.1)", color: "#fff", fontFamily: "var(--font-mono)" }}
               onKeyDown={(e) => e.key === "Enter" && joinGame()}
@@ -167,8 +190,7 @@ export default function PlayerPage() {
             <div className="text-sm text-center py-2 rounded-lg" style={{ color: "#FF3D71", background: "rgba(255,61,113,0.1)" }}>{error}</div>
           )}
           <button
-            onClick={joinGame}
-            disabled={!connected}
+            onClick={joinGame} disabled={!connected}
             className="w-full rounded-xl py-4 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105 disabled:opacity-40"
             style={{ fontFamily: "var(--font-pixel)", background: "#76FF03", color: "#0a0e1a" }}
           >
@@ -182,7 +204,7 @@ export default function PlayerPage() {
     );
   }
 
-  // ─── Lobby (waiting) ──────────────────────────────────────
+  // ─── Lobby ──────────────────────────────────────
   if (phase === "lobby") {
     return (
       <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12 text-center">
@@ -205,13 +227,17 @@ export default function PlayerPage() {
     const histories = market?.histories || STOCKS.map((s) => [s.basePrice]);
 
     return (
-      <div className="min-h-dvh flex flex-col px-3 py-3 gap-2 max-w-6xl mx-auto">
+      <div className="min-h-dvh flex flex-col px-3 py-3 gap-2 max-w-6xl mx-auto pb-28">
         <FlashMessage message={flash?.msg} color={flash?.color} />
+        <Mascot mood={mascotMood} latestEvent={mascotTrigger} />
 
         <div className="flex justify-between items-center">
-          <span className="text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
-            TRADING
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
+              TRADING
+            </span>
+            <TitleBadge portfolioValue={portfolioValue} />
+          </div>
           <span className="font-bold text-sm" style={{ color: pnl >= 0 ? "#76FF03" : "#FF3D71" }}>
             P&L: {pnl >= 0 ? "+" : ""}${pnl.toFixed(2)}
           </span>
@@ -219,35 +245,27 @@ export default function PlayerPage() {
 
         <Timer timeLeft={timeLeft} total={duration} />
 
-        {/* Cash / Portfolio */}
         <div className="flex justify-between items-center rounded-lg px-4 py-2.5 text-sm" style={{ background: "rgba(255,255,255,0.04)" }}>
           <span>💵 <b style={{ color: "#76FF03" }}>${cash.toFixed(2)}</b></span>
           <span>📊 <b style={{ color: "#00E5FF" }}>${portfolioValue.toFixed(2)}</b></span>
         </div>
 
-        {/* Two-column: stocks+controls left, news right */}
         <div className="flex flex-col lg:flex-row gap-3 flex-1">
           <div className="flex-1 flex flex-col gap-2 min-w-0">
             <div className="grid grid-cols-2 gap-2">
               {STOCKS.map((stock, i) => (
                 <StockCard
                   key={stock.symbol}
-                  index={i}
-                  price={prices[i]}
-                  history={histories[i]}
-                  holdings={holdings[i] || 0}
-                  selected={selectedStock === i}
+                  index={i} price={prices[i]} history={histories[i]}
+                  holdings={holdings[i] || 0} selected={selectedStock === i}
                   onSelect={setSelectedStock}
                 />
               ))}
             </div>
 
             <TradeControls
-              selectedStock={selectedStock}
-              price={prices[selectedStock]}
-              cash={cash}
-              onTrade={handleTrade}
-              disabled={false}
+              selectedStock={selectedStock} price={prices[selectedStock]}
+              cash={cash} onTrade={handleTrade} disabled={false}
             />
 
             {leaderboard.length > 0 && (
@@ -258,7 +276,6 @@ export default function PlayerPage() {
             )}
           </div>
 
-          {/* Right: news feed */}
           <div className="lg:w-80 xl:w-96 shrink-0 flex flex-col">
             <NewsTicker events={newsEvents} />
           </div>
