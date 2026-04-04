@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import confetti from "canvas-confetti";
@@ -29,15 +29,19 @@ export default function HostPage() {
   const [newsEvents, setNewsEvents] = useState([]);
   const [mascotMood, setMascotMood] = useState("idle");
   const [mascotTrigger, setMascotTrigger] = useState(0);
+  const hostCreateDoneRef = useRef(false);
 
   const joinUrl = typeof window !== "undefined" ? `${window.location.origin}/play/${roomCode}` : "";
 
   useEffect(() => {
     if (!socket || !connected) return;
 
-    socket.emit("host:create", (res) => {
-      if (res.ok) { setRoomCode(res.code); setPhase("lobby"); }
-    });
+    if (!hostCreateDoneRef.current) {
+      hostCreateDoneRef.current = true;
+      socket.emit("host:create", (res) => {
+        if (res.ok) { setRoomCode(res.code); setPhase("lobby"); }
+      });
+    }
 
     socket.on("lobby:update", ({ players: p }) => setPlayers(p));
 

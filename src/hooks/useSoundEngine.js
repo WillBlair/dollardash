@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect, useMemo } from "react";
 
 const AudioCtx = typeof window !== "undefined" ? (window.AudioContext || window.webkitAudioContext) : null;
 
@@ -139,5 +139,8 @@ export default function useSoundEngine() {
     };
   }, [stopAmbient]);
 
-  return { startAmbient, stopAmbient, bell, buy, sell, news, bigMove, error };
+  return useMemo(
+    () => ({ startAmbient, stopAmbient, bell, buy, sell, news, bigMove, error }),
+    [startAmbient, stopAmbient, bell, buy, sell, news, bigMove, error],
+  );
 }
