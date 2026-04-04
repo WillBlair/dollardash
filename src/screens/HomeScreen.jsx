@@ -10,23 +10,21 @@ export default function HomeScreen() {
         className="mb-2"
         style={{
           fontFamily: "var(--font-pixel)",
-          fontSize: "clamp(20px, 5vw, 40px)",
+          fontSize: "clamp(24px, 6vw, 48px)",
           color: "#FFD600",
-          lineHeight: 1.5,
+          lineHeight: 1.4,
           textShadow: "0 0 40px rgba(255,214,0,0.25)",
         }}
       >
-        COOL FINANCE
-        <br />
-        GAMES
+        DOLLAR DASH
       </div>
 
-      <div className="text-4xl my-3">📈💸📉</div>
+      <div className="text-4xl my-3">💰📈💸</div>
 
       <p className="text-sm max-w-md leading-relaxed mb-6" style={{ color: "#aaa" }}>
-        A multiplayer stock trading game. One host, many players.
+        A real-time stock trading game.
         <br />
-        Trade stocks in real-time. Highest portfolio wins.
+        Play solo or compete with friends. Highest portfolio wins.
       </p>
 
       <div className="flex flex-wrap gap-2 justify-center mb-8">
@@ -50,22 +48,10 @@ export default function HomeScreen() {
         ))}
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
+      <div className="flex flex-col gap-3 w-full max-w-sm">
         <button
-          onClick={() => navigate("/host")}
-          className="flex-1 rounded-xl py-4 px-6 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
-          style={{
-            fontFamily: "var(--font-pixel)",
-            background: "#FFD600",
-            color: "#0a0e1a",
-            boxShadow: "0 0 30px rgba(255,214,0,0.25)",
-          }}
-        >
-          HOST GAME
-        </button>
-        <button
-          onClick={() => navigate("/play")}
-          className="flex-1 rounded-xl py-4 px-6 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
+          onClick={() => navigate("/solo")}
+          className="w-full rounded-xl py-4 px-6 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
           style={{
             fontFamily: "var(--font-pixel)",
             background: "#76FF03",
@@ -73,12 +59,38 @@ export default function HomeScreen() {
             boxShadow: "0 0 30px rgba(118,255,3,0.25)",
           }}
         >
-          JOIN GAME
+          SOLO PLAY
         </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => navigate("/host")}
+            className="flex-1 rounded-xl py-4 px-6 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
+            style={{
+              fontFamily: "var(--font-pixel)",
+              background: "#FFD600",
+              color: "#0a0e1a",
+              boxShadow: "0 0 30px rgba(255,214,0,0.25)",
+            }}
+          >
+            HOST
+          </button>
+          <button
+            onClick={() => navigate("/play")}
+            className="flex-1 rounded-xl py-4 px-6 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
+            style={{
+              fontFamily: "var(--font-pixel)",
+              background: "#00E5FF",
+              color: "#0a0e1a",
+              boxShadow: "0 0 30px rgba(0,229,255,0.25)",
+            }}
+          >
+            JOIN
+          </button>
+        </div>
       </div>
 
       <p className="text-xs mt-8" style={{ color: "#444" }}>
-        Host projects on the big screen. Players join on their phones.
+        Solo mode works offline. Multiplayer needs a server.
       </p>
     </div>
   );

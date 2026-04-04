@@ -1,7 +1,14 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+import { existsSync } from "fs";
 import { RoomManager } from "./game.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const distPath = join(__dirname, "..", "dist");
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -9,6 +16,15 @@ const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: { origin: "*" },
 });
+
+// Serve built frontend in production
+if (existsSync(distPath)) {
+  app.use(express.static(distPath));
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/socket.io")) return next();
+    res.sendFile(join(distPath, "index.html"));
+  });
+}
 
 const rooms = new RoomManager();
 
@@ -117,7 +133,7 @@ function findHostRoom(hostSocketId) {
 }
 
 httpServer.listen(PORT, "0.0.0.0", () => {
-  console.log(`🎮 Cool Finance Games server running on http://localhost:${PORT}`);
+  console.log(`💰 Dollar Dash server running on http://localhost:${PORT}`);
   import("os").then(({ networkInterfaces }) => {
     const nets = networkInterfaces();
     for (const iface of Object.values(nets)) {

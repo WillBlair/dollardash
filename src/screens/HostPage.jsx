@@ -182,7 +182,7 @@ export default function HostPage() {
             className="text-sm tracking-widest"
             style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
           >
-            COOL FINANCE GAMES
+            DOLLAR DASH
           </div>
           <div className="text-xs px-3 py-1 rounded-md" style={{ background: "rgba(255,214,0,0.1)", color: "#FFD600" }}>
             ROOM: {roomCode}
