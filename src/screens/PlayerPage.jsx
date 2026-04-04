@@ -60,9 +60,6 @@ export default function PlayerPage() {
     socket.on("game:tick", (data) => {
       setMarket({ prices: data.prices, histories: data.histories, timeLeft: data.timeLeft });
       setLeaderboard(data.leaderboard);
-      if (data.news?.recentEvents) {
-        setNewsEvents(data.news.recentEvents);
-      }
       const me = data.leaderboard.find((e) => e.id === socket.id);
       if (me) setPortfolioValue(me.value);
     });

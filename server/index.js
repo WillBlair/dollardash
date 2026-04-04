@@ -31,7 +31,7 @@ app.post("/api/tts", async (req, res) => {
     return res.status(503).json({ error: "TTS not configured" });
   }
 
-  const text = String(req.body?.text ?? "").trim().slice(0, 500);
+  const text = String(req.body?.text ?? "").trim().slice(0, 300);
   if (!text) {
     return res.status(400).json({ error: "text required" });
   }
@@ -40,7 +40,7 @@ app.post("/api/tts", async (req, res) => {
 
   try {
     const elRes = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}/stream`,
       {
         method: "POST",
         headers: {
@@ -51,7 +51,9 @@ app.post("/api/tts", async (req, res) => {
         body: JSON.stringify({
           text,
           model_id: modelId,
+          voice_settings: { stability: 0.5, similarity_boost: 0.75 },
         }),
+        signal: AbortSignal.timeout(8000),
       },
     );
 
@@ -61,13 +63,27 @@ app.post("/api/tts", async (req, res) => {
       return res.status(502).json({ error: "upstream TTS failed" });
     }
 
-    const buf = Buffer.from(await elRes.arrayBuffer());
     res.setHeader("Content-Type", "audio/mpeg");
     res.setHeader("Cache-Control", "no-store");
-    res.send(buf);
+    res.setHeader("Transfer-Encoding", "chunked");
+
+    const reader = elRes.body.getReader();
+    const pump = async () => {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        res.write(Buffer.from(value));
+      }
+      res.end();
+    };
+    pump().catch((e) => {
+      console.error("[tts] stream", e);
+      if (!res.headersSent) res.status(500).json({ error: "stream error" });
+      else res.end();
+    });
   } catch (e) {
     console.error("[tts]", e);
-    res.status(500).json({ error: "TTS error" });
+    if (!res.headersSent) res.status(500).json({ error: "TTS error" });
   }
 });
 

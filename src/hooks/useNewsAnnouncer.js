@@ -1,99 +1,111 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 
-const MAX_CHARS = 500;
+const MAX_CHARS = 300;
 
 function announcementText(event) {
   if (!event?.headline) return "";
-  const sym = event.symbol || "Market";
-  const sent = (event.sentiment || "update").replace(/_/g, " ");
-  return `${sym}. ${sent}. ${event.headline}`.slice(0, MAX_CHARS);
+  return event.headline.slice(0, MAX_CHARS);
 }
 
 /**
- * Calls backend /api/tts (ElevenLabs) when a new headline lands.
- * API key stays on the server only.
+ * Speaks the latest news headline via server-side ElevenLabs TTS.
+ *
+ * Only fires when a genuinely NEW event appears (tracked by headline+timestamp).
+ * While one clip is playing, new events are queued — the next fires after the
+ * current one ends (no overlapping audio, no spam).
  */
 export function useNewsAnnouncer(events, enabled = true) {
-  const prevKeyRef = useRef("");
-  const audioRef = useRef(null);
-  const objectUrlRef = useRef(null);
+  const lastKeyRef = useRef("");
+  const busyRef = useRef(false);
+  const queueRef = useRef([]);
   const abortRef = useRef(null);
+  const audioRef = useRef(null);
+  const enabledRef = useRef(enabled);
+  enabledRef.current = enabled;
 
-  useEffect(() => {
-    if (!enabled) return;
-    if (!events?.length) {
-      prevKeyRef.current = "";
-      return;
-    }
+  const playNext = useCallback(() => {
+    if (!enabledRef.current) { busyRef.current = false; return; }
+    const text = queueRef.current.shift();
+    if (!text) { busyRef.current = false; return; }
 
-    const last = events[events.length - 1];
-    const key = `${last.timestamp}-${last.headline}`;
-    if (key === prevKeyRef.current) return;
-    prevKeyRef.current = key;
-
-    const text = announcementText(last);
-    if (!text.trim()) return;
-
+    busyRef.current = true;
     abortRef.current?.abort();
     const ac = new AbortController();
     abortRef.current = ac;
 
-    if (objectUrlRef.current) {
-      URL.revokeObjectURL(objectUrlRef.current);
-      objectUrlRef.current = null;
-    }
-    const prevAudio = audioRef.current;
-    if (prevAudio) {
-      prevAudio.pause();
-      prevAudio.src = "";
-      audioRef.current = null;
-    }
-
     const base = (import.meta.env.VITE_SERVER_URL || "").replace(/\/$/, "");
-    const url = `${base}/api/tts`;
 
     (async () => {
+      let objectUrl = null;
       try {
-        const res = await fetch(url, {
+        const res = await fetch(`${base}/api/tts`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Accept: "audio/mpeg" },
           body: JSON.stringify({ text }),
           signal: ac.signal,
         });
-        if (!res.ok) return;
+        if (!res.ok) { busyRef.current = false; playNext(); return; }
+
         const blob = await res.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        objectUrlRef.current = objectUrl;
+        if (ac.signal.aborted) return;
+
+        objectUrl = URL.createObjectURL(blob);
         const audio = new Audio(objectUrl);
         audioRef.current = audio;
+
         audio.addEventListener("ended", () => {
-          if (objectUrlRef.current === objectUrl) {
-            URL.revokeObjectURL(objectUrl);
-            objectUrlRef.current = null;
-          }
+          URL.revokeObjectURL(objectUrl);
+          audioRef.current = null;
+          playNext();
         });
+        audio.addEventListener("error", () => {
+          URL.revokeObjectURL(objectUrl);
+          audioRef.current = null;
+          playNext();
+        });
+
         await audio.play();
       } catch (e) {
-        if (e.name !== "AbortError" && e.name !== "NotAllowedError") {
-          console.warn("[NewsAnnouncer]", e);
-        }
-        if (objectUrlRef.current) {
-          URL.revokeObjectURL(objectUrlRef.current);
-          objectUrlRef.current = null;
-        }
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        if (e.name !== "AbortError") console.warn("[NewsAnnouncer]", e);
+        busyRef.current = false;
+        playNext();
       }
     })();
+  }, []);
 
+  useEffect(() => {
+    if (!enabled || !events?.length) return;
+
+    const last = events[events.length - 1];
+    const key = `${last.timestamp}|${last.headline}`;
+    if (key === lastKeyRef.current) return;
+    lastKeyRef.current = key;
+
+    const text = announcementText(last);
+    if (!text) return;
+
+    // Keep queue short — drop stale headlines
+    if (queueRef.current.length >= 2) {
+      queueRef.current = [queueRef.current[queueRef.current.length - 1]];
+    }
+    queueRef.current.push(text);
+
+    if (!busyRef.current) {
+      playNext();
+    }
+  });
+
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
-      ac.abort();
-      if (objectUrlRef.current) {
-        URL.revokeObjectURL(objectUrlRef.current);
-        objectUrlRef.current = null;
-      }
+      abortRef.current?.abort();
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
+      queueRef.current = [];
+      busyRef.current = false;
     };
-  }, [events, enabled]);
+  }, []);
 }

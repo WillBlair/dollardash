@@ -59,9 +59,6 @@ export default function HostPage() {
     socket.on("game:tick", (data) => {
       setMarket({ prices: data.prices, histories: data.histories, timeLeft: data.timeLeft });
       setLeaderboard(data.leaderboard);
-      if (data.news?.recentEvents) {
-        setNewsEvents(data.news.recentEvents);
-      }
     });
 
     socket.on("game:news", (event) => {
