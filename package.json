@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@elevenlabs/react": "^1.0.2",
     "canvas-confetti": "^1.9.3",
     "concurrently": "^9.1.2",
     "cors": "^2.8.5",

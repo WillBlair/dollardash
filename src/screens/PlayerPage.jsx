@@ -12,6 +12,7 @@ import NewsTicker from "../components/NewsTicker.jsx";
 import TitleBadge from "../components/TitleBadge.jsx";
 import Mascot from "../components/Mascot.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
+import VoiceAgent from "../components/VoiceAgent.jsx";
 
 export default function PlayerPage() {
   const { code: urlCode } = useParams();
@@ -275,11 +276,18 @@ export default function PlayerPage() {
               </div>
             )}
           </div>
-
           <div className="lg:w-80 xl:w-96 shrink-0 flex flex-col">
             <NewsTicker events={newsEvents} />
           </div>
         </div>
+
+        <VoiceAgent
+          onTrade={handleTrade}
+          cash={cash}
+          holdings={holdings}
+          prices={market?.prices || STOCKS.map((s) => s.basePrice)}
+          onSelectStock={setSelectedStock}
+        />
       </div>
     );
   }
