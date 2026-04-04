@@ -12,7 +12,7 @@ const __dirname = dirname(__filename);
 const distPath = join(__dirname, "..", "dist");
 
 /** Preset voice when `ELEVENLABS_VOICE_ID` is omitted (ElevenLabs “Rachel” — works with most keys for testing). */
-const DEFAULT_VOICE_ID = "21m00Tcm4TlvDq8ikWAM";
+const DEFAULT_VOICE_ID = "TxvUy8tvDazkNBlnGcpU";
 
 const PORT = process.env.PORT || 3001;
 const app = express();
