@@ -1,0 +1,425 @@
+import { useState, useEffect, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import confetti from "canvas-confetti";
+import { useSocket } from "../hooks/useSocket.js";
+import { STOCKS, STARTING_CASH, GAME_DURATION } from "../../shared/constants.js";
+import StockCard from "../components/StockCard.jsx";
+import TradeControls from "../components/TradeControls.jsx";
+import FlashMessage from "../components/FlashMessage.jsx";
+import Timer from "../components/Timer.jsx";
+import Leaderboard from "../components/Leaderboard.jsx";
+
+export default function PlayerPage() {
+  const { code: urlCode } = useParams();
+  const navigate = useNavigate();
+  const { socket, connected } = useSocket();
+
+  const [phase, setPhase] = useState("join"); // join | lobby | playing | results
+  const [roomCode, setRoomCode] = useState(urlCode?.toUpperCase() || "");
+  const [playerName, setPlayerName] = useState("");
+  const [error, setError] = useState("");
+  const [joinedCode, setJoinedCode] = useState("");
+
+  const [market, setMarket] = useState(null);
+  const [cash, setCash] = useState(STARTING_CASH);
+  const [holdings, setHoldings] = useState({});
+  const [portfolioValue, setPortfolioValue] = useState(STARTING_CASH);
+  const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [selectedStock, setSelectedStock] = useState(0);
+  const [flash, setFlash] = useState(null);
+  const [results, setResults] = useState(null);
+  const [myResult, setMyResult] = useState(null);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("game:start", () => {
+      setPhase("playing");
+      setCash(STARTING_CASH);
+      setHoldings({});
+      setPortfolioValue(STARTING_CASH);
+    });
+
+    socket.on("game:tick", (data) => {
+      setMarket({ prices: data.prices, histories: data.histories, timeLeft: data.timeLeft });
+      setLeaderboard(data.leaderboard);
+
+      // Recalculate local portfolio from leaderboard
+      const me = data.leaderboard.find((e) => e.id === socket.id);
+      if (me) {
+        setPortfolioValue(me.value);
+      }
+    });
+
+    socket.on("game:timer", ({ timeLeft: t }) => setTimeLeft(t));
+
+    socket.on("game:end", ({ results: r }) => {
+      setResults(r);
+      const me = r.find((e) => e.id === socket.id);
+      setMyResult(me);
+      setPhase("results");
+      if (me?.rank === 1) {
+        confetti({
+          particleCount: 200,
+          spread: 100,
+          origin: { y: 0.4 },
+          colors: ["#FFD600", "#76FF03", "#00E5FF"],
+        });
+      }
+    });
+
+    socket.on("player:kicked", () => {
+      setPhase("join");
+      setError("You were kicked from the room");
+    });
+
+    socket.on("room:closed", () => {
+      setPhase("join");
+      setError("Host disconnected. Room closed.");
+    });
+
+    return () => {
+      socket.off("game:start");
+      socket.off("game:tick");
+      socket.off("game:timer");
+      socket.off("game:end");
+      socket.off("player:kicked");
+      socket.off("room:closed");
+    };
+  }, [socket]);
+
+  const joinGame = useCallback(() => {
+    if (!socket || !connected) return;
+    const code = roomCode.trim().toUpperCase();
+    const name = playerName.trim();
+    if (!code || !name) {
+      setError("Enter a room code and your name");
+      return;
+    }
+    setError("");
+
+    socket.emit("player:join", { code, name }, (res) => {
+      if (res.ok) {
+        setJoinedCode(res.roomCode);
+        setPhase("lobby");
+      } else {
+        setError(res.error);
+      }
+    });
+  }, [socket, connected, roomCode, playerName]);
+
+  const handleTrade = useCallback(
+    ({ stockIdx, qty, type }) => {
+      if (!socket) return;
+      socket.emit("player:trade", { stockIdx, qty, type }, (res) => {
+        if (res.ok) {
+          setCash(res.cash);
+          setHoldings(res.holdings || {});
+          setPortfolioValue(res.portfolioValue);
+          const color = type === "buy" ? "#76FF03" : "#FFD600";
+          const msg = `${type === "buy" ? "BOUGHT" : "SOLD"} ${qty} ${res.symbol}`;
+          showFlash(msg, color);
+        } else {
+          showFlash(res.error || "Trade failed", "#FF3D71");
+        }
+      });
+    },
+    [socket],
+  );
+
+  const showFlash = (msg, color) => {
+    setFlash({ msg, color });
+    setTimeout(() => setFlash(null), 1200);
+  };
+
+  const pnl = portfolioValue - STARTING_CASH;
+
+  // ─── Join Screen ──────────────────────────────────────────
+  if (phase === "join") {
+    return (
+      <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12">
+        <div
+          className="text-lg mb-8 tracking-widest"
+          style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
+        >
+          JOIN GAME
+        </div>
+
+        <div className="w-full max-w-xs flex flex-col gap-4">
+          <div>
+            <label className="text-xs block mb-1" style={{ color: "#aaa" }}>
+              ROOM CODE
+            </label>
+            <input
+              type="text"
+              value={roomCode}
+              onChange={(e) => setRoomCode(e.target.value.toUpperCase().slice(0, 4))}
+              placeholder="ABCD"
+              maxLength={4}
+              className="w-full rounded-lg px-4 py-3 text-2xl text-center font-bold tracking-[0.3em] border-2 outline-none"
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                borderColor: "rgba(255,255,255,0.1)",
+                color: "#FFD600",
+                fontFamily: "var(--font-pixel)",
+              }}
+              autoFocus
+            />
+          </div>
+          <div>
+            <label className="text-xs block mb-1" style={{ color: "#aaa" }}>
+              YOUR NAME
+            </label>
+            <input
+              type="text"
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value.slice(0, 20))}
+              placeholder="Enter your name"
+              maxLength={20}
+              className="w-full rounded-lg px-4 py-3 text-base font-semibold border-2 outline-none"
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                borderColor: "rgba(255,255,255,0.1)",
+                color: "#fff",
+                fontFamily: "var(--font-mono)",
+              }}
+              onKeyDown={(e) => e.key === "Enter" && joinGame()}
+            />
+          </div>
+
+          {error && (
+            <div className="text-sm text-center py-2 rounded-lg" style={{ color: "#FF3D71", background: "rgba(255,61,113,0.1)" }}>
+              {error}
+            </div>
+          )}
+
+          <button
+            onClick={joinGame}
+            disabled={!connected}
+            className="w-full rounded-xl py-4 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105 disabled:opacity-40"
+            style={{
+              fontFamily: "var(--font-pixel)",
+              background: "#76FF03",
+              color: "#0a0e1a",
+            }}
+          >
+            {connected ? "JOIN" : "CONNECTING..."}
+          </button>
+        </div>
+
+        <button
+          onClick={() => navigate("/")}
+          className="mt-8 text-xs border-none bg-transparent cursor-pointer"
+          style={{ color: "#444" }}
+        >
+          ← Back to home
+        </button>
+      </div>
+    );
+  }
+
+  // ─── Lobby (waiting) ──────────────────────────────────────
+  if (phase === "lobby") {
+    return (
+      <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12 text-center">
+        <div className="text-4xl mb-4">🎮</div>
+        <div
+          className="text-base mb-2"
+          style={{ fontFamily: "var(--font-pixel)", color: "#76FF03" }}
+        >
+          YOU'RE IN!
+        </div>
+        <div className="text-sm mb-2" style={{ color: "#aaa" }}>
+          Room <span className="font-bold" style={{ color: "#FFD600" }}>{joinedCode}</span>
+        </div>
+        <div className="text-sm" style={{ color: "#666" }}>
+          Waiting for the host to start the game...
+        </div>
+        <div className="mt-8">
+          <div
+            className="w-6 h-6 border-2 rounded-full animate-spin"
+            style={{ borderColor: "#FFD600 transparent #FFD600 transparent" }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Playing ──────────────────────────────────────────────
+  if (phase === "playing") {
+    const prices = market?.prices || STOCKS.map((s) => s.basePrice);
+    const histories = market?.histories || STOCKS.map((s) => [s.basePrice]);
+
+    return (
+      <div className="min-h-dvh flex flex-col px-3 py-3 gap-2.5 max-w-lg mx-auto">
+        <FlashMessage message={flash?.msg} color={flash?.color} />
+
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <span
+            className="text-xs tracking-wider"
+            style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
+          >
+            TRADING
+          </span>
+          <span
+            className="font-bold text-sm"
+            style={{ color: pnl >= 0 ? "#76FF03" : "#FF3D71" }}
+          >
+            P&L: {pnl >= 0 ? "+" : ""}${pnl.toFixed(2)}
+          </span>
+        </div>
+
+        <Timer timeLeft={timeLeft} total={GAME_DURATION} />
+
+        {/* Cash / Portfolio */}
+        <div
+          className="flex justify-between items-center rounded-lg px-3 py-2 text-sm"
+          style={{ background: "rgba(255,255,255,0.04)" }}
+        >
+          <span>
+            💵 <b style={{ color: "#76FF03" }}>${cash.toFixed(2)}</b>
+          </span>
+          <span>
+            📊 <b style={{ color: "#00E5FF" }}>${portfolioValue.toFixed(2)}</b>
+          </span>
+        </div>
+
+        {/* Stock cards */}
+        <div className="grid grid-cols-2 gap-2">
+          {STOCKS.map((stock, i) => (
+            <StockCard
+              key={stock.symbol}
+              index={i}
+              price={prices[i]}
+              history={histories[i]}
+              holdings={holdings[i] || 0}
+              selected={selectedStock === i}
+              onSelect={setSelectedStock}
+            />
+          ))}
+        </div>
+
+        {/* Trade controls */}
+        <TradeControls
+          selectedStock={selectedStock}
+          price={prices[selectedStock]}
+          cash={cash}
+          onTrade={handleTrade}
+          disabled={false}
+        />
+
+        {/* Mini leaderboard */}
+        {leaderboard.length > 0 && (
+          <div>
+            <div className="text-xs mb-1" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>
+              STANDINGS
+            </div>
+            <Leaderboard entries={leaderboard.slice(0, 5)} highlightId={socket?.id} compact />
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ─── Results ──────────────────────────────────────────────
+  if (phase === "results" && myResult) {
+    const gradeColor = {
+      S: "#FFD600", A: "#76FF03", B: "#00E5FF", C: "#fff", D: "#FF9100", F: "#FF3D71",
+    };
+
+    return (
+      <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12 text-center">
+        <div
+          className="text-sm mb-2 tracking-widest"
+          style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}
+        >
+          MARKET CLOSED
+        </div>
+
+        <div
+          className="text-7xl font-bold mb-2"
+          style={{
+            fontFamily: "var(--font-pixel)",
+            color: gradeColor[myResult.grade] || "#fff",
+            textShadow: `0 0 40px ${gradeColor[myResult.grade]}66`,
+          }}
+        >
+          {myResult.grade}
+        </div>
+
+        <div className="text-lg font-bold mb-1" style={{ color: "#aaa" }}>
+          #{myResult.rank} of {results.length}
+        </div>
+
+        <div
+          className="text-2xl font-bold mb-6"
+          style={{ color: myResult.returnPct >= 0 ? "#76FF03" : "#FF3D71" }}
+        >
+          {myResult.returnPct >= 0 ? "+" : ""}{myResult.returnPct}% return
+        </div>
+
+        <div
+          className="rounded-xl p-5 w-full max-w-xs mb-6"
+          style={{ background: "rgba(255,255,255,0.04)" }}
+        >
+          <div className="flex justify-between text-sm mb-2">
+            <span style={{ color: "#aaa" }}>Final Value</span>
+            <span className="font-bold">${myResult.value?.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span style={{ color: "#aaa" }}>Trades</span>
+            <span className="font-bold">{myResult.trades}</span>
+          </div>
+        </div>
+
+        {myResult.badges?.length > 0 && (
+          <div className="mb-6">
+            <div className="text-xs mb-2" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>
+              BADGES
+            </div>
+            <div className="flex gap-2 flex-wrap justify-center">
+              {myResult.badges.map((b) => (
+                <div
+                  key={b.id}
+                  className="rounded-lg px-3 py-1.5 text-sm"
+                  style={{
+                    background: "rgba(255,214,0,0.1)",
+                    border: "1px solid rgba(255,214,0,0.2)",
+                  }}
+                >
+                  {b.icon} {b.label}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Full leaderboard */}
+        <div className="w-full max-w-sm mb-6">
+          <Leaderboard entries={results} highlightId={socket?.id} compact />
+        </div>
+
+        <button
+          onClick={() => {
+            setPhase("join");
+            setRoomCode("");
+            setPlayerName("");
+            navigate("/play");
+          }}
+          className="rounded-xl py-3 px-8 font-bold text-sm cursor-pointer border-none tracking-wider"
+          style={{
+            fontFamily: "var(--font-pixel)",
+            background: "#FFD600",
+            color: "#0a0e1a",
+          }}
+        >
+          PLAY AGAIN
+        </button>
+      </div>
+    );
+  }
+
+  return null;
+}
