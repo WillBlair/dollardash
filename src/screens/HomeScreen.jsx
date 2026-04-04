@@ -26,7 +26,24 @@ export default function HomeScreen() {
         DOLLAR DASH
       </div>
 
-      <div className="text-4xl my-3">💰📈💸</div>
+      <div className="flex items-end justify-center gap-2 my-3">
+        <span className="text-2xl select-none opacity-90 pb-1" aria-hidden>💰</span>
+        <img
+          src="/rocket-to-the-moon.gif"
+          alt=""
+          width={120}
+          height={120}
+          className="shrink-0"
+          style={{
+            width: "clamp(72px, 22vw, 120px)",
+            height: "auto",
+            imageRendering: "pixelated",
+            filter: "drop-shadow(0 0 12px rgba(255,214,0,0.25))",
+          }}
+          decoding="async"
+        />
+        <span className="text-2xl select-none opacity-90 pb-1" aria-hidden>💸</span>
+      </div>
 
       <p className="text-sm max-w-md leading-relaxed mb-6" style={{ color: "#aaa" }}>
         A real-time stock trading game.
