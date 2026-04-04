@@ -91,3 +91,36 @@ body {
   0%, 100% { opacity: 0; }
   50% { opacity: 1; }
 }
+
+/* Home: slow money GIF drift across viewport (decorative) */
+@keyframes money-fly-across {
+  from {
+    transform: translate3d(-40px, 0, 0);
+  }
+  to {
+    transform: translate3d(calc(100vw + 40px), 0, 0);
+  }
+}
+
+.home-money-fly {
+  position: fixed;
+  top: min(20vh, 140px);
+  left: 0;
+  width: 30px;
+  max-width: 30px;
+  height: auto;
+  z-index: 0;
+  pointer-events: none;
+  image-rendering: pixelated;
+  opacity: 0.9;
+  animation: money-fly-across 26s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-money-fly {
+    animation: none;
+    opacity: 0;
+    visibility: hidden;
+  }
+}

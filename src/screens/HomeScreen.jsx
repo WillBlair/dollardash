@@ -12,7 +12,16 @@ export default function HomeScreen() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12 text-center">
+    <>
+      <img
+        src="/moneyflynobackground.gif"
+        alt=""
+        className="home-money-fly"
+        width={30}
+        height={30}
+        decoding="async"
+      />
+      <div className="relative z-10 min-h-dvh flex flex-col items-center justify-center px-6 py-12 text-center">
       <div
         className="mb-2"
         style={{
@@ -26,23 +35,24 @@ export default function HomeScreen() {
         DOLLAR DASH
       </div>
 
-      <div className="flex items-end justify-center gap-2 my-3">
-        <span className="text-2xl select-none opacity-90 pb-1" aria-hidden>💰</span>
+      <div className="flex items-end justify-center gap-1.5 my-1.5">
+        <span className="text-base select-none opacity-90 pb-0.5" aria-hidden>💰</span>
         <img
           src="/rocket-to-the-moon.gif"
           alt=""
-          width={120}
-          height={120}
-          className="shrink-0"
+          width={30}
+          height={30}
+          className="shrink-0 w-auto"
           style={{
-            width: "clamp(72px, 22vw, 120px)",
+            width: "30px",
+            maxWidth: "30px",
             height: "auto",
             imageRendering: "pixelated",
-            filter: "drop-shadow(0 0 12px rgba(255,214,0,0.25))",
+            filter: "drop-shadow(0 0 4px rgba(255,214,0,0.18))",
           }}
           decoding="async"
         />
-        <span className="text-2xl select-none opacity-90 pb-1" aria-hidden>💸</span>
+        <span className="text-base select-none opacity-90 pb-0.5" aria-hidden>💸</span>
       </div>
 
       <p className="text-sm max-w-md leading-relaxed mb-6" style={{ color: "#aaa" }}>
@@ -170,6 +180,7 @@ export default function HomeScreen() {
           <span style={{ color: "#76FF03" }}>TIP:</span> Read the news feed — it tells you which stocks are about to move and in which direction.
         </p>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
