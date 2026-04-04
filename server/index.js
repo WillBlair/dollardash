@@ -11,6 +11,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const distPath = join(__dirname, "..", "dist");
 
+/** Preset voice when `ELEVENLABS_VOICE_ID` is omitted (ElevenLabs “Rachel” — works with most keys for testing). */
+const DEFAULT_VOICE_ID = "21m00Tcm4TlvDq8ikWAM";
+
 const PORT = process.env.PORT || 3001;
 const app = express();
 
@@ -22,9 +25,9 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: "8kb" }));
 
 app.post("/api/tts", async (req, res) => {
-  const apiKey = process.env.ELEVENLABS_API_KEY;
-  const voiceId = process.env.ELEVENLABS_VOICE_ID;
-  if (!apiKey?.trim() || !voiceId?.trim()) {
+  const apiKey = process.env.ELEVENLABS_API_KEY?.trim();
+  const voiceId = (process.env.ELEVENLABS_VOICE_ID?.trim() || DEFAULT_VOICE_ID);
+  if (!apiKey) {
     return res.status(503).json({ error: "TTS not configured" });
   }
 
