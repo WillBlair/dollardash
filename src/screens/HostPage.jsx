@@ -11,6 +11,7 @@ import Timer from "../components/Timer.jsx";
 import NewsTicker from "../components/NewsTicker.jsx";
 import DurationPicker from "../components/DurationPicker.jsx";
 import Mascot from "../components/Mascot.jsx";
+import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
 import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
 
@@ -177,6 +178,7 @@ export default function HostPage() {
   if (phase === "playing") {
     return (
       <div className="min-h-dvh flex flex-col px-4 py-3 gap-3 max-w-6xl mx-auto pb-28">
+        <UrgencyOverlay timeLeft={timeLeft} />
         <Mascot mood={mascotMood} latestEvent={mascotTrigger} />
 
         <div className="flex justify-between items-center flex-wrap gap-2">

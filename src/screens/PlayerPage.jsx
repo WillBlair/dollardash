@@ -12,6 +12,7 @@ import Leaderboard from "../components/Leaderboard.jsx";
 import NewsTicker from "../components/NewsTicker.jsx";
 import TitleBadge from "../components/TitleBadge.jsx";
 import Mascot from "../components/Mascot.jsx";
+import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
 import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
 import VoiceAgent from "../components/VoiceAgent.jsx";
@@ -231,26 +232,35 @@ export default function PlayerPage() {
 
     return (
       <div className="min-h-dvh flex flex-col px-3 py-3 gap-2 max-w-6xl mx-auto pb-28">
+        <UrgencyOverlay timeLeft={timeLeft} />
         <FlashMessage message={flash?.msg} color={flash?.color} />
         <Mascot mood={mascotMood} latestEvent={mascotTrigger} />
 
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <span className="text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
               TRADING
             </span>
             <TitleBadge portfolioValue={portfolioValue} />
           </div>
-          <span className="font-bold text-sm" style={{ color: pnl >= 0 ? "#76FF03" : "#FF3D71" }}>
-            P&L: {pnl >= 0 ? "+" : ""}${pnl.toFixed(2)}
-          </span>
         </div>
 
         <Timer timeLeft={timeLeft} total={duration} />
 
-        <div className="flex justify-between items-center rounded-lg px-4 py-2.5 text-sm" style={{ background: "rgba(255,255,255,0.04)" }}>
-          <span>💵 <b style={{ color: "#76FF03" }}>${cash.toFixed(2)}</b></span>
-          <span>📊 <b style={{ color: "#00E5FF" }}>${portfolioValue.toFixed(2)}</b></span>
+        {/* Cash / P&L — large and prominent */}
+        <div className="flex justify-between items-end rounded-xl px-5 py-4" style={{ background: "rgba(255,255,255,0.04)" }}>
+          <div>
+            <div className="text-[10px] tracking-wider mb-1" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>CASH</div>
+            <div className="text-2xl sm:text-3xl font-bold tabular-nums" style={{ color: "#76FF03", fontFamily: "var(--font-mono)" }}>
+              ${cash.toFixed(2)}
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-[10px] tracking-wider mb-1" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>P&L</div>
+            <div className="text-2xl sm:text-3xl font-bold tabular-nums" style={{ color: pnl >= 0 ? "#76FF03" : "#FF3D71", fontFamily: "var(--font-mono)" }}>
+              {pnl >= 0 ? "+" : ""}${pnl.toFixed(2)}
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-3 flex-1">

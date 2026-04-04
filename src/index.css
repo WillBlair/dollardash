@@ -86,3 +86,8 @@ body {
   min-height: 4px;
   animation: voice-wave 0.8s ease-in-out infinite alternate;
 }
+
+@keyframes urgency-pulse {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
