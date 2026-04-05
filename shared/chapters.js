@@ -80,25 +80,36 @@ export const CHAPTERS = [
     storyDialog: [
       {
         speaker: "dollar-guy",
-        text: "You've got the basics down! But how do we know if a stock's price will go up or down? It's all about the news.",
+        text: "You've got the basics down! You know how to buy and sell.",
         scene: { icon: "📰", headline: "READING THE ROOM", detail: "News → mood → price", accent: "#FF9100" },
       },
       {
         speaker: "dollar-guy",
-        text: "When a company announces an amazing new product, people get excited and buy. We call this 'Bullish'.",
+        text: "But how do we know if a stock's price is going to go up or go down? There's no crystal ball.",
+      },
+      {
+        speaker: "dollar-guy",
+        text: "Usually, it's all about the news and how the business is doing in the real world.",
+      },
+      {
+        speaker: "dollar-guy",
+        text: "When a company announces an amazing new product or record profits, people get excited and buy. We call this a 'Bullish' sign.",
         scene: { icon: "📈", headline: "BULL VS BEAR", detail: "Words you’ll hear nonstop", accent: "#00E5FF" },
       },
       {
         speaker: "dollar-guy",
-        text: "If they announce bad news, people sell to get out. That's 'Bearish'. Let's do a quick quiz to test your instincts.",
-        scene: { icon: "🎯", headline: "NEXT UP", detail: "Interactive drill", accent: "#FFD600" },
+        text: "If the company announces bad news, people panic and sell their shares to get out. That's a 'Bearish' sign.",
       },
     ],
     learnDialog: [
       {
         speaker: "dollar-guy",
-        text: "Let's practice reading the room. I'll show you some headlines, and you tell me if they are Bullish or Bearish.",
+        text: "Let's see if you can read the room. I'm going to show you a few real-world headlines.",
         scene: { icon: "🎯", headline: "YOUR TURN", detail: "Three headlines · pick a side", accent: "#FFD600" },
+      },
+      {
+        speaker: "dollar-guy",
+        text: "Read each one carefully and tell me if you think it's Bullish (good news) or Bearish (bad news). Here we go!",
       },
     ],
     situationDialog: [],
