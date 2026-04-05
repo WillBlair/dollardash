@@ -138,6 +138,10 @@ io.on("connection", (socket) => {
       io.to(room.code).emit("game:day", { dayNumber, leaderboard });
     };
 
+    room.onDayWarning = () => {
+      io.to(room.code).emit("game:dayWarning");
+    };
+
     callback({ ok: true, code: room.code });
   });
 
