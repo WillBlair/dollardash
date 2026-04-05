@@ -5,7 +5,6 @@ import confetti from "canvas-confetti";
 import { useSocket } from "../hooks/useSocket.js";
 import { STOCKS, STARTING_CASH, DEFAULT_DURATION } from "../../shared/constants.js";
 import BadgeChip from "../components/BadgeChip.jsx";
-import BigChart from "../components/BigChart.jsx";
 import Leaderboard from "../components/Leaderboard.jsx";
 import Timer from "../components/Timer.jsx";
 import NewsTicker from "../components/NewsTicker.jsx";
@@ -187,39 +186,31 @@ export default function HostPage() {
           <Timer timeLeft={timeLeft} total={duration} />
         </div>
 
-        <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-3">
-          <div className="flex-1 min-h-0 flex flex-col gap-1 min-w-0">
-            <div className="text-[10px] tracking-widest shrink-0" style={{ fontFamily: "var(--font-pixel)", color: "#7a8498" }}>
-              LIVE PRICES
-            </div>
-            <div className="flex-1 min-h-0 grid grid-cols-2 grid-rows-2 gap-2">
-              {STOCKS.map((stock, i) => {
-                const price = market?.prices?.[i];
-                return (
-                  <div key={stock.symbol} className="flex flex-col min-h-0 min-w-0">
-                    <div className="flex-1 min-h-0">
-                      <BigChart histories={market?.histories} selectedIdx={i} compact />
-                    </div>
-                    <div
-                      className="shrink-0 text-center rounded-md py-1 text-xs font-mono font-bold tabular-nums mt-0.5"
-                      style={{ background: "rgba(255,255,255,0.04)", color: stock.color }}
-                    >
-                      {stock.symbol} · ${price != null ? price.toFixed(2) : "—"}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+        <div className="shrink-0 flex flex-wrap gap-2">
+          {STOCKS.map((stock, i) => {
+            const price = market?.prices?.[i];
+            return (
+              <div
+                key={stock.symbol}
+                className="flex-[1_1_0%] text-center rounded-lg py-3 text-sm lg:text-xl font-mono font-bold tabular-nums"
+                style={{ background: "rgba(255,255,255,0.05)", color: stock.color, border: `1px solid ${stock.color}44` }}
+              >
+                {stock.symbol} <span className="opacity-70 ml-2">${price != null ? price.toFixed(2) : "—"}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-4">
+          <div className="flex-[7] min-h-0 flex flex-col max-w-full lg:max-w-[70%]">
+            <NewsTicker events={newsEvents} expanded />
           </div>
 
-          <div className="lg:w-64 xl:w-72 shrink-0 flex flex-col gap-2 min-h-0 max-h-[30vh] lg:max-h-none overflow-y-auto lg:overflow-visible">
-            <NewsTicker events={newsEvents} />
-            <div className="shrink-0">
-              <div className="text-xs mb-1 tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}>
-                LEADERBOARD
-              </div>
-              <Leaderboard entries={leaderboard} />
+          <div className="flex-[3] flex flex-col gap-2 min-h-0 min-w-0">
+            <div className="shrink-0 text-xs tracking-widest pt-1" style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}>
+              LEADERBOARD
             </div>
+            <Leaderboard entries={leaderboard} />
           </div>
         </div>
       </div>

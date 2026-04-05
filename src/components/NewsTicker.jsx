@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { STOCKS } from "../../shared/constants.js";
 import { NEWS_SENTIMENT_STYLES } from "./newsTheme.js";
 
-export default function NewsTicker({ events }) {
+export default function NewsTicker({ events, expanded = false }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -39,21 +39,21 @@ export default function NewsTicker({ events }) {
     );
   }
 
-  const displayed = events.slice(-4);
+  const displayed = events.slice(expanded ? -6 : -4);
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col min-w-0">
       <div
-        className="text-[10px] mb-2 shrink-0 tracking-[0.18em] flex items-center gap-2"
+        className={`text-[10px] mb-2 shrink-0 tracking-[0.18em] flex items-center gap-2 ${expanded ? "lg:text-sm lg:mb-4" : ""}`}
         style={{ fontFamily: "var(--font-pixel)", color: "#7a8498" }}
       >
         <span aria-hidden className="text-[#FFD600]">{"\u25c6"}</span>
         <span>MARKET WIRE</span>
-        <span className="text-[9px] tracking-widest ml-auto opacity-70">TELETEXT</span>
+        <span className={`tracking-widest ml-auto opacity-70 ${expanded ? "text-xs" : "text-[9px]"}`}>TELETEXT</span>
       </div>
       <div
         ref={containerRef}
-        className="news-ticker-frame flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-1.5 py-2"
+        className={`news-ticker-frame flex min-h-0 flex-1 flex-col overflow-y-auto ${expanded ? "gap-4 px-4 py-6" : "gap-2 px-1.5 py-2"}`}
         style={{
           background: "linear-gradient(180deg, rgba(5,9,16,0.92) 0%, rgba(7,12,22,0.98) 100%)",
           border: "3px double rgba(255, 214, 0, 0.22)",
@@ -68,7 +68,7 @@ export default function NewsTicker({ events }) {
           return (
             <div
               key={`${event.headline}-${event.timestamp}`}
-              className="relative overflow-hidden px-3 py-2.5 transition-all"
+              className={`relative overflow-hidden transition-all ${expanded ? "px-6 py-5 rounded-lg" : "px-3 py-2.5"}`}
               style={{
                 background: isLatest
                   ? `linear-gradient(90deg, ${s.bg} 0%, rgba(5,8,14,0.65) 100%)`
@@ -87,9 +87,9 @@ export default function NewsTicker({ events }) {
                   aria-hidden
                 />
               )}
-              <div className="relative flex items-center gap-2 mb-1.5 flex-wrap">
+              <div className={`relative flex items-center flex-wrap ${expanded ? "gap-4 mb-3" : "gap-2 mb-1.5"}`}>
                 <span
-                  className="text-[9px] font-bold tabular-nums px-1.5 py-0.5 border"
+                  className={`font-bold tabular-nums border ${expanded ? "text-sm px-3 py-1" : "text-[9px] px-1.5 py-0.5"}`}
                   style={{
                     fontFamily: "var(--font-pixel)",
                     borderColor: stockColor,
@@ -100,14 +100,14 @@ export default function NewsTicker({ events }) {
                   {event.symbol}
                 </span>
                 <span
-                  className="text-[8px] font-bold tracking-[0.2em]"
+                  className={`font-bold tracking-[0.2em] ${expanded ? "text-sm" : "text-[8px]"}`}
                   style={{ fontFamily: "var(--font-pixel)", color: s.accent }}
                 >
                   {s.icon} {s.label}
                 </span>
                 {isLatest && (
                   <span
-                    className="ml-auto flex items-center gap-1 text-[7px] tracking-[0.25em]"
+                    className={`ml-auto flex items-center tracking-[0.25em] ${expanded ? "gap-2 text-[10px]" : "gap-1 text-[7px]"}`}
                     style={{ fontFamily: "var(--font-pixel)", color: "#5a6578" }}
                   >
                     <span className="news-live-dot inline-block h-1.5 w-1.5 rounded-full" style={{ background: s.accent }} />
@@ -116,7 +116,7 @@ export default function NewsTicker({ events }) {
                 )}
               </div>
               <div
-                className="relative text-[13px] leading-snug font-semibold tracking-wide"
+                className={`relative leading-snug tracking-wide ${expanded ? "text-xl md:text-2xl lg:text-3xl font-bold" : "text-[13px] font-semibold"}`}
                 style={{
                   fontFamily: "var(--font-mono)",
                   color: isLatest ? s.color : "#5c6578",
