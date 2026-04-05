@@ -19,9 +19,9 @@ const voiceEnabledDefault = import.meta.env.VITE_STORY_VOICE_ENABLED !== "false"
 function DollarGuyPortrait({ size, isSpeaking }) {
   const isLarge = size === "large";
   return (
-    <div className="flex flex-col items-center gap-2 shrink-0 self-end">
+    <div className="flex shrink-0 flex-col items-center gap-2 self-start">
       <div
-        className={`rounded-2xl p-1.5 transition-all duration-300 ${
+        className={`rounded-2xl p-1.5 sm:p-2 transition-all duration-300 ${
           isSpeaking
             ? "bg-[rgba(255,214,0,0.14)] shadow-[0_0_40px_rgba(255,214,0,0.38)] ring-2 ring-[#FFD60055]"
             : "ring-2 ring-transparent"
@@ -32,14 +32,14 @@ function DollarGuyPortrait({ size, isSpeaking }) {
           alt="Dollar Guy"
           className={
             isLarge
-              ? "h-[16rem] sm:h-[20rem] md:h-[24rem] lg:h-[28rem] w-auto max-w-[min(52vw,28rem)] object-contain object-bottom drop-shadow-[0_16px_40px_rgba(0,0,0,0.55)] select-none"
-              : "h-40 sm:h-48 md:h-52 w-auto max-w-[min(44vw,20rem)] object-contain object-bottom drop-shadow-[0_10px_28px_rgba(0,0,0,0.45)] select-none"
+              ? "h-[13rem] min-[420px]:h-[22rem] sm:h-[28rem] md:h-[32rem] lg:h-[36rem] xl:h-[40rem] w-auto max-w-none object-contain object-bottom drop-shadow-[0_16px_40px_rgba(0,0,0,0.55)] select-none"
+              : "h-44 sm:h-52 md:h-60 w-auto max-w-none object-contain object-bottom drop-shadow-[0_10px_28px_rgba(0,0,0,0.45)] select-none"
           }
           draggable={false}
         />
       </div>
       <span
-        className="text-[8px] font-bold tracking-widest text-center leading-snug max-w-[12rem]"
+        className="text-[8px] font-bold tracking-widest text-center leading-snug max-w-[11rem] sm:max-w-[12rem]"
         style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
       >
         DOLLAR GUY · YOUR GUIDE
@@ -48,7 +48,13 @@ function DollarGuyPortrait({ size, isSpeaking }) {
   );
 }
 
-export default function DollarGuy({ dialog, onDialogComplete, size = "large", voiceEnabled = voiceEnabledDefault }) {
+export default function DollarGuy({
+  dialog,
+  onDialogComplete,
+  size = "large",
+  voiceEnabled = voiceEnabledDefault,
+  typingSpeed = 22,
+}) {
   const [steps, setSteps] = useState(() => toSteps(dialog));
   const [lineIndex, setLineIndex] = useState(0);
 
@@ -100,18 +106,20 @@ export default function DollarGuy({ dialog, onDialogComplete, size = "large", vo
       ? `L${lineIndex}-${step.line.text?.slice(0, 24) ?? ""}`
       : `C${lineIndex}`;
 
-  const rootMax = "max-w-6xl";
-
   const speakerCue = <DollarGuySpeakerCue isSpeaking={isSpeaking} />;
 
+  /** Narrow copy column so choices and cards never span full viewport. */
+  const copyColumnClass =
+    step.kind === "choice"
+      ? "w-full min-w-0 max-w-[20rem] sm:max-w-sm"
+      : "w-full min-w-0 max-w-md sm:max-w-lg";
+
   return (
-    <div className={`flex w-full flex-col gap-4 ${rootMax} mx-auto px-2 sm:px-4 animate-slide-up`}>
-      <div className="flex w-full flex-row items-end gap-4 sm:gap-6 md:gap-8">
+    <div className="flex w-full animate-slide-up flex-col gap-4">
+      <div className="flex w-full max-w-full flex-row flex-nowrap items-start gap-3 overflow-x-auto pb-1 sm:gap-4 md:gap-6 [scrollbar-width:thin]">
         <DollarGuyPortrait size={size} isSpeaking={isSpeaking} />
 
-        <div
-          className={`min-w-0 flex flex-col gap-3 pb-1 ${step.kind === "choice" ? "w-full max-w-lg flex-1" : "flex-1 w-full max-w-xl"}`}
-        >
+        <div className={`flex flex-col gap-3 pt-0.5 ${copyColumnClass}`}>
           {step.kind === "line" && (
             <>
               {step.line.scene && (
@@ -131,6 +139,7 @@ export default function DollarGuy({ dialog, onDialogComplete, size = "large", vo
                 key={bubbleKey}
                 text={step.line.text}
                 header={speakerCue}
+                typingSpeed={typingSpeed}
                 onComplete={handleAdvance}
               />
             </>

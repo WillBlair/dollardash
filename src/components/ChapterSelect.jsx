@@ -7,7 +7,7 @@ export default function ChapterSelect({ progress, onSelect, onBack }) {
         STORY MODE
       </div>
       <div className="text-sm mb-8 max-w-md mx-auto" style={{ color: "#888" }}>
-        One story with Dollar Guy—three lessons from your first paycheck to a steadier portfolio.
+        Six lessons with Dollar Guy—trading, news, diversification, compounding, budgeting, and core vocab.
       </div>
 
       <div className="flex flex-col gap-4 w-full max-w-md">

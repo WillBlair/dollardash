@@ -1,7 +1,7 @@
 /** Story choice list — narrow column, aligned text, readable tap targets. */
 export default function StoryChoicePanel({ options, onPick, disabled }) {
   return (
-    <div className="w-full max-w-md flex flex-col gap-2">
+    <div className="flex w-full flex-col gap-2">
       <div
         className="text-[10px] font-bold tracking-wider"
         style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}

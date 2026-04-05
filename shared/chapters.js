@@ -1,82 +1,38 @@
 import { STOCKS } from "./constants.js";
 
 /**
- * Story spine: your first paycheck → three lessons with Dollar Guy only.
- * Each chapter opens by recalling what you just learned, then teaches the next layer.
+ * Story spine: Dollar Guy, paycheck-to-portfolio path.
+ * Chapters 1–3: trade, headlines, diversification · 4–6: compounding, budgeting, vocab.
  */
 
 export const CHAPTERS = [
   {
     id: 1,
     title: "First Paycheck",
-    subtitle: "What is a stock?",
+    subtitle: "Stock = slice of a company",
+    /** Demo path: one dialog NEXT → practice trade → one-line recap. */
+    dialogTypingSpeed: 12,
     storyBackdrop: "/story/ch1-office-bg.jpg",
     storyDialog: [
       {
         speaker: "dollar-guy",
-        text: "Your first paycheck just hit. You’re wondering how people grow money in the market—I’m Dollar Guy, and I’ll take you through three short lessons, right here with you.",
-        scene: { icon: "🧾", headline: "WHERE WE START", detail: "Lesson 1 of 3 · What you’re buying", accent: "#76FF03" },
-      },
-      {
-        type: "choice",
-        scene: { icon: "🤔", headline: "THINK IT THROUGH", detail: "There’s no wrong tap—only what you learn next", accent: "#00E5FF" },
-        prompt: "You haven’t put money in the market yet. What’s the smartest first move?",
-        promptSpeaker: "dollar-guy",
-        options: [
-          {
-            emoji: "📱",
-            label: "Buy whatever’s loudest online",
-            lines: [
-              {
-                speaker: "dollar-guy",
-                text: "I get the pull—but start with what you own. A stock is a share of a real business; you’re buying a piece of its future results, not a sticker.",
-              },
-            ],
-          },
-          {
-            emoji: "🛋️",
-            label: "Leave it all in checking for now",
-            lines: [
-              {
-                speaker: "dollar-guy",
-                text: "Smart for cash you might need tomorrow. When you invest, it helps to know the basics first—that’s what we’re doing together.",
-              },
-            ],
-          },
-          {
-            emoji: "🎓",
-            label: "Learn what a stock is before I buy",
-            lines: [
-              {
-                speaker: "dollar-guy",
-                text: "That’s the one. When the company does well, your share can become worth more; when it struggles, it can drop. Simple idea—big implications.",
-              },
-            ],
-          },
-        ],
-        tail: [
-          {
-            speaker: "dollar-guy",
-            text: "Next screen: your first practice round. Fake dollars, same buy-and-sell moves you’d use for real—so your hands learn before your wallet is in play.",
-          },
-        ],
+        text: "I’m Dollar Guy. A stock is a tiny ownership slice of a company. Next: tap BUY once, wait a moment, SELL when the price is up—fake cash, real flow, ~30 seconds.",
+        scene: { icon: "🧾", headline: "DEMO", detail: "Chapter 1 · speed run", accent: "#76FF03" },
       },
     ],
-    learnDialog: [
-      {
-        speaker: "dollar-guy",
-        text: "You’ll see one ticker. Tap BUY for one share, watch the price wiggle, then SELL when you’re above what you paid. We’re learning the flow—timing the perfect trade comes later.",
-        scene: { icon: "📚", headline: "YOUR TURN", detail: "Sandbox · practice only", accent: "#00E5FF" },
-      },
-    ],
+    learnDialog: [],
     situationDialog: [],
     miniGame: {
       type: "first-buy",
       config: {
         stockIdx: 0,
-        instructions: "Buy one share, then sell when the price is higher than what you paid.",
-        successText: "Nice—you bought and sold. That’s the loop every stock trade runs through.",
-        failText: "Try again: buy one share, wait for a higher price, then sell.",
+        title: "PRACTICE TRADE",
+        /** Slightly faster uptrend + calmer noise so the demo almost always hits green quickly. */
+        priceDrift: 0.007,
+        shockScale: 0.65,
+        instructions: "BUY 1 share, wait a moment, SELL when you’re above your buy price.",
+        successText: "You completed the loop—buy, hold a tick, sell. That’s what “owning a share” feels like, shortened.",
+        failText: "Tap BUY, wait until the price is above your buy, then SELL—or try again; practice costs nothing.",
       },
     },
     gameplay: {
@@ -95,7 +51,7 @@ export const CHAPTERS = [
     reflectDialog: [
       {
         speaker: "dollar-guy",
-        text: "So you’ve felt a trade: you owned a slice, then you closed it. Next, we connect that moving price to the news—how to tell if a headline helps or hurts the story around a stock.",
+        text: "You felt buy → sell. Chapter two is only: bullish or bearish headlines—same Dollar Guy path.",
       },
     ],
     badge: { id: "ch1_complete", label: "First Trade", icon: "🏁", desc: "Completed Chapter 1" },
@@ -310,9 +266,155 @@ export const CHAPTERS = [
       },
       {
         speaker: "dollar-guy",
-        text: "You’ve got the foundation. Rehearse in solo free play or multiplayer when you want real pressure—and when new chapters arrive, they’ll continue this same story with you.",
+        text: "You’ve got the foundation. Rehearse in solo free play or multiplayer when you want heat—the next chapters add compounding, budgeting, and core vocab on the same path.",
       },
     ],
     badge: { id: "ch3_complete", label: "Diversified", icon: "🎯", desc: "Completed Chapter 3" },
+  },
+  {
+    id: 4,
+    title: "Snowball Effect",
+    subtitle: "How compounding works",
+    storyBackdrop: "/story/ch1-office-bg.jpg",
+    storyDialog: [
+      {
+        speaker: "dollar-guy",
+        text: "New lesson—not a stock tip. Compounding: if your balance grows, the next year’s growth applies to a bigger number. Small %, many years, big curve. Try the sliders next.",
+        scene: { icon: "📈", headline: "CHAPTER 4", detail: "Time × return", accent: "#76FF03" },
+      },
+    ],
+    learnDialog: [
+      {
+        speaker: "dollar-guy",
+        text: "Move amount, years, and yearly return. The ending number is a math illustration—real life is messier, but the idea is the same: start early, stay consistent.",
+        scene: { icon: "🧮", headline: "YOUR TURN", detail: "Compound toy", accent: "#00E5FF" },
+      },
+    ],
+    situationDialog: [],
+    miniGame: {
+      type: "compound-growth",
+      config: {
+        title: "COMPOUND GROWTH LAB",
+        initialPrincipal: 1500,
+        initialYears: 25,
+        initialApr: 7,
+      },
+    },
+    gameplay: {
+      skipGameplay: true,
+      availableStocks: [0],
+      durationSeconds: 60,
+      objective: { id: "compound", text: "Explore the compound growth mini-game", check: () => true },
+      hintLevel: "heavy",
+      hints: [],
+      scriptedEvents: [],
+    },
+    reflectDialog: [
+      {
+        speaker: "dollar-guy",
+        text: "You saw the curve. Same dollars behave differently with time and return—that’s why ‘start now’ shows up in every finance 101.",
+      },
+    ],
+    badge: { id: "ch4_complete", label: "Compounder", icon: "📊", desc: "Completed Chapter 4" },
+  },
+  {
+    id: 5,
+    title: "Split the Check",
+    subtitle: "Pay yourself first",
+    storyBackdrop: "/story/ch1-office-bg.jpg",
+    storyDialog: [
+      {
+        speaker: "dollar-guy",
+        text: "Markets are one slice of money skills. Here’s another: how you split a paycheck—needs, growth, fun. No guilt trip; just see the hundred percent add up.",
+        scene: { icon: "💸", headline: "CHAPTER 5", detail: "Budget buckets · % only", accent: "#FFD600" },
+      },
+    ],
+    learnDialog: [
+      {
+        speaker: "dollar-guy",
+        text: "Slide until the total reads 100%. Many people secure needs first, automate savings, then spend what’s left—your percentages can be yours.",
+        scene: { icon: "🪣", headline: "YOUR TURN", detail: "Must sum to 100%", accent: "#00E5FF" },
+      },
+    ],
+    situationDialog: [],
+    miniGame: {
+      type: "budget-buckets",
+      config: {
+        title: "PAYCHECK SPLITS",
+        budget: 100,
+        buckets: [
+          { id: "needs", label: "Needs (rent, food, bills)", emoji: "🏠", color: "#00E5FF" },
+          { id: "grow", label: "Save & invest (future you)", emoji: "📈", color: "#76FF03" },
+          { id: "flex", label: "Fun & flexible", emoji: "🎮", color: "#FFD600" },
+        ],
+        footnote: "Irregular life happens—this is practice for the habit, not a stricter budget app.",
+      },
+    },
+    gameplay: {
+      skipGameplay: true,
+      availableStocks: [0],
+      durationSeconds: 60,
+      objective: { id: "budget", text: "Balance buckets to 100%", check: () => true },
+      hintLevel: "heavy",
+      hints: [],
+      scriptedEvents: [],
+    },
+    reflectDialog: [
+      {
+        speaker: "dollar-guy",
+        text: "When savings isn’t an afterthought, investing gets fuel. You’ll feel that in solo practice later when you’re not starting from zero every month.",
+      },
+    ],
+    badge: { id: "ch5_complete", label: "Balanced", icon: "⚖️", desc: "Completed Chapter 5" },
+  },
+  {
+    id: 6,
+    title: "Speak Like a Market",
+    subtitle: "Core vocabulary",
+    storyBackdrop: "/story/ch1-office-bg.jpg",
+    storyDialog: [
+      {
+        speaker: "dollar-guy",
+        text: "Last mini-game for this arc: match plain-English meanings to words you’ll hear forever—bull, bear, dividend, ETF. Speed matters less than recognition.",
+        scene: { icon: "📖", headline: "CHAPTER 6", detail: "Tap term → meaning", accent: "#FF9100" },
+      },
+    ],
+    learnDialog: [
+      {
+        speaker: "dollar-guy",
+        text: "Left column: words. Right: definitions (shuffled). Pair them all, or tap skip if you already know the deck.",
+        scene: { icon: "🔗", headline: "YOUR TURN", detail: "Four pairs", accent: "#FFD600" },
+      },
+    ],
+    situationDialog: [],
+    miniGame: {
+      type: "term-match",
+      config: {
+        title: "TERM MATCH",
+        instructions: "Select a term, then its definition. Wrong pairs reset—keep going.",
+        pairs: [
+          { id: "bull", term: "Bull market", definition: "Broad uptrend—prices generally rising and mood optimistic." },
+          { id: "bear", term: "Bear market", definition: "Broad downtrend—prices falling and caution rules." },
+          { id: "div", term: "Dividend", definition: "Cash a company pays shareholders, usually per share, on a schedule." },
+          { id: "etf", term: "ETF", definition: "Basket of assets you buy like one stock—often tracks an index." },
+        ],
+      },
+    },
+    gameplay: {
+      skipGameplay: true,
+      availableStocks: [0],
+      durationSeconds: 60,
+      objective: { id: "terms", text: "Match all vocabulary pairs", check: () => true },
+      hintLevel: "heavy",
+      hints: [],
+      scriptedEvents: [],
+    },
+    reflectDialog: [
+      {
+        speaker: "dollar-guy",
+        text: "Six stops on one path: trade, news, diversify, compound, budget, vocab. Replay any chapter or take it to free play and multiplayer—you’ve got the tour.",
+      },
+    ],
+    badge: { id: "ch6_complete", label: "Fluent", icon: "💬", desc: "Completed Chapter 6" },
   },
 ];

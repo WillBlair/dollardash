@@ -296,15 +296,29 @@ export default function StoryPage() {
   if (phase === "story" && activeChapter) {
     return (
       <StoryPhaseShell backdropUrl={activeChapter.storyBackdrop}>
-        <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12">
-          <div className="text-xs tracking-wider mb-6" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
+        <div className="min-h-dvh flex w-full flex-col justify-center px-4 py-10 sm:px-6 md:px-8">
+          <div
+            className="mx-auto mb-5 w-full max-w-[52rem] text-center text-xs tracking-wider"
+            style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
+          >
             CHAPTER {activeChapter.id}: {activeChapter.title.toUpperCase()}
           </div>
-          <DollarGuy
-            key={`story-${activeChapter.id}`}
-            dialog={activeChapter.storyDialog}
-            onDialogComplete={() => setPhase("learn")}
-          />
+          <div className="mx-auto w-full max-w-[52rem]">
+            <DollarGuy
+              key={`story-${activeChapter.id}`}
+              dialog={activeChapter.storyDialog}
+              typingSpeed={activeChapter.dialogTypingSpeed ?? 22}
+              onDialogComplete={() =>
+                setPhase(
+                  activeChapter.learnDialog?.length
+                    ? "learn"
+                    : activeChapter.situationDialog?.length
+                      ? "situation"
+                      : "minigame",
+                )
+              }
+            />
+          </div>
         </div>
       </StoryPhaseShell>
     );
@@ -313,17 +327,23 @@ export default function StoryPage() {
   if (phase === "learn" && activeChapter) {
     return (
       <StoryPhaseShell backdropUrl={activeChapter.storyBackdrop}>
-        <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12">
-          <div className="text-xs tracking-wider mb-6" style={{ fontFamily: "var(--font-pixel)", color: "#00E5FF" }}>
+        <div className="min-h-dvh flex w-full flex-col justify-center px-4 py-10 sm:px-6 md:px-8">
+          <div
+            className="mx-auto mb-5 w-full max-w-[52rem] text-center text-xs tracking-wider"
+            style={{ fontFamily: "var(--font-pixel)", color: "#00E5FF" }}
+          >
             {activeChapter.subtitle.toUpperCase()}
           </div>
-          <DollarGuy
-            key={`learn-${activeChapter.id}`}
-            dialog={activeChapter.learnDialog}
-            onDialogComplete={() =>
-              setPhase(activeChapter.situationDialog?.length ? "situation" : "minigame")
-            }
-          />
+          <div className="mx-auto w-full max-w-[52rem]">
+            <DollarGuy
+              key={`learn-${activeChapter.id}`}
+              dialog={activeChapter.learnDialog}
+              typingSpeed={activeChapter.dialogTypingSpeed ?? 22}
+              onDialogComplete={() =>
+                setPhase(activeChapter.situationDialog?.length ? "situation" : "minigame")
+              }
+            />
+          </div>
         </div>
       </StoryPhaseShell>
     );
@@ -332,15 +352,21 @@ export default function StoryPage() {
   if (phase === "situation" && activeChapter?.situationDialog?.length) {
     return (
       <StoryPhaseShell backdropUrl={activeChapter.storyBackdrop}>
-        <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12">
-          <div className="text-xs tracking-wider mb-6" style={{ fontFamily: "var(--font-pixel)", color: "#FF9100" }}>
+        <div className="min-h-dvh flex w-full flex-col justify-center px-4 py-10 sm:px-6 md:px-8">
+          <div
+            className="mx-auto mb-5 w-full max-w-[52rem] text-center text-xs tracking-wider"
+            style={{ fontFamily: "var(--font-pixel)", color: "#FF9100" }}
+          >
             THE SITUATION
           </div>
-          <DollarGuy
-            key={`situation-${activeChapter.id}`}
-            dialog={activeChapter.situationDialog}
-            onDialogComplete={() => setPhase("minigame")}
-          />
+          <div className="mx-auto w-full max-w-[52rem]">
+            <DollarGuy
+              key={`situation-${activeChapter.id}`}
+              dialog={activeChapter.situationDialog}
+              typingSpeed={activeChapter.dialogTypingSpeed ?? 22}
+              onDialogComplete={() => setPhase("minigame")}
+            />
+          </div>
         </div>
       </StoryPhaseShell>
     );
@@ -438,15 +464,15 @@ export default function StoryPage() {
 
     return (
       <StoryPhaseShell backdropUrl={activeChapter.storyBackdrop}>
-        <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12 text-center">
-          <div className="text-xs tracking-wider mb-2" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
+        <div className="min-h-dvh flex w-full flex-col justify-center px-4 py-10 text-center sm:px-6 md:px-8">
+          <div className="mx-auto mb-2 w-full max-w-[52rem] text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
             CHAPTER {activeChapter.id} COMPLETE
           </div>
 
           <div className="text-4xl mb-3">{skipped || objectiveMet ? "🎉" : "📝"}</div>
 
           {!skipped && (
-            <div className="rounded-xl p-4 mb-6 w-full max-w-xs" style={{ background: objectiveMet ? "rgba(118,255,3,0.08)" : "rgba(255,214,0,0.08)", border: `1px solid ${objectiveMet ? "#76FF0333" : "#FFD60033"}` }}>
+            <div className="mx-auto rounded-xl p-4 mb-6 w-full max-w-xs" style={{ background: objectiveMet ? "rgba(118,255,3,0.08)" : "rgba(255,214,0,0.08)", border: `1px solid ${objectiveMet ? "#76FF0333" : "#FFD60033"}` }}>
               <div className="text-xs mb-1" style={{ fontFamily: "var(--font-pixel)", color: objectiveMet ? "#76FF03" : "#FFD600", fontSize: "10px" }}>
                 {objectiveMet ? "OBJECTIVE MET ✓" : "OBJECTIVE NOT MET"}
               </div>
@@ -457,7 +483,7 @@ export default function StoryPage() {
             </div>
           )}
 
-          <div className="mb-6">
+          <div className="mx-auto mb-6 w-full max-w-[52rem]">
             <div className="flex items-center gap-2 mb-2 justify-center">
               <span className="text-xl">{activeChapter.badge.icon}</span>
               <span className="text-xs font-bold" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
@@ -466,12 +492,15 @@ export default function StoryPage() {
             </div>
           </div>
 
-          <DollarGuy
-            key={`reflect-${activeChapter.id}`}
-            dialog={activeChapter.reflectDialog}
-            onDialogComplete={handleChapterComplete}
-            size="small"
-          />
+          <div className="mx-auto w-full max-w-[52rem]">
+            <DollarGuy
+              key={`reflect-${activeChapter.id}`}
+              dialog={activeChapter.reflectDialog}
+              typingSpeed={activeChapter.dialogTypingSpeed ?? 22}
+              onDialogComplete={handleChapterComplete}
+              size="small"
+            />
+          </div>
         </div>
       </StoryPhaseShell>
     );

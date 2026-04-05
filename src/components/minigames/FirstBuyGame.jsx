@@ -9,16 +9,18 @@ export default function FirstBuyGame({ config, onComplete }) {
   const [profit, setProfit] = useState(null);
   const tickRef = useRef(null);
 
+  const priceDrift = typeof config.priceDrift === "number" ? config.priceDrift : 0.002;
+  const shockScale = typeof config.shockScale === "number" ? config.shockScale : 1;
+
   useEffect(() => {
     tickRef.current = setInterval(() => {
       setPrice((prev) => {
-        const shock = (Math.random() - 0.5) * 2 * 0.015;
-        const drift = 0.002;
-        return Math.max(0.01, parseFloat((prev * (1 + shock + drift)).toFixed(2)));
+        const shock = (Math.random() - 0.5) * 2 * 0.015 * shockScale;
+        return Math.max(0.01, parseFloat((prev * (1 + shock + priceDrift)).toFixed(2)));
       });
     }, TICK_MS);
     return () => clearInterval(tickRef.current);
-  }, []);
+  }, [priceDrift, shockScale]);
 
   const handleBuy = () => {
     setBuyPrice(price);
@@ -48,10 +50,10 @@ export default function FirstBuyGame({ config, onComplete }) {
   return (
     <div className="flex flex-col items-center gap-5 w-full max-w-sm mx-auto animate-slide-up">
       <div className="text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
-        MINI-GAME: YOUR FIRST TRADE
+        {config.title ?? "MINI-GAME: YOUR FIRST TRADE"}
       </div>
 
-      <div className="text-sm text-center" style={{ color: "#aaa" }}>
+      <div className="text-sm text-center px-1" style={{ color: "#aaa" }}>
         {config.instructions}
       </div>
 
