@@ -1,6 +1,12 @@
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { STOCKS } from "../../shared/constants.js";
+
 import ArcadeTitle from "../components/ArcadeTitle.jsx";
+
+/** Looped on the landing page; fades out when leaving via Story / Host / Join. */
+const HOME_LOOP_MP3 = "end_of_line.mp3";
+const HOME_LOOP_VOLUME = 0.18;
+const LEAVE_FADE_MS = 750;
 
 const STEPS = [
   { num: "1", icon: "📰", title: "Watch the News", desc: "Headlines move prices. Bullish news pushes stocks up, bearish drags them down." },
@@ -13,14 +19,85 @@ const STEPS = [
 function publicAsset(filename) {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "") || "";
   const name = filename.replace(/^\//, "");
-  return base ? `${base}/${name}` : `/${name}`;
+  const encoded = name.split("/").map((seg) => encodeURIComponent(seg)).join("/");
+  return base ? `${base}/${encoded}` : `/${encoded}`;
 }
 
 export default function HomeScreen() {
   const navigate = useNavigate();
+  const introRef = useRef(null);
+  const fadeRafRef = useRef(null);
+  const [isMusicOn, setIsMusicOn] = useState(false);
+
+  /** Toggle music on/off — doubles as the user gesture that unlocks playback. */
+  const toggleMusic = useCallback((e) => {
+    e.stopPropagation();
+    const el = introRef.current;
+    if (!el) return;
+
+    if (isMusicOn) {
+      el.pause();
+      setIsMusicOn(false);
+    } else {
+      el.volume = HOME_LOOP_VOLUME;
+      el.play().catch(() => {});
+      setIsMusicOn(true);
+    }
+  }, [isMusicOn]);
+
+  useEffect(() => {
+    const el = introRef.current;
+    if (!el) return undefined;
+    el.volume = HOME_LOOP_VOLUME;
+
+    return () => {
+      if (fadeRafRef.current != null) {
+        cancelAnimationFrame(fadeRafRef.current);
+        fadeRafRef.current = null;
+      }
+      el.pause();
+      el.currentTime = 0;
+      el.volume = HOME_LOOP_VOLUME;
+    };
+  }, []);
+
+  const navigateAfterFade = useCallback(
+    (to) => {
+      const el = introRef.current;
+      if (!el || !isMusicOn || el.paused) {
+        navigate(to);
+        return;
+      }
+      const startVol = el.volume;
+      if (startVol < 0.02) {
+        navigate(to);
+        return;
+      }
+      if (fadeRafRef.current != null) {
+        cancelAnimationFrame(fadeRafRef.current);
+      }
+      const started = performance.now();
+      const tick = (now) => {
+        const t = Math.min(1, (now - started) / LEAVE_FADE_MS);
+        el.volume = startVol * (1 - t);
+        if (t < 1) {
+          fadeRafRef.current = requestAnimationFrame(tick);
+        } else {
+          fadeRafRef.current = null;
+          el.pause();
+          el.currentTime = 0;
+          el.volume = HOME_LOOP_VOLUME;
+          navigate(to);
+        }
+      };
+      fadeRafRef.current = requestAnimationFrame(tick);
+    },
+    [navigate, isMusicOn],
+  );
 
   return (
     <div className="relative isolate min-h-dvh">
+      <audio ref={introRef} src={publicAsset(HOME_LOOP_MP3)} preload="auto" playsInline loop />
       <img
         src={publicAsset("moneyflynobackground.gif")}
         alt=""
@@ -57,6 +134,23 @@ export default function HomeScreen() {
         decoding="async"
         loading="eager"
       />
+      <button
+        type="button"
+        onClick={toggleMusic}
+        className="fixed bottom-4 right-4 z-30 rounded-lg px-2.5 py-1.5 text-xs border cursor-pointer select-none"
+        style={{
+          fontFamily: "var(--font-pixel)",
+          background: "rgba(10,14,26,0.85)",
+          borderColor: "rgba(255,214,0,0.35)",
+          color: "#FFD600",
+          boxShadow: "0 0 12px rgba(255,214,0,0.12)",
+        }}
+        aria-label={isMusicOn ? "Mute music" : "Unmute music"}
+        aria-pressed={isMusicOn}
+      >
+        {isMusicOn ? "MUSIC ON" : "MUSIC OFF"}
+      </button>
+
       <div className="relative z-20">
         {/* First viewport: hero vertically centered (shifted down), “HOW TO PLAY” only at bottom */}
         <section className="min-h-dvh flex flex-col px-6">
@@ -105,27 +199,6 @@ export default function HomeScreen() {
                 decoding="async"
                 loading="eager"
               />
-            </div>
-
-            <div className="flex flex-wrap gap-2 justify-center mb-8">
-              {STOCKS.map((s) => (
-                <div
-                  key={s.symbol}
-                  className="rounded-lg px-3 py-2 text-xs"
-                  style={{
-                    background: "rgba(255,255,255,0.05)",
-                    border: `1px solid ${s.color}33`,
-                    fontFamily: "var(--font-mono)",
-                  }}
-                >
-                  <span className="font-bold" style={{ color: s.color }}>
-                    {s.symbol}
-                  </span>
-                  <span className="ml-2" style={{ color: "#555" }}>
-                    {s.volatility > 0.04 ? "⚡ Volatile" : s.volatility > 0.02 ? "⚡ Medium" : "🛡️ Steady"}
-                  </span>
-                </div>
-              ))}
             </div>
 
             <div className="flex flex-col gap-3 w-full max-w-sm">

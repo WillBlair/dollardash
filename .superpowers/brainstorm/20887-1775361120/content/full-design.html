@@ -1,0 +1,148 @@
+<h2>Dollar Dash — Story Mode Design</h2>
+<p class="subtitle">Full design proposal. Review each section — click any that needs changes.</p>
+
+<!-- SECTION 1: OVERVIEW -->
+<div class="section">
+  <div class="label">Overview</div>
+  <h3>Two-Mode Architecture</h3>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:220px;background:rgba(99,102,241,0.12);border-radius:12px;padding:20px;border:2px solid rgba(99,102,241,0.3);">
+      <h3 style="margin-top:0;">🎓 Solo: Story Mode</h3>
+      <p>A narrative-driven tutorial where Dollar Guy guides a young person through their first financial experiences. 3 chapters, each teaching a core concept through story → lesson → guided play → reflection.</p>
+      <p style="font-size:13px;opacity:0.7;">Replaces the current solo free-play. Current solo sim mechanics are reused inside chapter gameplay rounds.</p>
+    </div>
+    <div style="flex:1;min-width:220px;background:rgba(234,179,8,0.12);border-radius:12px;padding:20px;border:2px solid rgba(234,179,8,0.3);">
+      <h3 style="margin-top:0;">⚔️ Multiplayer: Competitive</h3>
+      <p>The existing Host/Join multiplayer — unchanged. Players who completed Story Mode understand the concepts; those who didn't can still jump in but won't know the strategies.</p>
+      <p style="font-size:13px;opacity:0.7;">Story Mode "unlocks" multiplayer narratively, but no hard gate — anyone can still join a room code.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: THE STORY -->
+<div class="section">
+  <div class="label">The Story</div>
+  <h3>Premise</h3>
+  <p>You're a young person who just got your first real job and your first paycheck. You know nothing about money, investing, or markets. <strong>Dollar Guy</strong> — a pixel-art Wall Street character — appears and becomes your guide. Over 3 chapters he takes you from "what even is a stock" to "I can compete with real traders."</p>
+</div>
+
+<!-- SECTION 3: CHAPTER FLOW -->
+<div class="section">
+  <div class="label">Chapter Pattern</div>
+  <h3>Every chapter follows this 4-phase structure:</h3>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:16px 0;">
+    <div style="flex:1;min-width:130px;background:rgba(99,102,241,0.1);border-radius:10px;padding:14px;text-align:center;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;opacity:0.6;margin-bottom:6px;">Phase 1</div>
+      <strong>Story Beat</strong>
+      <p style="font-size:12px;opacity:0.7;margin-top:4px;">Dollar Guy narrates via speech bubbles. Sets up the real-life situation. Player clicks through dialog.</p>
+    </div>
+    <div style="flex:1;min-width:130px;background:rgba(234,179,8,0.1);border-radius:10px;padding:14px;text-align:center;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;opacity:0.6;margin-bottom:6px;">Phase 2</div>
+      <strong>Learn</strong>
+      <p style="font-size:12px;opacity:0.7;margin-top:4px;">Dollar Guy teaches the concept. Mix of speech bubbles + 1-2 interactive moments (tap to buy, drag to allocate, quick quiz).</p>
+    </div>
+    <div style="flex:1;min-width:130px;background:rgba(34,197,94,0.1);border-radius:10px;padding:14px;text-align:center;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;opacity:0.6;margin-bottom:6px;">Phase 3</div>
+      <strong>Play</strong>
+      <p style="font-size:12px;opacity:0.7;margin-top:4px;">Guided trading round with chapter-specific objectives. Dollar Guy gives hints (fading over chapters). Uses existing sim engine.</p>
+    </div>
+    <div style="flex:1;min-width:130px;background:rgba(168,85,247,0.1);border-radius:10px;padding:14px;text-align:center;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;opacity:0.6;margin-bottom:6px;">Phase 4</div>
+      <strong>Reflect</strong>
+      <p style="font-size:12px;opacity:0.7;margin-top:4px;">Results screen: did you meet the objective? Dollar Guy summarizes what you learned. Badge earned. Next chapter unlocks.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: THE 3 CHAPTERS -->
+<div class="section">
+  <div class="label">The 3 Chapters</div>
+
+  <div style="background:rgba(99,102,241,0.08);border-radius:12px;padding:20px;margin-bottom:16px;border-left:4px solid rgba(99,102,241,0.5);">
+    <h3 style="margin-top:0;">Chapter 1 — "First Paycheck"</h3>
+    <table style="width:100%;font-size:14px;border-collapse:collapse;">
+      <tr><td style="padding:6px 12px 6px 0;font-weight:bold;vertical-align:top;white-space:nowrap;opacity:0.7;">Story</td><td style="padding:6px 0;">You got your first paycheck from your new job. You're staring at your bank account thinking "now what?" Dollar Guy pops up: <em>"Hey! Congrats on the first check. Wanna make that money actually do something? Let me show you."</em></td></tr>
+      <tr><td style="padding:6px 12px 6px 0;font-weight:bold;vertical-align:top;white-space:nowrap;opacity:0.7;">Concept</td><td style="padding:6px 0;"><strong>What is a stock?</strong> Buying a share = owning a piece of a company. Price goes up → profit. Price goes down → loss. That's it.</td></tr>
+      <tr><td style="padding:6px 12px 6px 0;font-weight:bold;vertical-align:top;white-space:nowrap;opacity:0.7;">Interactive</td><td style="padding:6px 0;">Tap to "buy your first share" of a single stock. Watch the price move in real time. Tap to sell when you're ready.</td></tr>
+      <tr><td style="padding:6px 12px 6px 0;font-weight:bold;vertical-align:top;white-space:nowrap;opacity:0.7;">Gameplay</td><td style="padding:6px 0;"><strong>1 stock unlocked, 60 seconds.</strong> Objective: <em>"Buy 1 share and sell it for a profit."</em> Dollar Guy gives heavy hints: "Price is going up — nice time to sell!"</td></tr>
+      <tr><td style="padding:6px 12px 6px 0;font-weight:bold;vertical-align:top;white-space:nowrap;opacity:0.7;">Takeaway</td><td style="padding:6px 0;"><em>"You just made your first trade! A stock is just a piece of a company. When it does well, so do you."</em></td></tr>
+    </table>
+  </div>
+
+  <div style="background:rgba(234,179,8,0.08);border-radius:12px;padding:20px;margin-bottom:16px;border-left:4px solid rgba(234,179,8,0.5);">
+    <h3 style="margin-top:0;">Chapter 2 — "Reading the Room"</h3>
+    <table style="width:100%;font-size:14px;border-collapse:collapse;">
+      <tr><td style="padding:6px 12px 6px 0;font-weight:bold;vertical-align:top;white-space:nowrap;opacity:0.7;">Story</td><td style="padding:6px 0;">A coworker brags about making money because they saw a news headline before everyone else. Dollar Guy: <em>"Markets react to information. The trick is knowing what to look for."</em></td></tr>
+      <tr><td style="padding:6px 12px 6px 0;font-weight:bold;vertical-align:top;white-space:nowrap;opacity:0.7;">Concept</td><td style="padding:6px 0;"><strong>News moves markets.</strong> Bullish news → price up. Bearish news → price down. Reading headlines = your edge.</td></tr>
+      <tr><td style="padding:6px 12px 6px 0;font-weight:bold;vertical-align:top;white-space:nowrap;opacity:0.7;">Interactive</td><td style="padding:6px 0;">Shown 3 headlines — tap whether each is bullish 📈 or bearish 📉. Dollar Guy confirms/corrects. Quick and punchy.</td></tr>
+      <tr><td style="padding:6px 12px 6px 0;font-weight:bold;vertical-align:top;white-space:nowrap;opacity:0.7;">Gameplay</td><td style="padding:6px 0;"><strong>2 stocks unlocked, 90 seconds, news ticker active.</strong> Objective: <em>"Make at least one trade based on a news headline."</em> Dollar Guy highlights relevant headlines with moderate hints.</td></tr>
+      <tr><td style="padding:6px 12px 6px 0;font-weight:bold;vertical-align:top;white-space:nowrap;opacity:0.7;">Takeaway</td><td style="padding:6px 0;"><em>"Information is power. The news isn't just noise — it's your cheat code."</em></td></tr>
+    </table>
+  </div>
+
+  <div style="background:rgba(239,68,68,0.08);border-radius:12px;padding:20px;margin-bottom:16px;border-left:4px solid rgba(239,68,68,0.5);">
+    <h3 style="margin-top:0;">Chapter 3 — "Don't Bet It All"</h3>
+    <table style="width:100%;font-size:14px;border-collapse:collapse;">
+      <tr><td style="padding:6px 12px 6px 0;font-weight:bold;vertical-align:top;white-space:nowrap;opacity:0.7;">Story</td><td style="padding:6px 0;">Dollar Guy tells a cautionary tale: <em>"I once knew a guy who put everything into one stock. It crashed. He lost it all. Don't be that guy."</em></td></tr>
+      <tr><td style="padding:6px 12px 6px 0;font-weight:bold;vertical-align:top;white-space:nowrap;opacity:0.7;">Concept</td><td style="padding:6px 0;"><strong>Diversification.</strong> Don't put all eggs in one basket. Spread across stocks with different risk levels. Volatile vs. stable.</td></tr>
+      <tr><td style="padding:6px 12px 6px 0;font-weight:bold;vertical-align:top;white-space:nowrap;opacity:0.7;">Interactive</td><td style="padding:6px 0;">Drag-to-allocate: given $100, split it across 4 stocks. See a simulated outcome showing how diversified vs. concentrated portfolios perform in a crash.</td></tr>
+      <tr><td style="padding:6px 12px 6px 0;font-weight:bold;vertical-align:top;white-space:nowrap;opacity:0.7;">Gameplay</td><td style="padding:6px 0;"><strong>All 4 stocks, 2 minutes, scripted crash event mid-round.</strong> Objective: <em>"End the round with shares in at least 3 different stocks."</em> Minimal hints — Dollar Guy trusts you now.</td></tr>
+      <tr><td style="padding:6px 12px 6px 0;font-weight:bold;vertical-align:top;white-space:nowrap;opacity:0.7;">Takeaway</td><td style="padding:6px 0;"><em>"Diversification isn't exciting, but it keeps you alive. You're ready for the real thing."</em></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION 5: AFTER STORY -->
+<div class="section">
+  <div class="label">After Story Mode</div>
+  <div style="background:rgba(34,197,94,0.1);border-radius:12px;padding:20px;border:2px solid rgba(34,197,94,0.3);">
+    <h3 style="margin-top:0;">🏁 Story Complete → Multiplayer Unlocked</h3>
+    <p>Dollar Guy: <em>"You've graduated from training. Think you can beat real people? Let's find out."</em></p>
+    <p>Player is routed to the <strong>Home Screen</strong> with multiplayer now emphasized. The HOST/JOIN buttons are the clear next step. All 4 stocks, news, no hints — everything they learned is now their toolkit.</p>
+    <p style="font-size:13px;opacity:0.7;">No hard gate — multiplayer is always accessible via room code. But the story creates a natural "earn your way there" progression.</p>
+  </div>
+</div>
+
+<!-- SECTION 6: TECHNICAL APPROACH -->
+<div class="section">
+  <div class="label">Technical Approach</div>
+  <h3>How it maps to the existing codebase</h3>
+  <table style="width:100%;font-size:14px;border-collapse:collapse;">
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.1);"><td style="padding:8px 12px 8px 0;font-weight:bold;opacity:0.7;">New route</td><td style="padding:8px 0;"><code>/story</code> replaces <code>/solo</code> as primary solo experience</td></tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.1);"><td style="padding:8px 12px 8px 0;font-weight:bold;opacity:0.7;">Chapter data</td><td style="padding:8px 0;">New <code>shared/chapters.js</code> — array of chapter configs (dialog, concept, objectives, hints, stock count, duration, scripted events). Adding chapters = adding data.</td></tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.1);"><td style="padding:8px 12px 8px 0;font-weight:bold;opacity:0.7;">StoryPage</td><td style="padding:8px 0;">New screen component — state machine cycling through phases (story → learn → play → reflect). Renders Dollar Guy + dialog in story/learn phases, existing sim components in play phase.</td></tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.1);"><td style="padding:8px 12px 8px 0;font-weight:bold;opacity:0.7;">DollarGuy component</td><td style="padding:8px 0;">New component — speech bubble UI, renders your pixel art asset, handles click-through dialog sequences.</td></tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.1);"><td style="padding:8px 12px 8px 0;font-weight:bold;opacity:0.7;">HintOverlay</td><td style="padding:8px 0;">New component — Dollar Guy's in-game hints during play phase. Positioned near relevant UI elements. Driven by chapter config.</td></tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.1);"><td style="padding:8px 12px 8px 0;font-weight:bold;opacity:0.7;">ObjectiveTracker</td><td style="padding:8px 0;">New component — shows current objective at top of play screen. Checks completion conditions from chapter config.</td></tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.1);"><td style="padding:8px 12px 8px 0;font-weight:bold;opacity:0.7;">Reused as-is</td><td style="padding:8px 0;"><code>NewsEngine</code>, <code>StockCard</code>, <code>TradeControls</code>, <code>MiniChart</code>, <code>NewsTicker</code>, <code>Timer</code>, sound engine, price generation — all unchanged.</td></tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.1);"><td style="padding:8px 12px 8px 0;font-weight:bold;opacity:0.7;">Progress</td><td style="padding:8px 0;"><code>localStorage</code> saves completed chapters. Simple — no backend needed.</td></tr>
+    <tr><td style="padding:8px 12px 8px 0;font-weight:bold;opacity:0.7;">HomeScreen update</td><td style="padding:8px 0;">Replace "SOLO" button with "STORY MODE" that routes to <code>/story</code>. Show chapter progress (1/3, 2/3, etc.).</td></tr>
+  </table>
+</div>
+
+<!-- SECTION 7: DEMO FLOW -->
+<div class="section">
+  <div class="label">Hackathon Demo (under 5 min)</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:120px;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px;text-align:center;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;opacity:0.5;">0:00–0:30</div>
+      <strong>Intro</strong>
+      <p style="font-size:12px;opacity:0.7;">Open app, show home screen. "This is Dollar Dash — a game that teaches you finance."</p>
+    </div>
+    <div style="flex:1;min-width:120px;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px;text-align:center;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;opacity:0.5;">0:30–2:30</div>
+      <strong>Story Mode</strong>
+      <p style="font-size:12px;opacity:0.7;">Play through Ch1 live. Show Dollar Guy, the lesson, the guided trade. Quick peek at Ch2/3 setup.</p>
+    </div>
+    <div style="flex:1;min-width:120px;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px;text-align:center;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;opacity:0.5;">2:30–4:00</div>
+      <strong>Multiplayer</strong>
+      <p style="font-size:12px;opacity:0.7;">Host a game, have 2-3 people join on phones. 60-second round. Show live competition.</p>
+    </div>
+    <div style="flex:1;min-width:120px;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px;text-align:center;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;opacity:0.5;">4:00–5:00</div>
+      <strong>Wrap</strong>
+      <p style="font-size:12px;opacity:0.7;">Show results, explain the vision: "More chapters, more concepts, everyone learns finance by playing."</p>
+    </div>
+  </div>
+</div>

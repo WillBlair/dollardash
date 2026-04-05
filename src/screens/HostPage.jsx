@@ -177,6 +177,17 @@ export default function HostPage() {
             >
               START GAME
             </button>
+            {phase === "lobby" && (
+              <audio 
+                src="/tron_score.mp3" 
+                autoPlay 
+                loop 
+                playsInline
+                ref={(el) => {
+                  if (el) el.play().catch(() => {});
+                }}
+              />
+            )}
           </>
         )}
       </div>
