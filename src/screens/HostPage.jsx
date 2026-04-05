@@ -27,7 +27,6 @@ export default function HostPage() {
   const [timeLeft, setTimeLeft] = useState(DEFAULT_DURATION);
   const [duration, setDuration] = useState(DEFAULT_DURATION);
   const [results, setResults] = useState(null);
-  const [selectedStock, setSelectedStock] = useState(0);
   const [newsEvents, setNewsEvents] = useState([]);
   const hostCreateDoneRef = useRef(false);
 
@@ -186,25 +185,24 @@ export default function HostPage() {
 
         <Timer timeLeft={timeLeft} total={duration} />
 
-        <div className="flex flex-col lg:flex-row gap-3 flex-1">
-          <div className="flex-1 flex flex-col gap-3 min-w-0">
-            <BigChart histories={market?.histories} selectedIdx={selectedStock} />
-            <div className="flex gap-2">
+        <div className="flex flex-col lg:flex-row gap-3 flex-1 min-h-0">
+          <div className="flex-1 flex flex-col gap-2 min-w-0 min-h-0">
+            <div className="text-[10px] tracking-widest shrink-0" style={{ fontFamily: "var(--font-pixel)", color: "#7a8498" }}>
+              LIVE PRICES — ALL TICKERS
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 min-h-0">
               {STOCKS.map((stock, i) => {
                 const price = market?.prices?.[i];
                 return (
-                  <button
-                    key={stock.symbol}
-                    onClick={() => setSelectedStock(i)}
-                    className="flex-1 rounded-lg px-3 py-2.5 cursor-pointer border-2 transition-all text-center"
-                    style={{
-                      background: selectedStock === i ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.03)",
-                      borderColor: selectedStock === i ? stock.color : "transparent",
-                    }}
-                  >
-                    <div className="font-bold text-xs" style={{ color: stock.color }}>{stock.symbol}</div>
-                    <div className="font-bold text-sm">${price?.toFixed(2)}</div>
-                  </button>
+                  <div key={stock.symbol} className="flex flex-col gap-1 min-w-0">
+                    <BigChart histories={market?.histories} selectedIdx={i} compact />
+                    <div
+                      className="text-center rounded-lg py-1.5 text-xs font-mono font-bold tabular-nums"
+                      style={{ background: "rgba(255,255,255,0.04)", color: stock.color }}
+                    >
+                      {stock.symbol} · ${price != null ? price.toFixed(2) : "—"}
+                    </div>
+                  </div>
                 );
               })}
             </div>

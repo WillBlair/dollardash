@@ -13,7 +13,6 @@ import NewsTicker from "../components/NewsTicker.jsx";
 import TitleBadge from "../components/TitleBadge.jsx";
 import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
-import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
 import VoiceAgent from "../components/VoiceAgent.jsx";
 
 export default function PlayerPage() {
@@ -40,8 +39,6 @@ export default function PlayerPage() {
   const [results, setResults] = useState(null);
   const [myResult, setMyResult] = useState(null);
   const [newsEvents, setNewsEvents] = useState([]);
-
-  useNewsAnnouncer(phase === "playing" ? newsEvents : [], phase === "playing");
 
   useEffect(() => {
     if (!socket) return;

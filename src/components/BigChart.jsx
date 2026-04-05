@@ -1,9 +1,9 @@
 import { STOCKS, MAX_HISTORY } from "../../shared/constants.js";
 
 const W = 600;
-const H = 200;
 
-export default function BigChart({ histories, selectedIdx }) {
+export default function BigChart({ histories, selectedIdx, compact = false }) {
+  const H = compact ? 140 : 200;
   const stock = STOCKS[selectedIdx];
   const history = histories?.[selectedIdx];
   if (!history || history.length < 2) {
@@ -25,9 +25,10 @@ export default function BigChart({ histories, selectedIdx }) {
   const lastX = ((history.length - 1) / (MAX_HISTORY - 1)) * W;
   const lastY = H - ((history[history.length - 1] - min) / range) * (H - 20) - 10;
 
-  const gridLines = Array.from({ length: 5 }, (_, i) => {
-    const y = 10 + (i / 4) * (H - 20);
-    const val = max - (i / 4) * range;
+  const gridCount = compact ? 4 : 5;
+  const gridLines = Array.from({ length: gridCount }, (_, i) => {
+    const y = 10 + (i / (gridCount - 1)) * (H - 20);
+    const val = max - (i / (gridCount - 1)) * range;
     return (
       <g key={i}>
         <line x1="0" y1={y} x2={W} y2={y} stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
@@ -35,7 +36,7 @@ export default function BigChart({ histories, selectedIdx }) {
           x={W - 4}
           y={y - 4}
           fill="rgba(255,255,255,0.3)"
-          fontSize="10"
+          fontSize={compact ? "8" : "10"}
           textAnchor="end"
           fontFamily="var(--font-mono)"
         >
@@ -57,15 +58,15 @@ export default function BigChart({ histories, selectedIdx }) {
         points={points}
         fill="none"
         stroke={stock.color}
-        strokeWidth="2.5"
+        strokeWidth={compact ? "2" : "2.5"}
         strokeLinejoin="round"
         opacity="0.9"
       />
-      <circle cx={lastX} cy={lastY} r="4" fill={stock.color} />
-      <text x="8" y="20" fill={stock.color} fontSize="14" fontWeight="700" fontFamily="var(--font-pixel)">
+      <circle cx={lastX} cy={lastY} r={compact ? "3" : "4"} fill={stock.color} />
+      <text x="8" y={compact ? "16" : "20"} fill={stock.color} fontSize={compact ? "11" : "14"} fontWeight="700" fontFamily="var(--font-pixel)">
         {stock.symbol}
       </text>
-      <text x="8" y="36" fill="rgba(255,255,255,0.5)" fontSize="10" fontFamily="var(--font-mono)">
+      <text x="8" y={compact ? "30" : "36"} fill="rgba(255,255,255,0.5)" fontSize={compact ? "8" : "10"} fontFamily="var(--font-mono)">
         {stock.name}
       </text>
     </svg>
