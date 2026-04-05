@@ -15,7 +15,7 @@ function arcadeTextShadow(gx, gy) {
 
 const INNER_STYLE = {
   fontFamily: "var(--font-pixel)",
-  fontSize: "clamp(28px, 9vw, 58px)",
+  fontSize: "clamp(40px, 12vw, 80px)",
   color: "#FFD600",
   lineHeight: 1.35,
   letterSpacing: "0.04em",

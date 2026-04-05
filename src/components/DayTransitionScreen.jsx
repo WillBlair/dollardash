@@ -4,8 +4,6 @@ import Leaderboard from "./Leaderboard.jsx";
 const TRANSITION_MS_DAY1 = 20000;
 const TRANSITION_MS = 10000;
 
-const DOLLAR_GUY_GIF = "/output-onlinegiftools%20(1).gif";
-
 const DAY_TITLE_STYLE = {
   fontFamily: "var(--font-pixel)",
   color: "#FFD600",
@@ -49,48 +47,27 @@ function ProgressBar({ durationMs }) {
         {pct < 100 ? "STARTING SOON..." : "LOADING..."}
       </div>
 
-      <div className="relative" style={{ paddingTop: 60 }}>
-        {/* Dollar Guy */}
+      <div
+        className="relative h-5 rounded-full overflow-hidden"
+        style={{
+          background: "rgba(255,255,255,0.07)",
+          border: "1px solid rgba(255,214,0,0.2)",
+        }}
+      >
         <div
-          className="absolute"
+          className="absolute inset-y-0 left-0 rounded-full"
           style={{
-            left: `clamp(0px, calc(${pct}% - 28px), calc(100% - 56px))`,
-            bottom: "100%",
-            transition: "left 0.05s linear",
-            marginBottom: 4,
+            width: `${pct}%`,
+            background: "linear-gradient(90deg, #FFD600 0%, #FF9100 100%)",
+            boxShadow: "0 0 12px rgba(255,214,0,0.5)",
+            transition: "width 0.05s linear",
           }}
-        >
-          <img
-            src={DOLLAR_GUY_GIF}
-            alt="Dollar Guy"
-            style={{ height: 52, imageRendering: "pixelated", display: "block" }}
-          />
-        </div>
-
-        {/* Track */}
+        />
         <div
-          className="relative h-5 rounded-full overflow-hidden"
-          style={{
-            background: "rgba(255,255,255,0.07)",
-            border: "1px solid rgba(255,214,0,0.2)",
-          }}
+          className="absolute inset-0 flex items-center justify-center text-[10px] font-bold"
+          style={{ fontFamily: "var(--font-pixel)", color: pct > 48 ? "#0a0e1a" : "#FFD600" }}
         >
-          {/* Fill */}
-          <div
-            className="absolute inset-y-0 left-0 rounded-full"
-            style={{
-              width: `${pct}%`,
-              background: "linear-gradient(90deg, #FFD600 0%, #FF9100 100%)",
-              boxShadow: "0 0 12px rgba(255,214,0,0.5)",
-              transition: "width 0.05s linear",
-            }}
-          />
-          <div
-            className="absolute inset-0 flex items-center justify-center text-[10px] font-bold"
-            style={{ fontFamily: "var(--font-pixel)", color: pct > 48 ? "#0a0e1a" : "#FFD600" }}
-          >
-            {pct}%
-          </div>
+          {pct}%
         </div>
       </div>
     </div>

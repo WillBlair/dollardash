@@ -11,7 +11,6 @@ import NewsTicker from "../components/NewsTicker.jsx";
 import DurationPicker from "../components/DurationPicker.jsx";
 import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
 import DayTransitionScreen from "../components/DayTransitionScreen.jsx";
-import NewsToast from "../components/NewsToast.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
 import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
 
@@ -173,7 +172,7 @@ export default function HostPage() {
 
             <button
               onClick={startGame} disabled={players.length === 0}
-              className="rounded-xl py-4 px-12 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="btn-pixel py-4 px-12 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ fontFamily: "var(--font-pixel)", background: "#76FF03", color: "#0a0e1a", boxShadow: players.length > 0 ? "0 0 30px rgba(118,255,3,0.25)" : "none" }}
             >
               START GAME
@@ -195,7 +194,6 @@ export default function HostPage() {
     return (
       <div className="h-dvh max-h-dvh overflow-hidden flex flex-col px-4 py-3 gap-2 w-full max-w-none box-border">
         <UrgencyOverlay timeLeft={timeLeft} />
-        <NewsToast events={newsEvents} />
 
         {/* Day-end flash overlay */}
         {dayWarning && (
@@ -335,7 +333,7 @@ export default function HostPage() {
 
         <button
           onClick={() => navigate("/")}
-          className="rounded-xl py-3 px-8 font-bold text-sm cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
+          className="btn-pixel py-3 px-8 font-bold text-sm cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
           style={{ fontFamily: "var(--font-pixel)", background: "#FFD600", color: "#0a0e1a" }}
         >
           NEW GAME

@@ -131,7 +131,7 @@ export default function HomeScreen() {
             <div className="flex flex-col gap-3 w-full max-w-sm">
               <button
                 onClick={() => navigate("/story")}
-                className="w-full rounded-xl py-4 px-6 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
+                className="btn-pixel w-full py-4 px-6 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
                 style={{
                   fontFamily: "var(--font-pixel)",
                   background: "#76FF03",
@@ -144,7 +144,7 @@ export default function HomeScreen() {
               <div className="flex gap-3">
                 <button
                   onClick={() => navigate("/host")}
-                  className="flex-1 rounded-xl py-4 px-6 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
+                  className="btn-pixel flex-1 py-4 px-6 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
                   style={{
                     fontFamily: "var(--font-pixel)",
                     background: "#FFD600",
@@ -156,7 +156,7 @@ export default function HomeScreen() {
                 </button>
                 <button
                   onClick={() => navigate("/play")}
-                  className="flex-1 rounded-xl py-4 px-6 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
+                  className="btn-pixel flex-1 py-4 px-6 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
                   style={{
                     fontFamily: "var(--font-pixel)",
                     background: "#00E5FF",

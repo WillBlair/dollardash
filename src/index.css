@@ -244,6 +244,30 @@ body {
   animation-delay: -15s;
 }
 
+/* 8-bit pixel button style */
+.btn-pixel {
+  border-radius: 0 !important;
+  clip-path: polygon(
+    6px 0%, calc(100% - 6px) 0%,
+    100% 6px, 100% calc(100% - 6px),
+    calc(100% - 6px) 100%, 6px 100%,
+    0% calc(100% - 6px), 0% 6px
+  );
+  box-shadow:
+    inset 4px 4px 0 rgba(255, 255, 255, 0.18),
+    inset -4px -4px 0 rgba(0, 0, 0, 0.35);
+}
+.btn-pixel:active {
+  box-shadow:
+    inset 4px 4px 0 rgba(0, 0, 0, 0.3),
+    inset -4px -4px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Room code input: dim placeholder, keep typed text vivid */
+.room-code-input::placeholder {
+  color: rgba(255, 214, 0, 0.28);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .news-live-dot {
     animation: none;
