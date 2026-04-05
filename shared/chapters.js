@@ -15,8 +15,12 @@ export const CHAPTERS = [
     storyDialog: [
       {
         speaker: "dollar-guy",
-        text: "I’m Dollar Guy. A stock is a tiny ownership slice of a company. Next: tap BUY once, wait a moment, SELL when the price is up—fake cash, real flow, ~30 seconds.",
+        text: "Welcome! I'm Dollar Guy, your personal guide to the world of money. Ready to make your first trade?",
         scene: { icon: "🧾", headline: "DEMO", detail: "Chapter 1 · speed run", accent: "#76FF03" },
+      },
+      {
+        speaker: "dollar-guy",
+        text: "A stock is simply a tiny slice of ownership in a company. Let's do a practice run. Buy a slice, wait for the price to go up, and sell it to lock in your profit!",
       },
     ],
     learnDialog: [],
@@ -50,7 +54,7 @@ export const CHAPTERS = [
     reflectDialog: [
       {
         speaker: "dollar-guy",
-        text: "You felt buy → sell. Chapter two is only: bullish or bearish headlines—same Dollar Guy path.",
+        text: "Great job! You just bought and sold your first stock! See? Nothing to be afraid of. Next, let's learn how to read the market.",
       },
     ],
     badge: { id: "ch1_complete", label: "First Trade", icon: "🏁", desc: "Completed Chapter 1" },
@@ -63,24 +67,24 @@ export const CHAPTERS = [
     storyDialog: [
       {
         speaker: "dollar-guy",
-        text: "Still here with you—you already know buy and sell. Headlines and events change how people feel about a company, and that shows up in the price.",
+        text: "You've got the basics down! But how do we know if a stock's price will go up or down? It's all about the news.",
         scene: { icon: "📰", headline: "READING THE ROOM", detail: "News → mood → price", accent: "#FF9100" },
       },
       {
         speaker: "dollar-guy",
-        text: "When earnings crush expectations, buyers often show up first—that pressure is what people mean by bullish. Bearish is the opposite: bad news, weaker story, more sellers leaning on the price.",
+        text: "When a company announces an amazing new product, people get excited and buy. We call this 'Bullish'.",
         scene: { icon: "📈", headline: "BULL VS BEAR", detail: "Words you’ll hear nonstop", accent: "#00E5FF" },
       },
       {
         speaker: "dollar-guy",
-        text: "Ask every headline: does this help or hurt the business? Next, three quick taps—bullish or bearish for each story—same path, no branches.",
+        text: "If they announce bad news, people sell to get out. That's 'Bearish'. Let's do a quick quiz to test your instincts.",
         scene: { icon: "🎯", headline: "NEXT UP", detail: "Interactive drill", accent: "#FFD600" },
       },
     ],
     learnDialog: [
       {
         speaker: "dollar-guy",
-        text: "Bullish: the story gets better for the business. Bearish: it gets worse. Same words pros use—you’re not guessing vibes, you’re labeling cause and effect.",
+        text: "Let's practice reading the room. I'll show you some headlines, and you tell me if they are Bullish or Bearish.",
         scene: { icon: "🎯", headline: "YOUR TURN", detail: "Three headlines · pick a side", accent: "#FFD600" },
       },
     ],
@@ -113,7 +117,7 @@ export const CHAPTERS = [
     reflectDialog: [
       {
         speaker: "dollar-guy",
-        text: "Now you’ve got two tools: how a trade works, and how news tilts the tape. Last piece with me—why betting everything on one stock can sting, and what spreading out buys you when a day goes wrong.",
+        text: "Nailed it! Understanding how the real world affects the market is your biggest edge. Next up: how to protect yourself on a bad day.",
       },
     ],
     badge: { id: "ch2_complete", label: "News Reader", icon: "📰", desc: "Completed Chapter 2" },
@@ -126,24 +130,24 @@ export const CHAPTERS = [
     storyDialog: [
       {
         speaker: "dollar-guy",
-        text: "Same story, deeper layer: if most of your money rides one ticker, one bad headline can carve a huge hole in your account.",
+        text: "Imagine putting all your money into one company, and they have a terrible year. Ouch! That's what we call Concentration Risk.",
         scene: { icon: "⚠️", headline: "CONCENTRATION RISK", detail: "Why “all in one” stings", accent: "#FF3D71" },
       },
       {
         speaker: "dollar-guy",
-        text: "Conviction in one name can win big or lose big—no cushion. Spreading across companies is diversification: when one drops, others can soften the fall. Cash is safe from swings, but inflation nibbles buying power; most people mix cash and investing.",
+        text: "Smart investors spread their money around so a single drop doesn't wipe them out. This is called 'Diversification'. Don't keep all your eggs in one basket!",
         scene: { icon: "🧺", headline: "DIVERSIFY", detail: "Many eggs, many baskets", accent: "#76FF03" },
       },
       {
         speaker: "dollar-guy",
-        text: "Next: split pretend $100 across four stocks with the sliders, simulate a crash, and feel balanced vs all-in-one for yourself.",
+        text: "Let's test this in the lab. You're going to split $100 across four stocks, and we'll throw a market crash at it to see what happens.",
         scene: { icon: "🧪", headline: "NEXT UP", detail: "Allocation lab", accent: "#00E5FF" },
       },
     ],
     learnDialog: [
       {
         speaker: "dollar-guy",
-        text: "Give more than one company weight. If you lean hard on one ticker, notice how your total jumps when that line breaks—then try a smoother split and run the same crash.",
+        text: "Try leaning hard into a single investment first and running the crash. Then spread it out smoothly and run it again to see the cushion!",
         scene: { icon: "🧪", headline: "YOUR TURN", detail: "Allocation · then simulate", accent: "#00E5FF" },
       },
     ],
@@ -193,11 +197,11 @@ export const CHAPTERS = [
     reflectDialog: [
       {
         speaker: "dollar-guy",
-        text: "That’s the spine we built from your paycheck: what a share is, how news tilts mood and price, and why spreading money dulls a one-company disaster. Everything else you study plugs into those three ideas.",
+        text: "See how diversifying protected your portfolio? That's how you stay in the game for the long haul.",
       },
       {
         speaker: "dollar-guy",
-        text: "You’ve got the foundation. Rehearse in solo free play or multiplayer when you want heat—the next chapters add compounding, budgeting, and core vocab on the same path.",
+        text: "You're getting really good at this. Next, I'm going to show you the secret to building real wealth. Trust me, you'll want to see this.",
       },
     ],
     badge: { id: "ch3_complete", label: "Diversified", icon: "🎯", desc: "Completed Chapter 3" },
@@ -210,14 +214,18 @@ export const CHAPTERS = [
     storyDialog: [
       {
         speaker: "dollar-guy",
-        text: "New lesson—not a stock tip. Compounding: if your balance grows, the next year’s growth applies to a bigger number. Small %, many years, big curve. Try the sliders next.",
+        text: "Time for my favorite topic! What if I told you your money could make its own money? That's what we call Compound Growth.",
         scene: { icon: "📈", headline: "CHAPTER 4", detail: "Time × return", accent: "#76FF03" },
+      },
+      {
+        speaker: "dollar-guy",
+        text: "Your money earns interest, and then that interest earns interest. Small numbers turn into massive mountains if you give them enough years to snowball.",
       },
     ],
     learnDialog: [
       {
         speaker: "dollar-guy",
-        text: "Move amount, years, and yearly return. The ending number is a math illustration—real life is messier, but the idea is the same: start early, stay consistent.",
+        text: "Jump into the lab and play with the numbers. Watch what happens if you just leave the money alone for 10 or 20 years. Give it a shot!",
         scene: { icon: "🧮", headline: "YOUR TURN", detail: "Compound toy", accent: "#00E5FF" },
       },
     ],
@@ -243,7 +251,7 @@ export const CHAPTERS = [
     reflectDialog: [
       {
         speaker: "dollar-guy",
-        text: "You saw the curve. Same dollars behave differently with time and return—that’s why ‘start now’ shows up in every finance 101.",
+        text: "Mind-blowing, right? The secret ingredient isn't a hot stock tip—it's simply giving it enough time. Start early, and your money does the hard work for you.",
       },
     ],
     badge: { id: "ch4_complete", label: "Compounder", icon: "📊", desc: "Completed Chapter 4" },
@@ -256,14 +264,18 @@ export const CHAPTERS = [
     storyDialog: [
       {
         speaker: "dollar-guy",
-        text: "Markets are one slice of money skills. Here’s another: how you split a paycheck—needs, growth, fun. No guilt trip; just see the hundred percent add up.",
+        text: "Before you can invest, you need cash. Let's talk about splitting up your paycheck so you're never scrambling.",
         scene: { icon: "💸", headline: "CHAPTER 5", detail: "Budget buckets · % only", accent: "#FFD600" },
+      },
+      {
+        speaker: "dollar-guy",
+        text: "You should always cover your needs, and you deserve to put some away for fun. But the most important part is paying your 'future self' by investing.",
       },
     ],
     learnDialog: [
       {
         speaker: "dollar-guy",
-        text: "Slide until the total reads 100%. Many people secure needs first, automate savings, then spend what’s left—your percentages can be yours.",
+        text: "Let's try balancing a budget. Slide the bars to divide up your paycheck. Try to cover your needs while keeping those long-term investments fueled!",
         scene: { icon: "🪣", headline: "YOUR TURN", detail: "Must sum to 100%", accent: "#00E5FF" },
       },
     ],
@@ -293,7 +305,7 @@ export const CHAPTERS = [
     reflectDialog: [
       {
         speaker: "dollar-guy",
-        text: "When savings isn’t an afterthought, investing gets fuel. You’ll feel that in solo practice later when you’re not starting from zero every month.",
+        text: "Perfect! By automating those buckets every month, you are building real wealth without having to stress about every dollar.",
       },
     ],
     badge: { id: "ch5_complete", label: "Balanced", icon: "⚖️", desc: "Completed Chapter 5" },
@@ -306,14 +318,18 @@ export const CHAPTERS = [
     storyDialog: [
       {
         speaker: "dollar-guy",
-        text: "Last mini-game for this arc: match plain-English meanings to words you’ll hear forever—bull, bear, dividend, ETF. Speed matters less than recognition.",
+        text: "You've come so far! By now, you're really starting to think like an investor.",
         scene: { icon: "📖", headline: "CHAPTER 6", detail: "Tap term → meaning", accent: "#FF9100" },
+      },
+      {
+        speaker: "dollar-guy",
+        text: "Let's do a quick victory lap. I'll test you on some of the slang we've covered, plus a couple new terms. Ready?",
       },
     ],
     learnDialog: [
       {
         speaker: "dollar-guy",
-        text: "Left column: words. Right: definitions (shuffled). Pair them all, or tap skip if you already know the deck.",
+        text: "Match the term on the left to its definition on the right. You've got this!",
         scene: { icon: "🔗", headline: "YOUR TURN", detail: "Four pairs", accent: "#FFD600" },
       },
     ],
@@ -343,7 +359,7 @@ export const CHAPTERS = [
     reflectDialog: [
       {
         speaker: "dollar-guy",
-        text: "Six stops on one path: trade, news, diversify, compound, budget, vocab. Replay any chapter or take it to free play and multiplayer—you’ve got the tour.",
+        text: "You did it! You've learned how to trade, read the news, diversify, compound, and budget. You've got the foundation. Now get out there and make it happen!",
       },
     ],
     badge: { id: "ch6_complete", label: "Fluent", icon: "💬", desc: "Completed Chapter 6" },
