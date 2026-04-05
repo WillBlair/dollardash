@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 export default function PortfolioBuilderGame({ config, onComplete }) {
   const [allocations, setAllocations] = useState(config.stocks.map(() => Math.floor(config.budget / config.stocks.length)));
@@ -18,7 +18,6 @@ export default function PortfolioBuilderGame({ config, onComplete }) {
   };
 
   const handleSimulate = () => {
-    setPhase("crash");
     const crashIdx = config.crashStockIdx;
     const results = allocations.map((amount, i) => {
       if (i === crashIdx) {
@@ -32,14 +31,21 @@ export default function PortfolioBuilderGame({ config, onComplete }) {
     const diversified = allocations.filter((a) => a > 0).length >= 3;
 
     setCrashResult({ results, totalBefore, totalAfter, diversified });
-
-    setTimeout(() => {
-      setPhase("result");
-      setTimeout(() => onComplete?.(diversified), 3000);
-    }, 2000);
+    setPhase("result");
   };
 
-  if (phase === "crash" || phase === "result") {
+  const handleContinue = useCallback(() => {
+    onComplete?.(crashResult?.diversified ?? false);
+  }, [onComplete, crashResult]);
+
+  const handleContinueKey = useCallback((e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleContinue();
+    }
+  }, [handleContinue]);
+
+  if (phase === "result" && crashResult) {
     return (
       <div className="flex flex-col items-center gap-4 w-full max-w-sm mx-auto animate-slide-up">
         <div className="text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FF3D71" }}>
@@ -62,16 +68,24 @@ export default function PortfolioBuilderGame({ config, onComplete }) {
           ))}
         </div>
 
-        {phase === "result" && (
-          <div className="text-center animate-slide-up">
-            <div className="text-lg font-bold mb-2" style={{ color: crashResult.diversified ? "#76FF03" : "#FF3D71" }}>
-              ${crashResult.totalBefore} → ${crashResult.totalAfter}
-            </div>
-            <div className="text-sm" style={{ color: "#aaa" }}>
-              {crashResult.diversified ? config.diversifiedMessage : config.concentratedMessage}
-            </div>
+        <div className="text-center animate-slide-up">
+          <div className="text-lg font-bold mb-2" style={{ color: crashResult.diversified ? "#76FF03" : "#FF3D71" }}>
+            ${crashResult.totalBefore} → ${crashResult.totalAfter}
           </div>
-        )}
+          <div className="text-sm" style={{ color: "#aaa" }}>
+            {crashResult.diversified ? config.diversifiedMessage : config.concentratedMessage}
+          </div>
+        </div>
+
+        <button
+          autoFocus
+          onClick={handleContinue}
+          onKeyDown={handleContinueKey}
+          className="rounded-xl py-3 px-8 font-bold text-sm cursor-pointer border-none tracking-wider transition-transform hover:scale-105 mt-2"
+          style={{ fontFamily: "var(--font-pixel)", background: "#FFD600", color: "#0a0e1a" }}
+        >
+          CONTINUE ▶
+        </button>
       </div>
     );
   }

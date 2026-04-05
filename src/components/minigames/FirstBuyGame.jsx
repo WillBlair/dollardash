@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { STOCKS, TICK_MS } from "../../../shared/constants.js";
 
 export default function FirstBuyGame({ config, onComplete }) {
@@ -30,11 +30,18 @@ export default function FirstBuyGame({ config, onComplete }) {
     setProfit(pnl);
     setPhase("sold");
     clearInterval(tickRef.current);
-    setTimeout(() => {
-      setPhase("done");
-      onComplete?.(pnl > 0);
-    }, 2000);
   };
+
+  const handleContinue = useCallback(() => {
+    onComplete?.(profit > 0);
+  }, [onComplete, profit]);
+
+  const handleContinueKey = useCallback((e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleContinue();
+    }
+  }, [handleContinue]);
 
   const pnlColor = profit !== null ? (profit >= 0 ? "#76FF03" : "#FF3D71") : "#fff";
 
@@ -63,6 +70,7 @@ export default function FirstBuyGame({ config, onComplete }) {
 
       {phase === "ready" && (
         <button
+          autoFocus
           onClick={handleBuy}
           className="rounded-xl py-4 px-12 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105 animate-pulse-border border-2"
           style={{ fontFamily: "var(--font-pixel)", background: "#76FF03", color: "#0a0e1a", borderColor: "#76FF03" }}
@@ -73,6 +81,7 @@ export default function FirstBuyGame({ config, onComplete }) {
 
       {phase === "bought" && (
         <button
+          autoFocus
           onClick={handleSell}
           className="rounded-xl py-4 px-12 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
           style={{ fontFamily: "var(--font-pixel)", background: "#FF3D71", color: "#fff" }}
@@ -82,13 +91,24 @@ export default function FirstBuyGame({ config, onComplete }) {
       )}
 
       {phase === "sold" && profit !== null && (
-        <div className="text-center animate-slide-up">
-          <div className="text-2xl font-bold mb-2" style={{ color: pnlColor }}>
-            {profit >= 0 ? "+" : ""}${profit.toFixed(2)}
+        <div className="flex flex-col items-center gap-4 animate-slide-up">
+          <div className="text-center">
+            <div className="text-2xl font-bold mb-2" style={{ color: pnlColor }}>
+              {profit >= 0 ? "+" : ""}${profit.toFixed(2)}
+            </div>
+            <div className="text-sm" style={{ color: "#aaa" }}>
+              {profit >= 0 ? config.successText : config.failText}
+            </div>
           </div>
-          <div className="text-sm" style={{ color: "#aaa" }}>
-            {profit >= 0 ? config.successText : config.failText}
-          </div>
+          <button
+            autoFocus
+            onClick={handleContinue}
+            onKeyDown={handleContinueKey}
+            className="rounded-xl py-3 px-8 font-bold text-sm cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
+            style={{ fontFamily: "var(--font-pixel)", background: "#FFD600", color: "#0a0e1a" }}
+          >
+            CONTINUE ▶
+          </button>
         </div>
       )}
     </div>

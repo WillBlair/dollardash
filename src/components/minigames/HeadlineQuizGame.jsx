@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 export default function HeadlineQuizGame({ config, onComplete }) {
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -6,6 +6,7 @@ export default function HeadlineQuizGame({ config, onComplete }) {
   const [feedback, setFeedback] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [phase, setPhase] = useState("playing");
+  const nextRef = useRef(null);
 
   const headline = config.headlines[currentIdx];
 
@@ -16,20 +17,41 @@ export default function HeadlineQuizGame({ config, onComplete }) {
 
     setScore(newScore);
     setAnswers(newAnswers);
-    setFeedback({ correct, explanation: headline.explanation });
-
-    setTimeout(() => {
-      setFeedback(null);
-      if (currentIdx >= config.headlines.length - 1) {
-        setPhase("result");
-        setTimeout(() => {
-          onComplete?.(newScore === config.headlines.length);
-        }, 2500);
-      } else {
-        setCurrentIdx((prev) => prev + 1);
-      }
-    }, 2000);
+    setFeedback({ correct, explanation: headline.explanation, isLast: currentIdx >= config.headlines.length - 1 });
   };
+
+  useEffect(() => {
+    if (feedback) nextRef.current?.focus();
+  }, [feedback]);
+
+  const advanceFromFeedback = useCallback(() => {
+    if (!feedback) return;
+    const isLast = feedback.isLast;
+    setFeedback(null);
+    if (isLast) {
+      setPhase("result");
+    } else {
+      setCurrentIdx((prev) => prev + 1);
+    }
+  }, [feedback]);
+
+  const handleFeedbackKey = useCallback((e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      advanceFromFeedback();
+    }
+  }, [advanceFromFeedback]);
+
+  const handleFinish = useCallback(() => {
+    onComplete?.(score === config.headlines.length);
+  }, [onComplete, score, config.headlines.length]);
+
+  const handleFinishKey = useCallback((e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleFinish();
+    }
+  }, [handleFinish]);
 
   if (phase === "result") {
     const allCorrect = score === config.headlines.length;
@@ -52,6 +74,15 @@ export default function HeadlineQuizGame({ config, onComplete }) {
             </div>
           ))}
         </div>
+        <button
+          autoFocus
+          onClick={handleFinish}
+          onKeyDown={handleFinishKey}
+          className="rounded-xl py-3 px-8 font-bold text-sm cursor-pointer border-none tracking-wider transition-transform hover:scale-105 mt-2"
+          style={{ fontFamily: "var(--font-pixel)", background: "#FFD600", color: "#0a0e1a" }}
+        >
+          CONTINUE ▶
+        </button>
       </div>
     );
   }
@@ -74,18 +105,29 @@ export default function HeadlineQuizGame({ config, onComplete }) {
             About: <span className="font-bold" style={{ color: "#FFD600" }}>{headline.stock}</span>
           </div>
           <div className="text-sm leading-relaxed font-semibold" style={{ color: "#e0e0e0" }}>
-            "{headline.text}"
+            &ldquo;{headline.text}&rdquo;
           </div>
         </div>
       )}
 
       {feedback && (
-        <div className="rounded-xl p-5 w-full text-center animate-slide-up" style={{ background: feedback.correct ? "rgba(118,255,3,0.08)" : "rgba(255,61,113,0.08)", border: `2px solid ${feedback.correct ? "#76FF03" : "#FF3D71"}44` }}>
-          <div className="text-2xl mb-2">{feedback.correct ? "✅" : "❌"}</div>
-          <div className="text-sm font-bold mb-1" style={{ color: feedback.correct ? "#76FF03" : "#FF3D71" }}>
-            {feedback.correct ? "Correct!" : "Not quite!"}
+        <div className="flex flex-col items-center gap-3 w-full animate-slide-up">
+          <div className="rounded-xl p-5 w-full text-center" style={{ background: feedback.correct ? "rgba(118,255,3,0.08)" : "rgba(255,61,113,0.08)", border: `2px solid ${feedback.correct ? "#76FF03" : "#FF3D71"}44` }}>
+            <div className="text-2xl mb-2">{feedback.correct ? "✅" : "❌"}</div>
+            <div className="text-sm font-bold mb-1" style={{ color: feedback.correct ? "#76FF03" : "#FF3D71" }}>
+              {feedback.correct ? "Correct!" : "Not quite!"}
+            </div>
+            <div className="text-xs" style={{ color: "#aaa" }}>{feedback.explanation}</div>
           </div>
-          <div className="text-xs" style={{ color: "#aaa" }}>{feedback.explanation}</div>
+          <button
+            ref={nextRef}
+            onClick={advanceFromFeedback}
+            onKeyDown={handleFeedbackKey}
+            className="self-end rounded-xl py-2.5 px-6 font-bold text-sm cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
+            style={{ fontFamily: "var(--font-pixel)", background: "#FFD600", color: "#0a0e1a", fontSize: "11px" }}
+          >
+            NEXT ▶
+          </button>
         </div>
       )}
 

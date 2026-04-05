@@ -71,23 +71,17 @@ export const CHAPTERS = [
       },
     },
     gameplay: {
+      skipGameplay: true,
       availableStocks: [0, 2],
       durationSeconds: 90,
       objective: {
         id: "news-trade",
-        text: "Make a profitable trade after a news headline drops",
-        check: (stats) => stats.newsBasedTrades >= 1 && stats.returnPct > -5,
+        text: "Identify whether headlines are good or bad news",
+        check: () => true,
       },
       hintLevel: "moderate",
-      hints: [
-        { trigger: "news-fired", text: "Breaking news! Read the headline — is it bullish or bearish?", position: "news-ticker" },
-        { trigger: "news-bullish-no-action", text: "That was good news for {stock}. Could be a buying opportunity!", position: "stock-card" },
-        { trigger: "news-bearish-holding", text: "Bad news just hit. If you're holding {stock}, think about selling.", position: "trade-controls" },
-      ],
-      scriptedEvents: [
-        { atSecond: 15, stockIdx: 0, headline: "Banana Inc. announces record-breaking quarter", sentiment: "bullish", driftMod: 0.035, durationSec: 10 },
-        { atSecond: 45, stockIdx: 2, headline: "EU proposes strict AI regulation — MOON under pressure", sentiment: "bearish", driftMod: -0.03, durationSec: 10 },
-      ],
+      hints: [],
+      scriptedEvents: [],
     },
     reflectDialog: [
       { speaker: "dollar-guy", text: "See? Information is power. The news feed isn't just noise — it's your cheat code." },
@@ -128,19 +122,19 @@ export const CHAPTERS = [
     },
     gameplay: {
       availableStocks: [0, 1, 2, 3],
-      durationSeconds: 120,
+      durationSeconds: 45,
       objective: {
         id: "diversified",
         text: "End the round holding shares in at least 3 different stocks",
         check: (stats) => stats.uniqueStocks >= 3,
       },
-      hintLevel: "light",
+      hintLevel: "moderate",
       hints: [
-        { trigger: "single-stock-30s", text: "You're only in one stock. Remember what happened to Steve!", position: "stock-card" },
+        { trigger: "single-stock-15s", text: "You're only in one stock. Remember what happened to Steve!", position: "stock-card" },
         { trigger: "crash-event", text: "Market crash! If you diversified, you'll be fine.", position: "center" },
       ],
       scriptedEvents: [
-        { atSecond: 60, stockIdx: -1, headline: "BREAKING: Major bank collapses — markets in panic", sentiment: "bearish", driftMod: -0.05, durationSec: 12 },
+        { atSecond: 20, stockIdx: -1, headline: "BREAKING: Major bank collapses — markets in panic", sentiment: "bearish", driftMod: -0.05, durationSec: 10 },
       ],
     },
     reflectDialog: [

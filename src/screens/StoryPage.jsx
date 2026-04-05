@@ -17,6 +17,7 @@ import Timer from "../components/Timer.jsx";
 import NewsTicker from "../components/NewsTicker.jsx";
 import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
+import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
 
 const INITIAL_PROGRESS = { currentChapter: 1, completed: [], badges: [] };
 
@@ -59,6 +60,8 @@ export default function StoryPage() {
   const [newsEvents, setNewsEvents] = useState([]);
   const [objectiveMet, setObjectiveMet] = useState(false);
   const [activeHint, setActiveHint] = useState(null);
+
+  useNewsAnnouncer(newsEvents, phase === "play");
 
   const gameRef = useRef(null);
   const newsRef = useRef(null);
@@ -402,8 +405,9 @@ export default function StoryPage() {
   }
 
   if (phase === "reflect" && activeChapter) {
+    const skipped = activeChapter.gameplay.skipGameplay;
     const g = gameRef.current;
-    const fv = getPortfolioValue(g.cash, g.holdings, g.prices);
+    const fv = g ? getPortfolioValue(g.cash, g.holdings, g.prices) : STARTING_CASH;
     const returnPct = ((fv - STARTING_CASH) / STARTING_CASH) * 100;
 
     return (
@@ -412,21 +416,19 @@ export default function StoryPage() {
           CHAPTER {activeChapter.id} COMPLETE
         </div>
 
-        {objectiveMet ? (
-          <div className="text-4xl mb-3">🎉</div>
-        ) : (
-          <div className="text-4xl mb-3">📝</div>
-        )}
+        <div className="text-4xl mb-3">{skipped || objectiveMet ? "🎉" : "📝"}</div>
 
-        <div className="rounded-xl p-4 mb-6 w-full max-w-xs" style={{ background: objectiveMet ? "rgba(118,255,3,0.08)" : "rgba(255,214,0,0.08)", border: `1px solid ${objectiveMet ? "#76FF0333" : "#FFD60033"}` }}>
-          <div className="text-xs mb-1" style={{ fontFamily: "var(--font-pixel)", color: objectiveMet ? "#76FF03" : "#FFD600", fontSize: "10px" }}>
-            {objectiveMet ? "OBJECTIVE MET ✓" : "OBJECTIVE NOT MET"}
+        {!skipped && (
+          <div className="rounded-xl p-4 mb-6 w-full max-w-xs" style={{ background: objectiveMet ? "rgba(118,255,3,0.08)" : "rgba(255,214,0,0.08)", border: `1px solid ${objectiveMet ? "#76FF0333" : "#FFD60033"}` }}>
+            <div className="text-xs mb-1" style={{ fontFamily: "var(--font-pixel)", color: objectiveMet ? "#76FF03" : "#FFD600", fontSize: "10px" }}>
+              {objectiveMet ? "OBJECTIVE MET ✓" : "OBJECTIVE NOT MET"}
+            </div>
+            <div className="text-xs" style={{ color: "#aaa" }}>{activeChapter.gameplay.objective.text}</div>
+            <div className="text-lg font-bold mt-2" style={{ color: returnPct >= 0 ? "#76FF03" : "#FF3D71" }}>
+              {returnPct >= 0 ? "+" : ""}{returnPct.toFixed(1)}% return
+            </div>
           </div>
-          <div className="text-xs" style={{ color: "#aaa" }}>{activeChapter.gameplay.objective.text}</div>
-          <div className="text-lg font-bold mt-2" style={{ color: returnPct >= 0 ? "#76FF03" : "#FF3D71" }}>
-            {returnPct >= 0 ? "+" : ""}{returnPct.toFixed(1)}% return
-          </div>
-        </div>
+        )}
 
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2 justify-center">
