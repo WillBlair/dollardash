@@ -32,8 +32,8 @@ function DollarGuyPortrait({ size, isSpeaking }) {
           alt="Dollar Guy"
           className={
             isLarge
-              ? "h-[13rem] min-[420px]:h-[22rem] sm:h-[28rem] md:h-[32rem] lg:h-[36rem] xl:h-[40rem] w-auto max-w-none object-contain object-bottom drop-shadow-[0_16px_40px_rgba(0,0,0,0.55)] select-none"
-              : "h-44 sm:h-52 md:h-60 w-auto max-w-none object-contain object-bottom drop-shadow-[0_10px_28px_rgba(0,0,0,0.45)] select-none"
+              ? "h-[6.5rem] min-[420px]:h-[11rem] sm:h-[14rem] md:h-[16rem] lg:h-[18rem] xl:h-[20rem] w-auto max-w-none object-contain object-bottom drop-shadow-[0_8px_22px_rgba(0,0,0,0.5)] select-none"
+              : "h-[5.5rem] sm:h-[6.5rem] md:h-[7.5rem] w-auto max-w-none object-contain object-bottom drop-shadow-[0_6px_16px_rgba(0,0,0,0.4)] select-none"
           }
           draggable={false}
         />
