@@ -5,7 +5,7 @@ import confetti from "canvas-confetti";
 import { useSocket } from "../hooks/useSocket.js";
 import { STOCKS, DEFAULT_DURATION } from "../../shared/constants.js";
 import BadgeChip from "../components/BadgeChip.jsx";
-import BigChart from "../components/BigChart.jsx";
+import Leaderboard from "../components/Leaderboard.jsx";
 import Timer from "../components/Timer.jsx";
 import NewsTicker from "../components/NewsTicker.jsx";
 import DurationPicker from "../components/DurationPicker.jsx";
@@ -27,6 +27,7 @@ export default function HostPage() {
   const [duration, setDuration] = useState(DEFAULT_DURATION);
   const [results, setResults] = useState(null);
   const [newsEvents, setNewsEvents] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
   const [dayScreen, setDayScreen] = useState(null);
   const hostCreateDoneRef = useRef(false);
 
@@ -61,6 +62,7 @@ export default function HostPage() {
     socket.on("game:tick", (data) => {
       setDayScreen(null);
       setMarket({ prices: data.prices, histories: data.histories, timeLeft: data.timeLeft });
+      setLeaderboard(data.leaderboard);
     });
 
     socket.on("game:news", (event) => {
@@ -218,12 +220,8 @@ export default function HostPage() {
             <NewsTicker events={newsEvents} expanded />
           </div>
 
-          <div className="flex-[4] min-h-0 grid grid-cols-2 gap-2 content-start">
-            {STOCKS.map((_, i) => (
-              <div key={i} className="min-h-0" style={{ height: "100%", maxHeight: "50%" }}>
-                <BigChart histories={histories} selectedIdx={i} compact />
-              </div>
-            ))}
+          <div className="flex-[4] min-h-0 overflow-auto">
+            <Leaderboard entries={leaderboard} />
           </div>
         </div>
       </div>
