@@ -117,9 +117,9 @@ export const CHAPTERS = [
       type: "headline-quiz",
       config: {
         headlines: [
-          { text: "Banana Inc. smashes earnings — revenue up 40%", answer: "bullish", stock: "BNNA", explanation: "Strong results → market likes the story → often 📈" },
-          { text: "SEC investigation into RektCoin for securities fraud", answer: "bearish", stock: "REKT", explanation: "Legal risk → hurt confidence → often 📉" },
-          { text: "MoonShot AI lands $2B government defense contract", answer: "bullish", stock: "MOON", explanation: "Big revenue growth → brighter outlook → often 📈" },
+          { text: "Government announces massive new subsidies for renewable energy", answer: "bullish", stock: "ECO", explanation: "More funding → cheaper operating costs → often 📈" },
+          { text: "Supply chain delays causing nationwide food shortages", answer: "bearish", stock: "CART", explanation: "Less inventory to sell → lower revenue → often 📉" },
+          { text: "NextGen Tech secures $2B government AI defense contract", answer: "bullish", stock: "NXT", explanation: "Big revenue growth → brighter outlook → often 📈" },
         ],
         successText: "Clean reads—that’s how you build headline reflexes.",
         partialText: "Good start. Remember: helps the business = bullish; hurts it = bearish. You’ll get faster with reps.",

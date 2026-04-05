@@ -10,10 +10,10 @@ export const STARTING_CASH = 10_000;
 export const MAX_HISTORY = 200;
 
 export const STOCKS = [
-  { symbol: "BNNA", name: "Banana Inc.", color: "#FFD600", volatility: 0.025, drift: 0.001, basePrice: 42 },
-  { symbol: "REKT", name: "RektCoin Ltd.", color: "#FF3D71", volatility: 0.06, drift: -0.002, basePrice: 7 },
-  { symbol: "MOON", name: "MoonShot AI", color: "#00E5FF", volatility: 0.04, drift: 0.003, basePrice: 120 },
-  { symbol: "SAFE", name: "SafeHaven Bonds", color: "#76FF03", volatility: 0.008, drift: 0.0005, basePrice: 95 },
+  { symbol: "NXT", name: "NextGen Tech", color: "#00E5FF", volatility: 0.045, drift: 0.002, basePrice: 120 },
+  { symbol: "ECO", name: "EcoPower Solar", color: "#76FF03", volatility: 0.035, drift: 0.001, basePrice: 42 },
+  { symbol: "CART", name: "FreshCart Retail", color: "#FFD600", volatility: 0.02, drift: 0.0005, basePrice: 75 },
+  { symbol: "SAFE", name: "SafeHaven Bonds", color: "#FF9100", volatility: 0.008, drift: 0.0002, basePrice: 95 },
 ];
 
 export const BADGES = [
@@ -38,36 +38,37 @@ export const TRADER_TITLES = [
 ];
 
 export const NEWS_EVENTS = [
-  { stockIdx: 0, headline: "Banana Inc. smashes earnings — revenue up 40%", sentiment: "bullish", driftMod: 0.035, durationSec: 8 },
-  { stockIdx: 0, headline: "FDA approves high-potassium superfruit patent for BNNA", sentiment: "bullish", driftMod: 0.025, durationSec: 7 },
-  { stockIdx: 0, headline: "Major banana blight hits South American supply chain", sentiment: "bearish", driftMod: -0.03, durationSec: 8 },
-  { stockIdx: 0, headline: "BNNA CEO caught in accounting scandal", sentiment: "bearish", driftMod: -0.04, durationSec: 6 },
-  { stockIdx: 0, headline: "Banana Inc. announces 3-for-1 stock split", sentiment: "bullish", driftMod: 0.02, durationSec: 6 },
-  { stockIdx: 0, headline: "BNNA warehouse fire destroys 2M units of inventory", sentiment: "bearish", driftMod: -0.025, durationSec: 7 },
+  // Tech (NXT)
+  { stockIdx: 0, headline: "NextGen Tech secures $2B government AI defense contract", sentiment: "bullish", driftMod: 0.04, durationSec: 8 },
+  { stockIdx: 0, headline: "Breakthrough in quantum computing announced by NXT", sentiment: "bullish", driftMod: 0.035, durationSec: 7 },
+  { stockIdx: 0, headline: "Global semiconductor shortage stalls tech manufacturing", sentiment: "bearish", driftMod: -0.03, durationSec: 8 },
+  { stockIdx: 0, headline: "Major cybersecurity breach exposes NXT user data", sentiment: "bearish", driftMod: -0.045, durationSec: 6 },
+  { stockIdx: 0, headline: "EU proposes strict new AI regulations on data usage", sentiment: "bearish", driftMod: -0.035, durationSec: 7 },
 
-  { stockIdx: 1, headline: "RektCoin listed on major exchange — volume surges 500%", sentiment: "bullish", driftMod: 0.06, durationSec: 6 },
-  { stockIdx: 1, headline: "Crypto whale dumps 10M REKT tokens in 30 minutes", sentiment: "bearish", driftMod: -0.07, durationSec: 5 },
-  { stockIdx: 1, headline: "REKT partners with top gaming studio for NFT launch", sentiment: "bullish", driftMod: 0.04, durationSec: 7 },
-  { stockIdx: 1, headline: "SEC investigation into RektCoin for securities fraud", sentiment: "bearish", driftMod: -0.08, durationSec: 6 },
-  { stockIdx: 1, headline: "Celebrity influencer tweets 'REKT to the moon!'", sentiment: "bullish", driftMod: 0.05, durationSec: 5 },
-  { stockIdx: 1, headline: "RektCoin smart contract exploit — $50M drained", sentiment: "bearish", driftMod: -0.09, durationSec: 5 },
+  // Solar/Energy (ECO)
+  { stockIdx: 1, headline: "Government announces massive new subsidies for renewable energy", sentiment: "bullish", driftMod: 0.05, durationSec: 8 },
+  { stockIdx: 1, headline: "EcoPower Solar unveils record-breaking efficient solar panel", sentiment: "bullish", driftMod: 0.04, durationSec: 7 },
+  { stockIdx: 1, headline: "Oil prices plummet, reducing immediate demand for green alternatives", sentiment: "bearish", driftMod: -0.03, durationSec: 8 },
+  { stockIdx: 1, headline: "Changes in tax policy strip funding away from solar initiatives", sentiment: "bearish", driftMod: -0.04, durationSec: 7 },
+  { stockIdx: 1, headline: "Major cities mandate solar panels on all new commercial buildings", sentiment: "bullish", driftMod: 0.045, durationSec: 9 },
 
-  { stockIdx: 2, headline: "MoonShot AI lands $2B government defense contract", sentiment: "bullish", driftMod: 0.04, durationSec: 8 },
-  { stockIdx: 2, headline: "MoonShot AI model outperforms GPT on all benchmarks", sentiment: "bullish", driftMod: 0.035, durationSec: 7 },
-  { stockIdx: 2, headline: "Key engineer leaves MoonShot AI for competitor", sentiment: "bearish", driftMod: -0.025, durationSec: 6 },
-  { stockIdx: 2, headline: "EU proposes strict AI regulation — MOON hit hardest", sentiment: "bearish", driftMod: -0.035, durationSec: 8 },
-  { stockIdx: 2, headline: "MoonShot AI reveals humanoid robot prototype", sentiment: "bullish", driftMod: 0.03, durationSec: 7 },
-  { stockIdx: 2, headline: "MOON data center outage takes services offline globally", sentiment: "bearish", driftMod: -0.04, durationSec: 6 },
+  // Retail (CART)
+  { stockIdx: 2, headline: "Supply chain delays and labor strikes causing nationwide food shortages", sentiment: "bearish", driftMod: -0.04, durationSec: 8 },
+  { stockIdx: 2, headline: "FreshCart posts record holiday quarter consumer spending", sentiment: "bullish", driftMod: 0.03, durationSec: 7 },
+  { stockIdx: 2, headline: "Inflation hits families — grocery spending shifts to bargain brands", sentiment: "bearish", driftMod: -0.025, durationSec: 9 },
+  { stockIdx: 2, headline: "FreshCart acquires major organic farming conglomerate", sentiment: "bullish", driftMod: 0.02, durationSec: 6 },
+  { stockIdx: 2, headline: "E-coli outbreak linked to national retail produce distributor", sentiment: "bearish", driftMod: -0.045, durationSec: 6 },
 
-  { stockIdx: 3, headline: "Federal Reserve signals rate cuts — bonds rally", sentiment: "bullish", driftMod: 0.015, durationSec: 10 },
-  { stockIdx: 3, headline: "Inflation spikes to 9% — bond yields crater", sentiment: "bearish", driftMod: -0.012, durationSec: 10 },
-  { stockIdx: 3, headline: "SafeHaven upgrades credit rating to AAA", sentiment: "bullish", driftMod: 0.01, durationSec: 8 },
-  { stockIdx: 3, headline: "Treasury auction sees record low demand", sentiment: "bearish", driftMod: -0.01, durationSec: 8 },
+  // Bonds (SAFE)
+  { stockIdx: 3, headline: "Federal Reserve signals aggressive rate cuts — bonds rally", sentiment: "bullish", driftMod: 0.015, durationSec: 10 },
+  { stockIdx: 3, headline: "Inflation spikes unexpectedly — bond yields crater", sentiment: "bearish", driftMod: -0.015, durationSec: 10 },
+  { stockIdx: 3, headline: "Stock market volatility drives investors toward safe-haven assets", sentiment: "bullish", driftMod: 0.01, durationSec: 8 },
+  { stockIdx: 3, headline: "Treasury auction sees worst demand in a decade", sentiment: "bearish", driftMod: -0.01, durationSec: 8 },
 
-  { stockIdx: -1, headline: "BREAKING: Major bank collapses — markets in panic", sentiment: "bearish", driftMod: -0.04, durationSec: 8 },
-  { stockIdx: -1, headline: "Fed announces emergency stimulus package", sentiment: "bullish", driftMod: 0.03, durationSec: 8 },
-  { stockIdx: -1, headline: "Trade war escalates — tariffs up 25% across the board", sentiment: "bearish", driftMod: -0.025, durationSec: 7 },
-  { stockIdx: -1, headline: "Global peace deal signed — investor confidence soars", sentiment: "bullish", driftMod: 0.02, durationSec: 7 },
-  { stockIdx: -1, headline: "Unemployment hits all-time low — economy booming", sentiment: "bullish", driftMod: 0.015, durationSec: 9 },
-  { stockIdx: -1, headline: "Surprise CPI report: inflation out of control", sentiment: "bearish", driftMod: -0.02, durationSec: 8 },
+  // Macro (All/Market)
+  { stockIdx: -1, headline: "BREAKING: Unexpected banking crisis — global markets in panic", sentiment: "bearish", driftMod: -0.04, durationSec: 8 },
+  { stockIdx: -1, headline: "Fed announces surprise emergency economic stimulus package", sentiment: "bullish", driftMod: 0.03, durationSec: 8 },
+  { stockIdx: -1, headline: "Trade war escalates — massive tariffs enacted globally", sentiment: "bearish", driftMod: -0.03, durationSec: 7 },
+  { stockIdx: -1, headline: "Historic peace treaty signed — global investor confidence soars", sentiment: "bullish", driftMod: 0.02, durationSec: 7 },
+  { stockIdx: -1, headline: "Unemployment hits all-time low — consumer economy booming", sentiment: "bullish", driftMod: 0.015, durationSec: 9 }
 ];
