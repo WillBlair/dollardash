@@ -1,6 +1,12 @@
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { STOCKS } from "../../shared/constants.js";
 import ArcadeTitle from "../components/ArcadeTitle.jsx";
+
+/** Looped on the landing page; fades out when leaving via Story / Host / Join. */
+const HOME_LOOP_MP3 = "final selected.mp3";
+const HOME_LOOP_VOLUME = 0.72;
+const LEAVE_FADE_MS = 750;
 
 const STEPS = [
   { num: "1", icon: "📰", title: "Watch the News", desc: "Headlines move prices. Bullish news pushes stocks up, bearish drags them down." },
@@ -13,14 +19,80 @@ const STEPS = [
 function publicAsset(filename) {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "") || "";
   const name = filename.replace(/^\//, "");
-  return base ? `${base}/${name}` : `/${name}`;
+  const encoded = name.split("/").map((seg) => encodeURIComponent(seg)).join("/");
+  return base ? `${base}/${encoded}` : `/${encoded}`;
 }
 
 export default function HomeScreen() {
   const navigate = useNavigate();
+  const introRef = useRef(null);
+  const fadeRafRef = useRef(null);
+  const [introMuted, setIntroMuted] = useState(false);
+
+  useEffect(() => {
+    const el = introRef.current;
+    if (!el) return undefined;
+    el.volume = HOME_LOOP_VOLUME;
+    el.play().catch(() => {});
+    return () => {
+      if (fadeRafRef.current != null) {
+        cancelAnimationFrame(fadeRafRef.current);
+        fadeRafRef.current = null;
+      }
+      el.pause();
+      el.currentTime = 0;
+      el.volume = HOME_LOOP_VOLUME;
+    };
+  }, []);
+
+  useEffect(() => {
+    const el = introRef.current;
+    if (el) el.muted = introMuted;
+  }, [introMuted]);
+
+  const tryPlayIntroAfterGesture = useCallback(() => {
+    const el = introRef.current;
+    if (!el) return;
+    el.play().catch(() => {});
+  }, []);
+
+  const navigateAfterFade = useCallback(
+    (to) => {
+      const el = introRef.current;
+      if (!el || introMuted || el.paused) {
+        navigate(to);
+        return;
+      }
+      const startVol = el.volume;
+      if (startVol < 0.02) {
+        navigate(to);
+        return;
+      }
+      if (fadeRafRef.current != null) {
+        cancelAnimationFrame(fadeRafRef.current);
+      }
+      const started = performance.now();
+      const tick = (now) => {
+        const t = Math.min(1, (now - started) / LEAVE_FADE_MS);
+        el.volume = startVol * (1 - t);
+        if (t < 1) {
+          fadeRafRef.current = requestAnimationFrame(tick);
+        } else {
+          fadeRafRef.current = null;
+          el.pause();
+          el.currentTime = 0;
+          el.volume = HOME_LOOP_VOLUME;
+          navigate(to);
+        }
+      };
+      fadeRafRef.current = requestAnimationFrame(tick);
+    },
+    [navigate, introMuted],
+  );
 
   return (
-    <div className="relative isolate min-h-dvh">
+    <div className="relative isolate min-h-dvh" onPointerDownCapture={tryPlayIntroAfterGesture}>
+      <audio ref={introRef} src={publicAsset(HOME_LOOP_MP3)} preload="auto" playsInline loop />
       <img
         src={publicAsset("moneyflynobackground.gif")}
         alt=""
@@ -57,6 +129,26 @@ export default function HomeScreen() {
         decoding="async"
         loading="eager"
       />
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setIntroMuted((m) => !m);
+        }}
+        className="fixed bottom-4 right-4 z-30 rounded-lg px-2.5 py-1.5 text-xs border cursor-pointer select-none"
+        style={{
+          fontFamily: "var(--font-pixel)",
+          background: "rgba(10,14,26,0.85)",
+          borderColor: "rgba(255,214,0,0.35)",
+          color: "#FFD600",
+          boxShadow: "0 0 12px rgba(255,214,0,0.12)",
+        }}
+        aria-label={introMuted ? "Unmute intro music" : "Mute intro music"}
+        aria-pressed={introMuted}
+      >
+        {introMuted ? "MUSIC OFF" : "MUSIC ON"}
+      </button>
+
       <div className="relative z-20">
         {/* First viewport: hero vertically centered (shifted down), “HOW TO PLAY” only at bottom */}
         <section className="min-h-dvh flex flex-col px-6">
@@ -130,7 +222,7 @@ export default function HomeScreen() {
 
             <div className="flex flex-col gap-3 w-full max-w-sm">
               <button
-                onClick={() => navigate("/story")}
+                onClick={() => navigateAfterFade("/story")}
                 className="w-full rounded-xl py-4 px-6 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
                 style={{
                   fontFamily: "var(--font-pixel)",
@@ -143,7 +235,7 @@ export default function HomeScreen() {
               </button>
               <div className="flex gap-3">
                 <button
-                  onClick={() => navigate("/host")}
+                  onClick={() => navigateAfterFade("/host")}
                   className="flex-1 rounded-xl py-4 px-6 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
                   style={{
                     fontFamily: "var(--font-pixel)",
@@ -155,7 +247,7 @@ export default function HomeScreen() {
                   HOST
                 </button>
                 <button
-                  onClick={() => navigate("/play")}
+                  onClick={() => navigateAfterFade("/play")}
                   className="flex-1 rounded-xl py-4 px-6 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
                   style={{
                     fontFamily: "var(--font-pixel)",
