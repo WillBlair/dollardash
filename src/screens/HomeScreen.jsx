@@ -4,8 +4,8 @@ import { STOCKS } from "../../shared/constants.js";
 import ArcadeTitle from "../components/ArcadeTitle.jsx";
 
 /** Looped on the landing page; fades out when leaving via Story / Host / Join. */
-const HOME_LOOP_MP3 = "home_loop.mp3";
-const HOME_LOOP_VOLUME = 0.72;
+const HOME_LOOP_MP3 = "end_of_line.mp3";
+const HOME_LOOP_VOLUME = 0.18;
 const LEAVE_FADE_MS = 750;
 
 const STEPS = [
@@ -28,12 +28,23 @@ export default function HomeScreen() {
   const introRef = useRef(null);
   const fadeRafRef = useRef(null);
   const [introMuted, setIntroMuted] = useState(false);
+  const hasUnmutedRef = useRef(false);
 
   useEffect(() => {
     const el = introRef.current;
     if (!el) return undefined;
+
     el.volume = HOME_LOOP_VOLUME;
-    el.play().catch(() => {});
+    el.muted = false;
+
+    // Try unmuted autoplay first — works on localhost and sites the user
+    // has previously interacted with. If the browser blocks it, fall back
+    // to muted autoplay and unmute on first interaction.
+    el.play().catch(() => {
+      el.muted = true;
+      el.play().catch(() => {});
+    });
+
     return () => {
       if (fadeRafRef.current != null) {
         cancelAnimationFrame(fadeRafRef.current);
@@ -50,11 +61,16 @@ export default function HomeScreen() {
     if (el) el.muted = introMuted;
   }, [introMuted]);
 
+  /** Unmute audio on the very first user interaction (click, tap, keypress). */
   const tryPlayIntroAfterGesture = useCallback(() => {
     const el = introRef.current;
     if (!el) return;
+    if (!hasUnmutedRef.current) {
+      hasUnmutedRef.current = true;
+      el.muted = introMuted;
+    }
     el.play().catch(() => {});
-  }, []);
+  }, [introMuted]);
 
   const navigateAfterFade = useCallback(
     (to) => {
@@ -91,7 +107,7 @@ export default function HomeScreen() {
   );
 
   return (
-    <div className="relative isolate min-h-dvh" onPointerDownCapture={tryPlayIntroAfterGesture}>
+    <div className="relative isolate min-h-dvh" onPointerDownCapture={tryPlayIntroAfterGesture} onMouseMoveCapture={tryPlayIntroAfterGesture} onTouchStartCapture={tryPlayIntroAfterGesture} onKeyDownCapture={tryPlayIntroAfterGesture}>
       <audio ref={introRef} src={publicAsset(HOME_LOOP_MP3)} preload="auto" playsInline loop />
       <img
         src={publicAsset("moneyflynobackground.gif")}
