@@ -1,15 +1,7 @@
-import { useEffect, useRef } from "react";
 import { STOCKS } from "../../shared/constants.js";
 import { NEWS_SENTIMENT_STYLES } from "./newsTheme.js";
 
 export default function NewsTicker({ events, expanded = false }) {
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
-    }
-  }, [events?.length]);
 
   if (!events || events.length === 0) {
     return (
@@ -39,7 +31,8 @@ export default function NewsTicker({ events, expanded = false }) {
     );
   }
 
-  const displayed = events.slice(expanded ? -6 : -4);
+  // Newest first: reverse so latest appears at top
+  const displayed = events.slice(expanded ? -6 : -4).slice().reverse();
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col min-w-0">
@@ -52,7 +45,6 @@ export default function NewsTicker({ events, expanded = false }) {
         <span className={`tracking-widest ml-auto opacity-70 ${expanded ? "text-xs" : "text-[9px]"}`}>TELETEXT</span>
       </div>
       <div
-        ref={containerRef}
         className={`news-ticker-frame flex min-h-0 flex-1 flex-col overflow-y-auto ${expanded ? "gap-4 px-4 py-6" : "gap-2 px-1.5 py-2"}`}
         style={{
           background: "linear-gradient(180deg, rgba(5,9,16,0.92) 0%, rgba(7,12,22,0.98) 100%)",
@@ -63,7 +55,7 @@ export default function NewsTicker({ events, expanded = false }) {
         {displayed.map((event, i) => {
           const s = NEWS_SENTIMENT_STYLES[event.sentiment] || NEWS_SENTIMENT_STYLES.neutral;
           const stockColor = event.stockIdx >= 0 ? STOCKS[event.stockIdx]?.color : "#FFD600";
-          const isLatest = i === displayed.length - 1;
+          const isLatest = i === 0; // newest is now at top (index 0)
 
           return (
             <div
