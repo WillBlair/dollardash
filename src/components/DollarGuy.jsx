@@ -9,6 +9,25 @@ function toSteps(dialog) {
   );
 }
 
+/** Served from /public/story — story-mode mascot art. */
+const DOLLAR_GUY_SRC = "/story/dollar-guy.png";
+
+function DollarGuyPortrait({ size }) {
+  const isLarge = size === "large";
+  return (
+    <img
+      src={DOLLAR_GUY_SRC}
+      alt="Dollar Guy"
+      className={
+        isLarge
+          ? "h-32 sm:h-36 w-auto max-w-[12rem] sm:max-w-[14rem] object-contain drop-shadow-[0_8px_24px_rgba(0,0,0,0.45)] shrink-0 select-none"
+          : "h-16 sm:h-[4.5rem] w-auto max-w-[7rem] object-contain drop-shadow-md shrink-0 select-none"
+      }
+      draggable={false}
+    />
+  );
+}
+
 export default function DollarGuy({ dialog, onDialogComplete, size = "large" }) {
   const [steps, setSteps] = useState(() => toSteps(dialog));
   const [lineIndex, setLineIndex] = useState(0);
@@ -19,7 +38,6 @@ export default function DollarGuy({ dialog, onDialogComplete, size = "large" }) 
   }, [dialog]);
 
   const step = steps[lineIndex];
-  const spriteSize = size === "large" ? "w-24 h-24" : "w-14 h-14";
 
   const handleAdvance = useCallback(() => {
     if (!step || step.kind === "choice") return;
@@ -55,16 +73,7 @@ export default function DollarGuy({ dialog, onDialogComplete, size = "large" }) 
 
   return (
     <div className={`flex flex-col items-center gap-4 w-full ${rootMax} mx-auto px-1 animate-slide-up`}>
-      <div
-        className={`${spriteSize} rounded-full flex items-center justify-center shrink-0`}
-        style={{
-          background: "linear-gradient(135deg, #FFD600 0%, #FF9100 100%)",
-          boxShadow: "0 0 30px rgba(255,214,0,0.3)",
-          fontSize: size === "large" ? "48px" : "28px",
-        }}
-      >
-        💰
-      </div>
+      <DollarGuyPortrait size={size} />
 
       <div className="w-full">
         {step.kind === "line" && (
@@ -82,12 +91,7 @@ export default function DollarGuy({ dialog, onDialogComplete, size = "large" }) 
                 )}
               </SituationCard>
             )}
-            <DialogBubble
-              key={bubbleKey}
-              text={step.line.text}
-              speaker={step.line.speaker}
-              onComplete={handleAdvance}
-            />
+            <DialogBubble key={bubbleKey} text={step.line.text} onComplete={handleAdvance} />
           </>
         )}
 
@@ -110,27 +114,11 @@ export default function DollarGuy({ dialog, onDialogComplete, size = "large" }) 
               <div
                 className="rounded-2xl border-2 p-4 w-full"
                 style={{
-                  borderColor: "rgba(255, 145, 0, 0.55)",
+                  borderColor: "rgba(255, 214, 0, 0.45)",
                   backgroundColor: "#141c2e",
                   boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
                 }}
               >
-                {step.promptSpeaker === "dollar-guy" && (
-                  <div
-                    className="text-[10px] font-bold mb-2 tracking-wider"
-                    style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
-                  >
-                    DOLLAR GUY
-                  </div>
-                )}
-                {step.promptSpeaker === "narrator" && (
-                  <div
-                    className="text-[10px] font-bold mb-2 tracking-wider"
-                    style={{ fontFamily: "var(--font-pixel)", color: "#FF9100" }}
-                  >
-                    THE SITUATION
-                  </div>
-                )}
                 <p
                   className="m-0"
                   style={{

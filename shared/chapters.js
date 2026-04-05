@@ -1,57 +1,63 @@
 import { STOCKS } from "./constants.js";
 
-/** One continuous arc: first paycheck → Dollar Guy teaches stocks, news, then diversification. */
+/**
+ * Story spine: your first paycheck → three lessons with Dollar Guy only.
+ * Each chapter opens by recalling what you just learned, then teaches the next layer.
+ */
 
 export const CHAPTERS = [
   {
     id: 1,
     title: "First Paycheck",
     subtitle: "What is a stock?",
-    /** Shown behind story / learn / situation / minigame / reflect for this chapter only. */
     storyBackdrop: "/story/ch1-office-bg.jpg",
     storyDialog: [
       {
-        speaker: "narrator",
-        text: "Your first real paycheck hits your account. You want your money to grow—but you are not sure what a stock actually is.",
-        scene: { icon: "🧾", headline: "FIRST PAYCHECK", detail: "Friday • direct deposit", accent: "#76FF03" },
-      },
-      {
         speaker: "dollar-guy",
-        text: "I am Dollar Guy. Think of me as your guide from here on out—we will go step by step.",
-        scene: { icon: "💵", headline: "YOUR GUIDE", detail: "Same story, three lessons", accent: "#FFD600" },
+        text: "Your first paycheck just hit. You’re wondering how people grow money in the market—I’m Dollar Guy, and I’ll take you through three short lessons, right here with you.",
+        scene: { icon: "🧾", headline: "WHERE WE START", detail: "Lesson 1 of 3 · What you’re buying", accent: "#76FF03" },
       },
       {
         type: "choice",
-        scene: { icon: "🤔", headline: "BEFORE YOU INVEST", detail: "Lesson 1 of 3", accent: "#00E5FF" },
-        prompt: "What should you do first?",
+        scene: { icon: "🤔", headline: "THINK IT THROUGH", detail: "There’s no wrong tap—only what you learn next", accent: "#00E5FF" },
+        prompt: "You haven’t put money in the market yet. What’s the smartest first move?",
         promptSpeaker: "dollar-guy",
         options: [
           {
             emoji: "📱",
-            label: "Buy whatever is trending online",
+            label: "Buy whatever’s loudest online",
             lines: [
-              { speaker: "dollar-guy", text: "Trends come and go. First you need to know what you are buying: a share is a small ownership stake in a company." },
+              {
+                speaker: "dollar-guy",
+                text: "I get the pull—but start with what you own. A stock is a share of a real business; you’re buying a piece of its future results, not a sticker.",
+              },
             ],
           },
           {
             emoji: "🛋️",
-            label: "Leave it all in checking and decide later",
+            label: "Leave it all in checking for now",
             lines: [
-              { speaker: "dollar-guy", text: "That is safe for cash you need soon. For long-term growth many people invest—but only after they understand the basics." },
+              {
+                speaker: "dollar-guy",
+                text: "Smart for cash you might need tomorrow. When you invest, it helps to know the basics first—that’s what we’re doing together.",
+              },
             ],
           },
           {
             emoji: "🎓",
-            label: "Learn what a stock is before spending",
+            label: "Learn what a stock is before I buy",
             lines: [
-              { speaker: "dollar-guy", text: "That is the right instinct. A stock is a share of a business. If the business does well, your shares may rise; if it struggles, they may fall." },
+              {
+                speaker: "dollar-guy",
+                text: "That’s the one. When the company does well, your share can become worth more; when it struggles, it can drop. Simple idea—big implications.",
+              },
             ],
           },
         ],
         tail: [
           {
             speaker: "dollar-guy",
-            text: "Next, try one practice buy and one sell in the sandbox below. Watch how the price moves—it is the same idea real markets use, without real money at risk.",
+            text: "Next screen: your first practice round. Fake dollars, same buy-and-sell moves you’d use for real—so your hands learn before your wallet is in play.",
           },
         ],
       },
@@ -59,24 +65,18 @@ export const CHAPTERS = [
     learnDialog: [
       {
         speaker: "dollar-guy",
-        text: "Practice round: tap BUY once, watch the price, then SELL when you are ready. The goal is to see how a trade works, not to be perfect.",
-        scene: { icon: "📚", headline: "PRACTICE TRADE", detail: "Sandbox—no real money", accent: "#00E5FF" },
+        text: "You’ll see one ticker. Tap BUY for one share, watch the price wiggle, then SELL when you’re above what you paid. We’re learning the flow—timing the perfect trade comes later.",
+        scene: { icon: "📚", headline: "YOUR TURN", detail: "Sandbox · practice only", accent: "#00E5FF" },
       },
     ],
-    situationDialog: [
-      {
-        speaker: "dollar-guy",
-        text: "Use the buttons on the stock card. Buy one share, then sell it when the price is higher than what you paid.",
-        scene: { icon: "📱", headline: "YOUR TURN", detail: "One buy, one sell", accent: "#76FF03" },
-      },
-    ],
+    situationDialog: [],
     miniGame: {
       type: "first-buy",
       config: {
         stockIdx: 0,
-        instructions: "Tap BUY to purchase your first share, then sell it for a profit!",
-        successText: "Nice! You just made your first trade!",
-        failText: "No worries — try again! Buy a share, then sell when the price goes up.",
+        instructions: "Buy one share, then sell when the price is higher than what you paid.",
+        successText: "Nice—you bought and sold. That’s the loop every stock trade runs through.",
+        failText: "Try again: buy one share, wait for a higher price, then sell.",
       },
     },
     gameplay: {
@@ -93,8 +93,10 @@ export const CHAPTERS = [
       scriptedEvents: [],
     },
     reflectDialog: [
-      { speaker: "dollar-guy", text: "You bought and sold a share. That is what investing in a single stock looks like in miniature." },
-      { speaker: "dollar-guy", text: "Next, in the same journey with me: how news and sentiment push those prices up and down." },
+      {
+        speaker: "dollar-guy",
+        text: "So you’ve felt a trade: you owned a slice, then you closed it. Next, we connect that moving price to the news—how to tell if a headline helps or hurts the story around a stock.",
+      },
     ],
     badge: { id: "ch1_complete", label: "First Trade", icon: "🏁", desc: "Completed Chapter 1" },
   },
@@ -106,41 +108,50 @@ export const CHAPTERS = [
     storyDialog: [
       {
         speaker: "dollar-guy",
-        text: "You have seen a share price move. Now we connect it to the real world: headlines and events change how investors feel about a company.",
-        scene: { icon: "📰", headline: "LESSON 2", detail: "News and prices", accent: "#FF9100" },
+        text: "Still here with you—you already know buy and sell. Now add the layer traders watch all day: headlines and events change how people feel about a company, and that shows up in the price.",
+        scene: { icon: "📰", headline: "BUILDING ON LESSON 1", detail: "Lesson 2 of 3 · News and mood", accent: "#FF9100" },
       },
       {
         type: "choice",
-        scene: { icon: "📈", headline: "GOOD VS BAD NEWS", detail: "Bullish vs bearish", accent: "#00E5FF" },
-        prompt: "Earnings come in much stronger than expected. What usually happens to the stock short term?",
+        scene: { icon: "📈", headline: "THINK IT THROUGH", detail: "What usually happens when surprise news is good?", accent: "#00E5FF" },
+        prompt: "A company reports earnings much stronger than Wall Street expected. In general, what do buyers tend to do with the stock in the short run?",
         promptSpeaker: "dollar-guy",
         options: [
           {
             emoji: "📉",
-            label: "Investors usually sell on good news",
+            label: "They usually dump it on good news",
             lines: [
-              { speaker: "dollar-guy", text: "Sometimes people take profits, but better-than-expected results usually support the price—we call that bullish." },
+              {
+                speaker: "dollar-guy",
+                text: "Sometimes people take profits, which can pull price back—but a big positive surprise usually attracts buyers first. We call that pressure bullish.",
+              },
             ],
           },
           {
             emoji: "📈",
-            label: "The news is positive for the company—often bullish",
+            label: "More buyers show up—price often rises",
             lines: [
-              { speaker: "dollar-guy", text: "Right. Bullish means upward pressure or optimism; bearish means the opposite." },
+              {
+                speaker: "dollar-guy",
+                text: "Right. Bullish means the mood tilts toward “pay up”; bearish means the mood tilts toward “sell first, ask later.” You’ll hear those two words everywhere.",
+              },
             ],
           },
           {
             emoji: "🤷",
-            label: "Headlines never matter",
+            label: "Headlines don’t move stocks",
             lines: [
-              { speaker: "dollar-guy", text: "They do. Markets react to information. The skill is reading whether news helps or hurts the business." },
+              {
+                speaker: "dollar-guy",
+                text: "They absolutely can—markets are people reacting to information. Your job is to ask: does this news make the business look stronger or weaker?",
+              },
             ],
           },
         ],
         tail: [
           {
             speaker: "dollar-guy",
-            text: "In the quiz below, choose whether each headline is bullish or bearish for that company.",
+            text: "Coming up: three short headlines. For each one, you’ll tag it bullish or bearish for that company—quick reps before you ever do it under pressure.",
           },
         ],
       },
@@ -148,27 +159,21 @@ export const CHAPTERS = [
     learnDialog: [
       {
         speaker: "dollar-guy",
-        text: "Bullish: good for the stock’s story. Bearish: bad for the stock’s story. Apply that to every headline.",
-        scene: { icon: "🎯", headline: "VOCABULARY", detail: "Bullish 📈 • Bearish 📉", accent: "#FFD600" },
+        text: "Bullish: the story gets better for the business. Bearish: it gets worse. Same words pros use—you’re not guessing vibes, you’re labeling cause and effect.",
+        scene: { icon: "🎯", headline: "YOUR TURN", detail: "Three headlines · pick a side", accent: "#FFD600" },
       },
     ],
-    situationDialog: [
-      {
-        speaker: "dollar-guy",
-        text: "Read each headline once, then choose. There is no timer—accuracy matters more than speed.",
-        scene: { icon: "📳", headline: "HEADLINE QUIZ", detail: "Three examples", accent: "#76FF03" },
-      },
-    ],
+    situationDialog: [],
     miniGame: {
       type: "headline-quiz",
       config: {
         headlines: [
-          { text: "Banana Inc. smashes earnings — revenue up 40%", answer: "bullish", stock: "BNNA", explanation: "Great earnings = company is doing well = stock goes UP" },
-          { text: "SEC investigation into RektCoin for securities fraud", answer: "bearish", stock: "REKT", explanation: "Legal trouble = bad news = stock goes DOWN" },
-          { text: "MoonShot AI lands $2B government defense contract", answer: "bullish", stock: "MOON", explanation: "Huge new deal = more money coming in = stock goes UP" },
+          { text: "Banana Inc. smashes earnings — revenue up 40%", answer: "bullish", stock: "BNNA", explanation: "Strong results → market likes the story → often 📈" },
+          { text: "SEC investigation into RektCoin for securities fraud", answer: "bearish", stock: "REKT", explanation: "Legal risk → hurt confidence → often 📉" },
+          { text: "MoonShot AI lands $2B government defense contract", answer: "bullish", stock: "MOON", explanation: "Big revenue growth → brighter outlook → often 📈" },
         ],
-        successText: "You're a natural! Now let's put that skill to work.",
-        partialText: "Not bad! Remember: good news = 📈, bad news = 📉. Let's practice for real.",
+        successText: "Clean reads—that’s how you build headline reflexes.",
+        partialText: "Good start. Remember: helps the business = bullish; hurts it = bearish. You’ll get faster with reps.",
       },
     },
     gameplay: {
@@ -185,8 +190,10 @@ export const CHAPTERS = [
       scriptedEvents: [],
     },
     reflectDialog: [
-      { speaker: "dollar-guy", text: "You linked headlines to direction. Traders use the same bullish and bearish language all day." },
-      { speaker: "dollar-guy", text: "Last stop with me: why holding only one stock is risky—and how spreading money across names helps." },
+      {
+        speaker: "dollar-guy",
+        text: "Now you’ve got two tools: how a trade works, and how news tilts the tape. Last piece with me—why betting everything on one stock can sting, and what spreading out buys you when a day goes wrong.",
+      },
     ],
     badge: { id: "ch2_complete", label: "News Reader", icon: "📰", desc: "Completed Chapter 2" },
   },
@@ -198,41 +205,50 @@ export const CHAPTERS = [
     storyDialog: [
       {
         speaker: "dollar-guy",
-        text: "You know what a stock is and how news moves prices. The last core idea for this course: if all your money is in one company, one bad shock can hurt your whole portfolio.",
-        scene: { icon: "⚠️", headline: "LESSON 3", detail: "Concentration risk", accent: "#FF3D71" },
+        text: "Third lesson—same paycheck story, deeper layer. You can trade and you can read the room. Now we guard the downside: if most of your money rides one ticker, one ugly headline can carve a huge hole in your account.",
+        scene: { icon: "⚠️", headline: "BUILDING ON LESSONS 1–2", detail: "Lesson 3 of 3 · Not one basket", accent: "#FF3D71" },
       },
       {
         type: "choice",
-        scene: { icon: "🧺", headline: "DIVERSIFICATION", detail: "Many eggs, many baskets", accent: "#76FF03" },
-        prompt: "You have $100 to invest for the long run. What is the soundest approach?",
+        scene: { icon: "🧺", headline: "THINK IT THROUGH", detail: "Long horizon · pretend $100", accent: "#76FF03" },
+        prompt: "Say you have $100 you won’t need for years. What’s the soundest habit to start with?",
         promptSpeaker: "dollar-guy",
         options: [
           {
             emoji: "🎯",
-            label: "Put 100% in one stock you believe in",
+            label: "Put all $100 in my one best idea",
             lines: [
-              { speaker: "dollar-guy", text: "You might win big—or lose big. High conviction does not remove company-specific risk." },
+              {
+                speaker: "dollar-guy",
+                text: "Conviction feels good—but you’re concentrated. If that company stumbles, there’s no cushion. That’s the risk we’re about to feel in the lab.",
+              },
             ],
           },
           {
             emoji: "🥚",
-            label: "Split across several companies or sectors",
+            label: "Split it across several companies",
             lines: [
-              { speaker: "dollar-guy", text: "That is diversification: when one holding drops, others may hold steadier. It does not guarantee profit, but it spreads risk." },
+              {
+                speaker: "dollar-guy",
+                text: "That’s diversification: when one name drops, the others can soften the blow. It doesn’t erase risk—it spreads it so one surprise doesn’t own you.",
+              },
             ],
           },
           {
             emoji: "💵",
-            label: "Keep everything in cash forever",
+            label: "Keep 100% in cash forever",
             lines: [
-              { speaker: "dollar-guy", text: "Cash is safe from market swings, but inflation can erode buying power over time—many people blend cash and investments." },
+              {
+                speaker: "dollar-guy",
+                text: "Cash sleeps easy, but inflation can eat its value over time. Most people end up mixing safe cash with invested money—we’ll focus on the invested part here.",
+              },
             ],
           },
         ],
         tail: [
           {
             speaker: "dollar-guy",
-            text: "Use the sliders to split $100 across four tickers, then run the crash simulation. Notice how a balanced mix behaves versus everything in one name.",
+            text: "Next: drag sliders to split pretend $100 across four stocks, then run the crash. Watch a balanced book versus everything parked in one name.",
           },
         ],
       },
@@ -240,17 +256,11 @@ export const CHAPTERS = [
     learnDialog: [
       {
         speaker: "dollar-guy",
-        text: "Adjust weights so no single line is your whole portfolio. Then trigger the crash and compare the outcome.",
-        scene: { icon: "🧪", headline: "ALLOCATION LAB", detail: "$100 practice capital", accent: "#00E5FF" },
+        text: "Give more than one company weight. If you lean hard on one ticker, notice how your total jumps when that line breaks—then try a smoother split and run the same crash.",
+        scene: { icon: "🧪", headline: "YOUR TURN", detail: "Allocation · then simulate", accent: "#00E5FF" },
       },
     ],
-    situationDialog: [
-      {
-        speaker: "dollar-guy",
-        text: "Four stocks, one portfolio. After you set weights, simulate a sharp drop in one of them and read the result.",
-        scene: { icon: "🖥️", headline: "PORTFOLIO VIEW", detail: "Practice only", accent: "#FFD600" },
-      },
-    ],
+    situationDialog: [],
     miniGame: {
       type: "portfolio-builder",
       config: {
@@ -263,9 +273,9 @@ export const CHAPTERS = [
         })),
         crashStockIdx: 1,
         crashPct: -55,
-        instructions: "Drag the sliders to split $100 across stocks. Then watch what happens in a crash!",
-        diversifiedMessage: "Smart! Because you spread your money around, the crash only hurt a little.",
-        concentratedMessage: "Ouch! All your eggs were in one basket. Diversification would have saved you.",
+        instructions: "Split $100 across the stocks, then simulate a crash and compare the outcome.",
+        diversifiedMessage: "Because you spread the money, one stock’s crash didn’t erase the whole hundred.",
+        concentratedMessage: "When everything sat in one name, that single drop took most of the portfolio with it.",
       },
     },
     gameplay: {
@@ -279,8 +289,8 @@ export const CHAPTERS = [
       },
       hintLevel: "moderate",
       hints: [
-        { trigger: "single-stock-15s", text: "You are only in one stock—consider spreading across more names.", position: "stock-card" },
-        { trigger: "crash-event", text: "Bumpy stretch! If you diversified, you'll be fine.", position: "center" },
+        { trigger: "single-stock-15s", text: "Try opening a second and third position—one line shouldn’t carry the whole round.", position: "stock-card" },
+        { trigger: "crash-event", text: "Rough patch—if you’re spread out, you’ll usually feel less of a single-stock punch.", position: "center" },
       ],
       scriptedEvents: [
         {
@@ -295,30 +305,12 @@ export const CHAPTERS = [
     },
     reflectDialog: [
       {
-        type: "choice",
-        scene: { icon: "🏁", headline: "YOU COMPLETED THE ARC", detail: "Stocks → news → diversification", accent: "#76FF03" },
-        prompt: "Which idea will you remember first?",
-        promptSpeaker: "dollar-guy",
-        options: [
-          {
-            emoji: "🧩",
-            label: "A stock is ownership; prices move with the business and the news",
-            lines: [{ speaker: "dollar-guy", text: "Solid foundation. Build from there." }],
-          },
-          {
-            emoji: "🎯",
-            label: "Spread risk so one bad day in one stock does not sink everything",
-            lines: [{ speaker: "dollar-guy", text: "That is diversification in one sentence." }],
-          },
-          {
-            emoji: "📰",
-            label: "Classify news as bullish or bearish before acting on impulse",
-            lines: [{ speaker: "dollar-guy", text: "Good habit: headline first, buttons second." }],
-          },
-        ],
-        tail: [
-          { speaker: "dollar-guy", text: "Same story from your first paycheck to here: three lessons. Take them into solo practice or multiplayer when you are ready." },
-        ],
+        speaker: "dollar-guy",
+        text: "That’s the spine we built from your paycheck: what a share is, how news tilts mood and price, and why spreading money dulls a one-company disaster. Everything else you study plugs into those three ideas.",
+      },
+      {
+        speaker: "dollar-guy",
+        text: "You’ve got the foundation. Rehearse in solo free play or multiplayer when you want real pressure—and when new chapters arrive, they’ll continue this same story with you.",
       },
     ],
     badge: { id: "ch3_complete", label: "Diversified", icon: "🎯", desc: "Completed Chapter 3" },

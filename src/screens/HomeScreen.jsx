@@ -89,7 +89,7 @@ export default function HomeScreen() {
             </div>
 
             <p className="text-sm max-w-md leading-relaxed mb-6" style={{ color: "#aaa" }}>
-              Learn to trade through Dollar Guy's story
+              Learn the basics in one guided story—with Dollar Guy from paycheck to portfolio
               <br />
               — then compete with friends.
             </p>
