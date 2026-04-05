@@ -48,12 +48,13 @@ export default function ArcadeTitle({ children, className = "" }) {
       return;
     }
 
-    let t = 0;
     let glitchX = 0;
     let glitchY = 0;
     let glitchUntil = 0;
     let flickerBurstEnd = 0;
     let rafId = 0;
+    let startTime = 0;
+    let lastFlickerCheck = 0;
 
     const pickGlitch = () => {
       glitchX = (Math.random() - 0.5) * 7;
@@ -63,9 +64,11 @@ export default function ArcadeTitle({ children, className = "" }) {
 
     const glitchTimer = window.setInterval(pickGlitch, 2000 + Math.random() * 1800);
 
-    const loop = () => {
-      const now = performance.now();
-      t += 0.021;
+    const loop = (now) => {
+      if (!startTime) { startTime = now; lastFlickerCheck = now; }
+      const elapsed = (now - startTime) / 1000;
+      const t = elapsed * 1.26;
+
       const active = now < glitchUntil;
       const gx = active ? glitchX : 0;
       const gy = active ? glitchY : 0;
@@ -84,8 +87,12 @@ export default function ArcadeTitle({ children, className = "" }) {
         (active ? gy * 1.25 : 0) + driftY,
       );
 
-      if (Math.random() < 0.065) {
-        flickerBurstEnd = now + 50 + Math.random() * 140;
+      const dtFlicker = now - lastFlickerCheck;
+      if (dtFlicker >= 16.67) {
+        lastFlickerCheck = now;
+        if (Math.random() < 0.065) {
+          flickerBurstEnd = now + 50 + Math.random() * 140;
+        }
       }
       const inBurst = now < flickerBurstEnd;
       const shimmer =

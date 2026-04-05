@@ -7,7 +7,12 @@ export default function BigChart({ histories, selectedIdx, compact = false }) {
   const stock = STOCKS[selectedIdx];
   const history = histories?.[selectedIdx];
   if (!history || history.length < 2) {
-    return <div style={{ width: "100%", aspectRatio: `${W}/${H}` }} />;
+    return (
+      <div
+        className="block w-full rounded-lg"
+        style={compact ? { width: "100%", height: "100%" } : { width: "100%", aspectRatio: `${W}/${H}` }}
+      />
+    );
   }
 
   const min = Math.min(...history) * 0.98;
@@ -49,7 +54,9 @@ export default function BigChart({ histories, selectedIdx, compact = false }) {
   return (
     <svg
       width="100%"
+      height={compact ? "100%" : undefined}
       viewBox={`0 0 ${W} ${H}`}
+      preserveAspectRatio={compact ? "none" : "xMidYMid meet"}
       className="block rounded-lg"
       style={{ background: "rgba(0,0,0,0.3)" }}
     >

@@ -171,10 +171,10 @@ export default function HostPage() {
   // ─── Playing ──────────────────────────────────────────────
   if (phase === "playing") {
     return (
-      <div className="min-h-dvh flex flex-col px-4 py-3 gap-3 max-w-6xl mx-auto pb-28">
+      <div className="h-dvh max-h-dvh overflow-hidden flex flex-col px-4 py-3 gap-2 max-w-6xl mx-auto box-border">
         <UrgencyOverlay timeLeft={timeLeft} />
 
-        <div className="flex justify-between items-center flex-wrap gap-2">
+        <div className="shrink-0 flex justify-between items-center flex-wrap gap-2">
           <div className="text-sm tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
             DOLLAR DASH
           </div>
@@ -183,21 +183,25 @@ export default function HostPage() {
           </div>
         </div>
 
-        <Timer timeLeft={timeLeft} total={duration} />
+        <div className="shrink-0">
+          <Timer timeLeft={timeLeft} total={duration} />
+        </div>
 
-        <div className="flex flex-col lg:flex-row gap-3 flex-1 min-h-0">
-          <div className="flex-1 flex flex-col gap-2 min-w-0 min-h-0">
+        <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-3">
+          <div className="flex-1 min-h-0 flex flex-col gap-1 min-w-0">
             <div className="text-[10px] tracking-widest shrink-0" style={{ fontFamily: "var(--font-pixel)", color: "#7a8498" }}>
-              LIVE PRICES — ALL TICKERS
+              LIVE PRICES
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 min-h-0">
+            <div className="flex-1 min-h-0 grid grid-cols-2 grid-rows-2 gap-2">
               {STOCKS.map((stock, i) => {
                 const price = market?.prices?.[i];
                 return (
-                  <div key={stock.symbol} className="flex flex-col gap-1 min-w-0">
-                    <BigChart histories={market?.histories} selectedIdx={i} compact />
+                  <div key={stock.symbol} className="flex flex-col min-h-0 min-w-0">
+                    <div className="flex-1 min-h-0">
+                      <BigChart histories={market?.histories} selectedIdx={i} compact />
+                    </div>
                     <div
-                      className="text-center rounded-lg py-1.5 text-xs font-mono font-bold tabular-nums"
+                      className="shrink-0 text-center rounded-md py-1 text-xs font-mono font-bold tabular-nums mt-0.5"
                       style={{ background: "rgba(255,255,255,0.04)", color: stock.color }}
                     >
                       {stock.symbol} · ${price != null ? price.toFixed(2) : "—"}
@@ -208,10 +212,10 @@ export default function HostPage() {
             </div>
           </div>
 
-          <div className="lg:w-80 xl:w-96 shrink-0 flex flex-col gap-3">
+          <div className="lg:w-72 xl:w-80 shrink-0 flex flex-col gap-2 min-h-0 max-h-[30vh] lg:max-h-none overflow-y-auto lg:overflow-visible">
             <NewsTicker events={newsEvents} />
-            <div>
-              <div className="text-xs mb-2 tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}>
+            <div className="shrink-0">
+              <div className="text-xs mb-1 tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}>
                 LEADERBOARD
               </div>
               <Leaderboard entries={leaderboard} />
