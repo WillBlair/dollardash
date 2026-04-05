@@ -171,7 +171,7 @@ export default function HostPage() {
   // ─── Playing ──────────────────────────────────────────────
   if (phase === "playing") {
     return (
-      <div className="h-dvh max-h-dvh overflow-hidden flex flex-col px-4 py-3 gap-2 max-w-6xl mx-auto box-border">
+      <div className="h-dvh max-h-dvh overflow-hidden flex flex-col px-4 py-3 gap-2 w-full max-w-none box-border">
         <UrgencyOverlay timeLeft={timeLeft} />
 
         <div className="shrink-0 flex justify-between items-center flex-wrap gap-2">
@@ -212,7 +212,7 @@ export default function HostPage() {
             </div>
           </div>
 
-          <div className="lg:w-72 xl:w-80 shrink-0 flex flex-col gap-2 min-h-0 max-h-[30vh] lg:max-h-none overflow-y-auto lg:overflow-visible">
+          <div className="lg:w-64 xl:w-72 shrink-0 flex flex-col gap-2 min-h-0 max-h-[30vh] lg:max-h-none overflow-y-auto lg:overflow-visible">
             <NewsTicker events={newsEvents} />
             <div className="shrink-0">
               <div className="text-xs mb-1 tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}>
