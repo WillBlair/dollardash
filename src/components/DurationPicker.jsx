@@ -25,7 +25,7 @@ export default function DurationPicker({ value, onChange }) {
             <button
               key={d.seconds}
               onClick={() => { setCustomMode(false); onChange(d.seconds); }}
-              className="rounded-lg px-4 py-2.5 font-bold text-sm cursor-pointer border-2 transition-all"
+              className="btn-pixel px-4 py-2.5 font-bold text-sm cursor-pointer border-2 transition-all"
               style={{
                 fontFamily: "var(--font-pixel)",
                 fontSize: 11,
@@ -39,7 +39,7 @@ export default function DurationPicker({ value, onChange }) {
           ))}
           <button
             onClick={() => setCustomMode((m) => !m)}
-            className="rounded-lg px-4 py-2.5 font-bold text-sm cursor-pointer border-2 transition-all"
+            className="btn-pixel px-4 py-2.5 font-bold text-sm cursor-pointer border-2 transition-all"
             style={{
               fontFamily: "var(--font-pixel)",
               fontSize: 11,
@@ -74,7 +74,7 @@ export default function DurationPicker({ value, onChange }) {
           />
           <button
             onClick={applyCustom}
-            className="rounded-lg px-4 py-2 font-bold text-xs cursor-pointer border-2 transition-all"
+            className="btn-pixel px-4 py-2 font-bold text-xs cursor-pointer border-2 transition-all"
             style={{
               fontFamily: "var(--font-pixel)",
               background: "rgba(0,229,255,0.15)",

@@ -13,8 +13,41 @@ import NewsTicker from "../components/NewsTicker.jsx";
 import TitleBadge from "../components/TitleBadge.jsx";
 import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
 import DayTransitionScreen from "../components/DayTransitionScreen.jsx";
-import NewsToast from "../components/NewsToast.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
+
+function BadgeList({ badges }) {
+  const [openId, setOpenId] = useState(null);
+  return (
+    <div className="mb-6 w-full max-w-sm">
+      <div className="text-xs mb-3" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>BADGES EARNED</div>
+      <div className="flex flex-col gap-2">
+        {badges.map((b) => {
+          const open = openId === b.id;
+          return (
+            <button
+              key={b.id}
+              onClick={() => setOpenId(open ? null : b.id)}
+              className="w-full text-left rounded-xl px-4 py-3 cursor-pointer border-none transition-all"
+              style={{
+                background: open ? "rgba(255,214,0,0.12)" : "rgba(255,214,0,0.07)",
+                border: `1px solid ${open ? "rgba(255,214,0,0.35)" : "rgba(255,214,0,0.18)"}`,
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl shrink-0">{b.icon}</span>
+                <span className="flex-1 text-sm font-bold" style={{ color: "#FFD600" }}>{b.label}</span>
+                <span className="text-xs shrink-0" style={{ color: "#666" }}>{open ? "▲" : "▼"}</span>
+              </div>
+              {open && (
+                <div className="text-xs mt-2 leading-snug" style={{ color: "#aaa" }}>{b.desc}</div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function PlayerPage() {
   const { code: urlCode } = useParams();
@@ -171,7 +204,7 @@ export default function PlayerPage() {
               type="text" value={roomCode}
               onChange={(e) => setRoomCode(e.target.value.toUpperCase().slice(0, 4))}
               placeholder="ABCD" maxLength={4}
-              className="w-full rounded-lg px-4 py-3 text-2xl text-center font-bold tracking-[0.3em] border-2 outline-none"
+              className="room-code-input w-full rounded-lg px-4 py-3 text-2xl text-center font-bold tracking-[0.3em] border-2 outline-none"
               style={{ background: "rgba(255,255,255,0.06)", borderColor: "rgba(255,255,255,0.1)", color: "#FFD600", fontFamily: "var(--font-pixel)" }}
               autoFocus
             />
@@ -192,7 +225,7 @@ export default function PlayerPage() {
           )}
           <button
             onClick={joinGame} disabled={!connected}
-            className="w-full rounded-xl py-4 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105 disabled:opacity-40"
+            className="btn-pixel w-full py-4 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105 disabled:opacity-40"
             style={{ fontFamily: "var(--font-pixel)", background: "#76FF03", color: "#0a0e1a" }}
           >
             {connected ? "JOIN" : "CONNECTING..."}
@@ -234,7 +267,6 @@ export default function PlayerPage() {
     return (
       <div className="min-h-dvh flex flex-col px-3 py-3 gap-2 max-w-6xl mx-auto pb-28">
         <UrgencyOverlay timeLeft={timeLeft} />
-        <NewsToast events={newsEvents} />
         <FlashMessage message={flash?.msg} color={flash?.color} />
 
         {dayWarning && (
@@ -245,25 +277,6 @@ export default function PlayerPage() {
               animation: "urgency-pulse 0.7s ease-in-out infinite",
             }}
           />
-        )}
-        {dayWarning && (
-          <div
-            className="fixed bottom-6 right-4 z-50 flex items-center gap-3 rounded-xl px-4 py-3"
-            style={{
-              background: "rgba(20,5,8,0.95)",
-              border: "2px solid #FF3D71",
-              boxShadow: "0 0 24px rgba(255,61,113,0.5)",
-              animation: "urgency-pulse 0.7s ease-in-out infinite",
-            }}
-          >
-            <span style={{ fontSize: 18 }}>⚠️</span>
-            <div>
-              <div className="text-xs font-bold tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#FF3D71" }}>
-                DAY ENDING
-              </div>
-              <div className="text-xs" style={{ color: "#aaa" }}>Next day in 5s</div>
-            </div>
-          </div>
         )}
 
         <div className="flex justify-between items-center">
@@ -352,31 +365,14 @@ export default function PlayerPage() {
           </div>
         </div>
         {myResult.badges?.length > 0 && (
-          <div className="mb-6 w-full max-w-sm">
-            <div className="text-xs mb-3" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>BADGES EARNED</div>
-            <div className="flex flex-col gap-2">
-              {myResult.badges.map((b) => (
-                <div
-                  key={b.id}
-                  className="flex items-center gap-3 rounded-xl px-4 py-3"
-                  style={{ background: "rgba(255,214,0,0.07)", border: "1px solid rgba(255,214,0,0.18)" }}
-                >
-                  <span className="text-2xl shrink-0">{b.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-bold" style={{ color: "#FFD600" }}>{b.label}</div>
-                    <div className="text-xs mt-0.5 leading-snug" style={{ color: "#888" }}>{b.desc}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <BadgeList badges={myResult.badges} />
         )}
         <div className="w-full max-w-sm mb-6">
           <Leaderboard entries={results} highlightId={socket?.id} compact />
         </div>
         <button
           onClick={() => { setPhase("join"); setRoomCode(""); setPlayerName(""); navigate("/play"); }}
-          className="rounded-xl py-3 px-8 font-bold text-sm cursor-pointer border-none tracking-wider"
+          className="btn-pixel py-3 px-8 font-bold text-sm cursor-pointer border-none tracking-wider"
           style={{ fontFamily: "var(--font-pixel)", background: "#FFD600", color: "#0a0e1a" }}
         >
           PLAY AGAIN
