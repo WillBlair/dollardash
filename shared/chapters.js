@@ -15,8 +15,12 @@ export const CHAPTERS = [
     storyDialog: [
       {
         speaker: "dollar-guy",
-        text: "Welcome! I'm Dollar Guy. I'm going to help you learn all about stocks, markets, and how to make your money work for you.",
-        scene: { icon: "🧾", headline: "DEMO", detail: "Chapter 1 · speed run", accent: "#76FF03" },
+        text: "Welcome! I'm Dollar Guy. I know you're here to learn, so I'm going to help you understand stocks, markets, and how money works.",
+        scene: { icon: "🎒", headline: "CLASS IN SESSION", detail: "Chapter 1 · student intro", accent: "#76FF03" },
+      },
+      {
+        speaker: "dollar-guy",
+        text: "Whether you're studying in the classroom right now or practicing at home, the stock market doesn't have to be an intimidating mystery.",
       },
       {
         speaker: "dollar-guy",
