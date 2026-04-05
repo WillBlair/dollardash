@@ -58,8 +58,8 @@ export default function DialogBubble({ text, speaker, onComplete, autoAdvance = 
         onKeyDown={handleKeyDown}
         className="w-full text-left rounded-2xl p-5 cursor-pointer border-2 transition-all relative"
         style={{
-          background: "rgba(255,255,255,0.06)",
-          borderColor: "rgba(255,214,0,0.3)",
+          backgroundColor: "#141c2e",
+          borderColor: "rgba(255, 214, 0, 0.55)",
           fontFamily: "var(--font-mono)",
           fontSize: "clamp(13px, 2.5vw, 15px)",
           lineHeight: 1.7,

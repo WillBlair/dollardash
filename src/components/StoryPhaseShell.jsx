@@ -17,7 +17,7 @@ export default function StoryPhaseShell({ backdropUrl, children }) {
         role="presentation"
       />
       <div
-        className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-[#0a0e1a]/78 via-[#0a0e1a]/82 to-[#0a0e1a]/92"
+        className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-[#0a0e1a]/35 via-[#0a0e1a]/45 to-[#0a0e1a]/60"
         aria-hidden
       />
       <div className="relative z-10 min-h-dvh">{children}</div>

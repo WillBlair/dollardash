@@ -51,8 +51,10 @@ export default function DollarGuy({ dialog, onDialogComplete, size = "large" }) 
       ? `L${lineIndex}-${step.line.text?.slice(0, 24) ?? ""}`
       : `C${lineIndex}`;
 
+  const rootMax = step.kind === "choice" ? "max-w-5xl" : "max-w-lg";
+
   return (
-    <div className="flex flex-col items-center gap-4 w-full max-w-lg mx-auto animate-slide-up">
+    <div className={`flex flex-col items-center gap-4 w-full ${rootMax} mx-auto px-1 animate-slide-up`}>
       <div
         className={`${spriteSize} rounded-full flex items-center justify-center shrink-0`}
         style={{
@@ -90,56 +92,61 @@ export default function DollarGuy({ dialog, onDialogComplete, size = "large" }) 
         )}
 
         {step.kind === "choice" && (
-          <div className="flex flex-col gap-3 w-full">
-            {step.scene && (
-              <SituationCard
-                icon={step.scene.icon}
-                headline={step.scene.headline}
-                accent={step.scene.accent ?? "#FF9100"}
-              >
-                {step.scene.detail && (
-                  <div className="text-xs mt-1" style={{ color: "#aaa" }}>
-                    {step.scene.detail}
-                  </div>
-                )}
-              </SituationCard>
-            )}
-            <div
-              className="rounded-2xl border-2 p-4 w-full"
-              style={{
-                borderColor: "rgba(255, 145, 0, 0.35)",
-                background: "rgba(255,255,255,0.04)",
-              }}
-            >
-              {step.promptSpeaker === "dollar-guy" && (
-                <div
-                  className="text-[10px] font-bold mb-2 tracking-wider"
-                  style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
+          <div className="flex w-full flex-col gap-4 md:flex-row md:items-start md:gap-5">
+            <div className="flex min-w-0 flex-1 flex-col gap-3">
+              {step.scene && (
+                <SituationCard
+                  icon={step.scene.icon}
+                  headline={step.scene.headline}
+                  accent={step.scene.accent ?? "#FF9100"}
                 >
-                  DOLLAR GUY
-                </div>
+                  {step.scene.detail && (
+                    <div className="text-xs mt-1" style={{ color: "#aaa" }}>
+                      {step.scene.detail}
+                    </div>
+                  )}
+                </SituationCard>
               )}
-              {step.promptSpeaker === "narrator" && (
-                <div
-                  className="text-[10px] font-bold mb-2 tracking-wider"
-                  style={{ fontFamily: "var(--font-pixel)", color: "#FF9100" }}
-                >
-                  THE SITUATION
-                </div>
-              )}
-              <p
-                className="m-0"
+              <div
+                className="rounded-2xl border-2 p-4 w-full"
                 style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "clamp(13px, 2.5vw, 15px)",
-                  lineHeight: 1.65,
-                  color: "#e8e8e8",
+                  borderColor: "rgba(255, 145, 0, 0.55)",
+                  backgroundColor: "#141c2e",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
                 }}
               >
-                {step.prompt}
-              </p>
+                {step.promptSpeaker === "dollar-guy" && (
+                  <div
+                    className="text-[10px] font-bold mb-2 tracking-wider"
+                    style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
+                  >
+                    DOLLAR GUY
+                  </div>
+                )}
+                {step.promptSpeaker === "narrator" && (
+                  <div
+                    className="text-[10px] font-bold mb-2 tracking-wider"
+                    style={{ fontFamily: "var(--font-pixel)", color: "#FF9100" }}
+                  >
+                    THE SITUATION
+                  </div>
+                )}
+                <p
+                  className="m-0"
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "clamp(13px, 2.5vw, 15px)",
+                    lineHeight: 1.65,
+                    color: "#e8e8e8",
+                  }}
+                >
+                  {step.prompt}
+                </p>
+              </div>
             </div>
-            <StoryChoicePanel options={step.options} onPick={handlePick} />
+            <div className="w-full shrink-0 md:w-[min(20.5rem,34vw)] md:max-w-sm">
+              <StoryChoicePanel options={step.options} onPick={handlePick} />
+            </div>
           </div>
         )}
       </div>
