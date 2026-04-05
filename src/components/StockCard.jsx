@@ -14,7 +14,7 @@ export default function StockCard({ index, price, history, holdings, selected, o
   return (
     <button
       onClick={() => onSelect(index)}
-      className="rounded-sm p-2 text-left transition-all cursor-pointer border-[3px] border-double outline-none"
+      className="rounded-sm p-1.5 sm:p-2 text-left transition-all cursor-pointer border-[3px] border-double outline-none"
       style={{
         background: selected
           ? "linear-gradient(160deg, rgba(14,20,32,0.97) 0%, rgba(8,12,22,0.99) 100%)"

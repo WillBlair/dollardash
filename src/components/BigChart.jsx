@@ -7,7 +7,9 @@ export default function BigChart({ histories, selectedIdx }) {
   const stock = STOCKS[selectedIdx];
   const history = histories?.[selectedIdx];
   if (!history || history.length < 2) {
-    return <div className="w-full flex-1 min-h-[200px]" />;
+    return (
+      <div className="w-full shrink-0 min-h-[100px] max-h-[24vh] lg:flex-1 lg:min-h-[200px] lg:max-h-none" />
+    );
   }
 
   const min = Math.min(...history) * 0.98;
@@ -46,7 +48,7 @@ export default function BigChart({ histories, selectedIdx }) {
   });
 
   return (
-    <div className="w-full flex-1 min-h-[200px]">
+    <div className="w-full shrink-0 min-h-[100px] max-h-[24vh] lg:flex-1 lg:min-h-[200px] lg:max-h-none">
       <svg
         width="100%"
         height="100%"
