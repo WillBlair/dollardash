@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { STOCKS } from "../../shared/constants.js";
+
 import ArcadeTitle from "../components/ArcadeTitle.jsx";
 
 /** Looped on the landing page; fades out when leaving via Story / Host / Join. */
@@ -27,23 +27,28 @@ export default function HomeScreen() {
   const navigate = useNavigate();
   const introRef = useRef(null);
   const fadeRafRef = useRef(null);
-  const [introMuted, setIntroMuted] = useState(false);
-  const hasUnmutedRef = useRef(false);
+  const [isMusicOn, setIsMusicOn] = useState(false);
+
+  /** Toggle music on/off — doubles as the user gesture that unlocks playback. */
+  const toggleMusic = useCallback((e) => {
+    e.stopPropagation();
+    const el = introRef.current;
+    if (!el) return;
+
+    if (isMusicOn) {
+      el.pause();
+      setIsMusicOn(false);
+    } else {
+      el.volume = HOME_LOOP_VOLUME;
+      el.play().catch(() => {});
+      setIsMusicOn(true);
+    }
+  }, [isMusicOn]);
 
   useEffect(() => {
     const el = introRef.current;
     if (!el) return undefined;
-
     el.volume = HOME_LOOP_VOLUME;
-    el.muted = false;
-
-    // Try unmuted autoplay first — works on localhost and sites the user
-    // has previously interacted with. If the browser blocks it, fall back
-    // to muted autoplay and unmute on first interaction.
-    el.play().catch(() => {
-      el.muted = true;
-      el.play().catch(() => {});
-    });
 
     return () => {
       if (fadeRafRef.current != null) {
@@ -56,26 +61,10 @@ export default function HomeScreen() {
     };
   }, []);
 
-  useEffect(() => {
-    const el = introRef.current;
-    if (el) el.muted = introMuted;
-  }, [introMuted]);
-
-  /** Unmute audio on the very first user interaction (click, tap, keypress). */
-  const tryPlayIntroAfterGesture = useCallback(() => {
-    const el = introRef.current;
-    if (!el) return;
-    if (!hasUnmutedRef.current) {
-      hasUnmutedRef.current = true;
-      el.muted = introMuted;
-    }
-    el.play().catch(() => {});
-  }, [introMuted]);
-
   const navigateAfterFade = useCallback(
     (to) => {
       const el = introRef.current;
-      if (!el || introMuted || el.paused) {
+      if (!el || !isMusicOn || el.paused) {
         navigate(to);
         return;
       }
@@ -103,11 +92,11 @@ export default function HomeScreen() {
       };
       fadeRafRef.current = requestAnimationFrame(tick);
     },
-    [navigate, introMuted],
+    [navigate, isMusicOn],
   );
 
   return (
-    <div className="relative isolate min-h-dvh" onPointerDownCapture={tryPlayIntroAfterGesture} onMouseMoveCapture={tryPlayIntroAfterGesture} onTouchStartCapture={tryPlayIntroAfterGesture} onKeyDownCapture={tryPlayIntroAfterGesture}>
+    <div className="relative isolate min-h-dvh">
       <audio ref={introRef} src={publicAsset(HOME_LOOP_MP3)} preload="auto" playsInline loop />
       <img
         src={publicAsset("moneyflynobackground.gif")}
@@ -147,10 +136,7 @@ export default function HomeScreen() {
       />
       <button
         type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setIntroMuted((m) => !m);
-        }}
+        onClick={toggleMusic}
         className="fixed bottom-4 right-4 z-30 rounded-lg px-2.5 py-1.5 text-xs border cursor-pointer select-none"
         style={{
           fontFamily: "var(--font-pixel)",
@@ -159,10 +145,10 @@ export default function HomeScreen() {
           color: "#FFD600",
           boxShadow: "0 0 12px rgba(255,214,0,0.12)",
         }}
-        aria-label={introMuted ? "Unmute intro music" : "Mute intro music"}
-        aria-pressed={introMuted}
+        aria-label={isMusicOn ? "Mute music" : "Unmute music"}
+        aria-pressed={isMusicOn}
       >
-        {introMuted ? "MUSIC OFF" : "MUSIC ON"}
+        {isMusicOn ? "MUSIC ON" : "MUSIC OFF"}
       </button>
 
       <div className="relative z-20">
@@ -213,27 +199,6 @@ export default function HomeScreen() {
                 decoding="async"
                 loading="eager"
               />
-            </div>
-
-            <div className="flex flex-wrap gap-2 justify-center mb-8">
-              {STOCKS.map((s) => (
-                <div
-                  key={s.symbol}
-                  className="rounded-lg px-3 py-2 text-xs"
-                  style={{
-                    background: "rgba(255,255,255,0.05)",
-                    border: `1px solid ${s.color}33`,
-                    fontFamily: "var(--font-mono)",
-                  }}
-                >
-                  <span className="font-bold" style={{ color: s.color }}>
-                    {s.symbol}
-                  </span>
-                  <span className="ml-2" style={{ color: "#555" }}>
-                    {s.volatility > 0.04 ? "⚡ Volatile" : s.volatility > 0.02 ? "⚡ Medium" : "🛡️ Steady"}
-                  </span>
-                </div>
-              ))}
             </div>
 
             <div className="flex flex-col gap-3 w-full max-w-sm">

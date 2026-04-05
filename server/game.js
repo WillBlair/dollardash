@@ -162,6 +162,8 @@ export class GameRoom {
     this.onDay?.(this.dayNumber, this.getLeaderboard());
     setTimeout(() => {
       if (this.state === "playing") {
+        // Fire the first news event immediately when the new day starts
+        this.newsEngine.nextEventTick = this.newsEngine.tickCount + 1;
         this.tickInterval = setInterval(() => this._tick(), TICK_MS);
         this.timerInterval = setInterval(() => this._timer(), 1000);
       }

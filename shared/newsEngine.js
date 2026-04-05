@@ -16,7 +16,7 @@ export class NewsEngine {
     this.firedEvents = [];
     this.usedIndices = new Set();
     this.tickCount = 0;
-    this.nextEventTick = this._randomTickBetween(28, 40); // first event at ~7-10s
+    this.nextEventTick = 1; // Fire the first news event immediately when trading starts
     this._modIdCounter = 0;
   }
 

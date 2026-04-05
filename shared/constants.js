@@ -10,10 +10,10 @@ export const STARTING_CASH = 10_000;
 export const MAX_HISTORY = 200;
 
 export const STOCKS = [
-  { symbol: "NXT", name: "NextGen Tech", color: "#00E5FF", volatility: 0.045, drift: 0.002, basePrice: 120, risk: "HIGH RISK", desc: "A cutting-edge AI & semiconductor company. Highly volatile — massive swings on every news cycle. High risk, high reward." },
-  { symbol: "ECO", name: "EcoPower Solar", color: "#76FF03", volatility: 0.035, drift: 0.001, basePrice: 42, risk: "MED RISK", desc: "Green energy leader riding the renewables wave. Reacts strongly to policy news. Moderate risk with solid upside." },
-  { symbol: "CART", name: "FreshCart Retail", color: "#FFD600", volatility: 0.02, drift: 0.0005, basePrice: 75, risk: "LOW-MED", desc: "A consumer retail giant. Slow and steady — less dramatic swings but moves with inflation and spending data." },
-  { symbol: "SAFE", name: "SafeHaven Bonds", color: "#FF9100", volatility: 0.008, drift: 0.0002, basePrice: 95, risk: "LOW RISK", desc: "Government-backed bonds. Barely moves. A safe parking spot for cash — but don't expect big gains." },
+  { symbol: "NXT", name: "NextGen Tech", color: "#00E5FF", volatility: 0.045, drift: 0.002, basePrice: 120, risk: "HIGH RISK", desc: "Artificial intelligence and semiconductor manufacturer. Supplies chips to data centers, autonomous vehicles, and defense systems. Moves on tech breakthroughs, chip shortages, and government contracts." },
+  { symbol: "ECO", name: "EcoPower Solar", color: "#76FF03", volatility: 0.035, drift: 0.001, basePrice: 42, risk: "MED RISK", desc: "Designs and installs commercial solar farms and residential panels. Revenue depends heavily on government subsidies, tax credits, and energy policy. Competes directly with fossil fuel pricing." },
+  { symbol: "CART", name: "FreshCart Retail", color: "#FFD600", volatility: 0.02, drift: 0.0005, basePrice: 75, risk: "LOW-MED", desc: "National grocery and household goods chain with 2,400+ stores. Performance tracks consumer spending, inflation reports, and supply chain health. A defensive pick — people always need groceries." },
+  { symbol: "SAFE", name: "SafeHaven Bonds", color: "#FF9100", volatility: 0.008, drift: 0.0002, basePrice: 95, risk: "LOW RISK", desc: "U.S. Treasury bond fund backed by the federal government. Moves with interest rate decisions and inflation data. Investors buy bonds when the stock market feels risky — a place to protect your cash." },
 ];
 
 export const BADGES = [
