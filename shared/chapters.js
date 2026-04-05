@@ -1,8 +1,7 @@
 import { STOCKS } from "./constants.js";
 
 /**
- * Story spine: Dollar Guy, paycheck-to-portfolio path.
- * Chapters 1–3: trade, headlines, diversification · 4–6: compounding, budgeting, vocab.
+ * Story spine: Dollar Guy, linear paycheck-to-portfolio path (NEXT only; interactive mini-games between beats).
  */
 
 export const CHAPTERS = [
@@ -64,52 +63,18 @@ export const CHAPTERS = [
     storyDialog: [
       {
         speaker: "dollar-guy",
-        text: "Still here with you—you already know buy and sell. Now add the layer traders watch all day: headlines and events change how people feel about a company, and that shows up in the price.",
-        scene: { icon: "📰", headline: "BUILDING ON LESSON 1", detail: "Lesson 2 of 3 · News and mood", accent: "#FF9100" },
+        text: "Still here with you—you already know buy and sell. Headlines and events change how people feel about a company, and that shows up in the price.",
+        scene: { icon: "📰", headline: "READING THE ROOM", detail: "News → mood → price", accent: "#FF9100" },
       },
       {
-        type: "choice",
-        scene: { icon: "📈", headline: "THINK IT THROUGH", detail: "What usually happens when surprise news is good?", accent: "#00E5FF" },
-        prompt: "A company reports earnings much stronger than Wall Street expected. In general, what do buyers tend to do with the stock in the short run?",
-        promptSpeaker: "dollar-guy",
-        options: [
-          {
-            emoji: "📉",
-            label: "They usually dump it on good news",
-            lines: [
-              {
-                speaker: "dollar-guy",
-                text: "Sometimes people take profits, which can pull price back—but a big positive surprise usually attracts buyers first. We call that pressure bullish.",
-              },
-            ],
-          },
-          {
-            emoji: "📈",
-            label: "More buyers show up—price often rises",
-            lines: [
-              {
-                speaker: "dollar-guy",
-                text: "Right. Bullish means the mood tilts toward “pay up”; bearish means the mood tilts toward “sell first, ask later.” You’ll hear those two words everywhere.",
-              },
-            ],
-          },
-          {
-            emoji: "🤷",
-            label: "Headlines don’t move stocks",
-            lines: [
-              {
-                speaker: "dollar-guy",
-                text: "They absolutely can—markets are people reacting to information. Your job is to ask: does this news make the business look stronger or weaker?",
-              },
-            ],
-          },
-        ],
-        tail: [
-          {
-            speaker: "dollar-guy",
-            text: "Coming up: three short headlines. For each one, you’ll tag it bullish or bearish for that company—quick reps before you ever do it under pressure.",
-          },
-        ],
+        speaker: "dollar-guy",
+        text: "When earnings crush expectations, buyers often show up first—that pressure is what people mean by bullish. Bearish is the opposite: bad news, weaker story, more sellers leaning on the price.",
+        scene: { icon: "📈", headline: "BULL VS BEAR", detail: "Words you’ll hear nonstop", accent: "#00E5FF" },
+      },
+      {
+        speaker: "dollar-guy",
+        text: "Ask every headline: does this help or hurt the business? Next, three quick taps—bullish or bearish for each story—same path, no branches.",
+        scene: { icon: "🎯", headline: "NEXT UP", detail: "Interactive drill", accent: "#FFD600" },
       },
     ],
     learnDialog: [
@@ -161,52 +126,18 @@ export const CHAPTERS = [
     storyDialog: [
       {
         speaker: "dollar-guy",
-        text: "Third lesson—same paycheck story, deeper layer. You can trade and you can read the room. Now we guard the downside: if most of your money rides one ticker, one ugly headline can carve a huge hole in your account.",
-        scene: { icon: "⚠️", headline: "BUILDING ON LESSONS 1–2", detail: "Lesson 3 of 3 · Not one basket", accent: "#FF3D71" },
+        text: "Same story, deeper layer: if most of your money rides one ticker, one bad headline can carve a huge hole in your account.",
+        scene: { icon: "⚠️", headline: "CONCENTRATION RISK", detail: "Why “all in one” stings", accent: "#FF3D71" },
       },
       {
-        type: "choice",
-        scene: { icon: "🧺", headline: "THINK IT THROUGH", detail: "Long horizon · pretend $100", accent: "#76FF03" },
-        prompt: "Say you have $100 you won’t need for years. What’s the soundest habit to start with?",
-        promptSpeaker: "dollar-guy",
-        options: [
-          {
-            emoji: "🎯",
-            label: "Put all $100 in my one best idea",
-            lines: [
-              {
-                speaker: "dollar-guy",
-                text: "Conviction feels good—but you’re concentrated. If that company stumbles, there’s no cushion. That’s the risk we’re about to feel in the lab.",
-              },
-            ],
-          },
-          {
-            emoji: "🥚",
-            label: "Split it across several companies",
-            lines: [
-              {
-                speaker: "dollar-guy",
-                text: "That’s diversification: when one name drops, the others can soften the blow. It doesn’t erase risk—it spreads it so one surprise doesn’t own you.",
-              },
-            ],
-          },
-          {
-            emoji: "💵",
-            label: "Keep 100% in cash forever",
-            lines: [
-              {
-                speaker: "dollar-guy",
-                text: "Cash sleeps easy, but inflation can eat its value over time. Most people end up mixing safe cash with invested money—we’ll focus on the invested part here.",
-              },
-            ],
-          },
-        ],
-        tail: [
-          {
-            speaker: "dollar-guy",
-            text: "Next: drag sliders to split pretend $100 across four stocks, then run the crash. Watch a balanced book versus everything parked in one name.",
-          },
-        ],
+        speaker: "dollar-guy",
+        text: "Conviction in one name can win big or lose big—no cushion. Spreading across companies is diversification: when one drops, others can soften the fall. Cash is safe from swings, but inflation nibbles buying power; most people mix cash and investing.",
+        scene: { icon: "🧺", headline: "DIVERSIFY", detail: "Many eggs, many baskets", accent: "#76FF03" },
+      },
+      {
+        speaker: "dollar-guy",
+        text: "Next: split pretend $100 across four stocks with the sliders, simulate a crash, and feel balanced vs all-in-one for yourself.",
+        scene: { icon: "🧪", headline: "NEXT UP", detail: "Allocation lab", accent: "#00E5FF" },
       },
     ],
     learnDialog: [

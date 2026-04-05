@@ -1,14 +1,14 @@
 import { useState, useCallback, useEffect } from "react";
 import DialogBubble from "./DialogBubble.jsx";
 import SituationCard from "./SituationCard.jsx";
-import StoryChoicePanel from "./StoryChoicePanel.jsx";
 import DollarGuySpeakerCue from "./DollarGuySpeakerCue.jsx";
 import { useStoryNarrator } from "../hooks/useStoryNarrator.js";
 
+/** Linear story beats only — each item is a dialog line (optional scene on line). */
 function toSteps(dialog) {
-  return dialog.map((item) =>
-    item?.type === "choice" ? { kind: "choice", ...item } : { kind: "line", line: item },
-  );
+  return (dialog ?? [])
+    .filter((item) => item && item.type !== "choice")
+    .map((item) => ({ kind: "line", line: item }));
 }
 
 /** Served from /public/story — story-mode mascot art. */
@@ -32,8 +32,8 @@ function DollarGuyPortrait({ size, isSpeaking }) {
           alt="Dollar Guy"
           className={
             isLarge
-              ? "h-[6.5rem] min-[420px]:h-[11rem] sm:h-[14rem] md:h-[16rem] lg:h-[18rem] xl:h-[20rem] w-auto max-w-none object-contain object-bottom drop-shadow-[0_8px_22px_rgba(0,0,0,0.5)] select-none"
-              : "h-[5.5rem] sm:h-[6.5rem] md:h-[7.5rem] w-auto max-w-none object-contain object-bottom drop-shadow-[0_6px_16px_rgba(0,0,0,0.4)] select-none"
+              ? "h-[clamp(6.25rem,22vmin,10.5rem)] w-auto max-h-[10.5rem] max-w-none object-contain object-bottom drop-shadow-[0_8px_22px_rgba(0,0,0,0.5)] select-none"
+              : "h-[clamp(5rem,16vmin,6.75rem)] w-auto max-h-[6.75rem] max-w-none object-contain object-bottom drop-shadow-[0_6px_16px_rgba(0,0,0,0.4)] select-none"
           }
           draggable={false}
         />
@@ -70,14 +70,13 @@ export default function DollarGuy({
   useEffect(() => {
     if (!voiceEnabled) return;
     const s = steps[lineIndex];
-    if (!s) return;
-    const text = s.kind === "line" ? s.line.text : s.prompt;
-    speak(text);
+    if (!s?.line?.text) return;
+    speak(s.line.text);
     return () => stop();
   }, [steps, lineIndex, voiceEnabled, speak, stop]);
 
   const handleAdvance = useCallback(() => {
-    if (!step || step.kind === "choice") return;
+    if (!step) return;
     if (lineIndex >= steps.length - 1) {
       onDialogComplete?.();
     } else {
@@ -85,114 +84,37 @@ export default function DollarGuy({
     }
   }, [lineIndex, steps.length, onDialogComplete, step]);
 
-  const handlePick = useCallback(
-    (optIdx) => {
-      if (!step || step.kind !== "choice") return;
-      const opt = step.options[optIdx];
-      if (!opt) return;
-      const injected = [
-        ...(opt.lines || []).map((line) => ({ kind: "line", line })),
-        ...(step.tail || []).map((line) => ({ kind: "line", line })),
-      ];
-      setSteps((prev) => [...prev.slice(0, lineIndex), ...injected, ...prev.slice(lineIndex + 1)]);
-    },
-    [step, lineIndex],
-  );
-
   if (!step) return null;
 
-  const bubbleKey =
-    step.kind === "line"
-      ? `L${lineIndex}-${step.line.text?.slice(0, 24) ?? ""}`
-      : `C${lineIndex}`;
-
+  const bubbleKey = `L${lineIndex}-${step.line.text?.slice(0, 24) ?? ""}`;
   const speakerCue = <DollarGuySpeakerCue isSpeaking={isSpeaking} />;
-
-  /** Narrow copy column so choices and cards never span full viewport. */
-  const copyColumnClass =
-    step.kind === "choice"
-      ? "w-full min-w-0 max-w-[20rem] sm:max-w-sm"
-      : "w-full min-w-0 max-w-md sm:max-w-lg";
 
   return (
     <div className="flex w-full animate-slide-up flex-col gap-4">
       <div className="flex w-full max-w-full flex-row flex-nowrap items-start gap-3 overflow-x-auto pb-1 sm:gap-4 md:gap-6 [scrollbar-width:thin]">
         <DollarGuyPortrait size={size} isSpeaking={isSpeaking} />
 
-        <div className={`flex flex-col gap-3 pt-0.5 ${copyColumnClass}`}>
-          {step.kind === "line" && (
-            <>
-              {step.line.scene && (
-                <SituationCard
-                  icon={step.line.scene.icon}
-                  headline={step.line.scene.headline}
-                  accent={step.line.scene.accent ?? "#00E5FF"}
-                >
-                  {step.line.scene.detail && (
-                    <div className="text-xs mt-1" style={{ color: "#aaa" }}>
-                      {step.line.scene.detail}
-                    </div>
-                  )}
-                </SituationCard>
+        <div className="flex min-w-0 w-full max-w-md flex-col gap-3 pt-0.5 sm:max-w-lg">
+          {step.line.scene && (
+            <SituationCard
+              icon={step.line.scene.icon}
+              headline={step.line.scene.headline}
+              accent={step.line.scene.accent ?? "#00E5FF"}
+            >
+              {step.line.scene.detail && (
+                <div className="text-xs mt-1" style={{ color: "#aaa" }}>
+                  {step.line.scene.detail}
+                </div>
               )}
-              <DialogBubble
-                key={bubbleKey}
-                text={step.line.text}
-                header={speakerCue}
-                typingSpeed={typingSpeed}
-                onComplete={handleAdvance}
-              />
-            </>
+            </SituationCard>
           )}
-
-          {step.kind === "choice" && (
-            <div className="flex w-full flex-col gap-3">
-              {step.scene && (
-                <SituationCard
-                  icon={step.scene.icon}
-                  headline={step.scene.headline}
-                  accent={step.scene.accent ?? "#FF9100"}
-                >
-                  {step.scene.detail && (
-                    <div className="text-xs mt-1" style={{ color: "#aaa" }}>
-                      {step.scene.detail}
-                    </div>
-                  )}
-                </SituationCard>
-              )}
-              {speakerCue}
-              <div
-                className="rounded-xl border-2 px-3.5 py-3 w-full relative"
-                style={{
-                  borderColor: "rgba(255, 214, 0, 0.45)",
-                  backgroundColor: "#141c2e",
-                  boxShadow: "0 4px 16px rgba(0,0,0,0.35)",
-                }}
-              >
-                <div
-                  className="pointer-events-none absolute left-0 top-6 -translate-x-1.5 sm:-translate-x-2 w-0 h-0 border-y-[7px] border-y-transparent border-r-[9px] sm:border-r-[10px]"
-                  style={{ borderRightColor: "#141c2e" }}
-                  aria-hidden
-                />
-                <div
-                  className="pointer-events-none absolute left-0 top-[calc(1.5rem-2px)] -translate-x-[calc(0.375rem+2px)] sm:-translate-x-[calc(0.5rem+2px)] w-0 h-0 border-y-[9px] border-y-transparent border-r-[11px]"
-                  style={{ borderRightColor: "rgba(255, 214, 0, 0.45)" }}
-                  aria-hidden
-                />
-                <p
-                  className="m-0 text-sm sm:text-[15px] relative"
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    lineHeight: 1.55,
-                    color: "#e8e8e8",
-                  }}
-                >
-                  {step.prompt}
-                </p>
-              </div>
-              <StoryChoicePanel options={step.options} onPick={handlePick} />
-            </div>
-          )}
+          <DialogBubble
+            key={bubbleKey}
+            text={step.line.text}
+            header={speakerCue}
+            typingSpeed={typingSpeed}
+            onComplete={handleAdvance}
+          />
         </div>
       </div>
 
