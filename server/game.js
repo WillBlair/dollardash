@@ -34,6 +34,8 @@ export class GameRoom {
     this.onTimer = null;
     this.onEnd = null;
     this.onNews = null;
+    this.onDay = null;
+    this.dayNumber = 1;
   }
 
   setDuration(seconds) {
@@ -77,6 +79,7 @@ export class GameRoom {
     if (this.state !== "lobby") return;
     this.state = "playing";
     this.timeLeft = this.duration;
+    this.dayNumber = 1;
     this.prices = STOCKS.map((s) => s.basePrice);
     this.histories = STOCKS.map((s) => [s.basePrice]);
     this.demand = STOCKS.map(() => 0);
@@ -94,8 +97,13 @@ export class GameRoom {
       };
     }
 
-    this.tickInterval = setInterval(() => this._tick(), TICK_MS);
-    this.timerInterval = setInterval(() => this._timer(), 1000);
+    // Start trading after 3-second Day 1 transition
+    setTimeout(() => {
+      if (this.state === "playing") {
+        this.tickInterval = setInterval(() => this._tick(), TICK_MS);
+        this.timerInterval = setInterval(() => this._timer(), 1000);
+      }
+    }, 3200);
   }
 
   _tick() {
@@ -134,9 +142,30 @@ export class GameRoom {
     this.timeLeft--;
     this.onTimer?.();
 
+    const elapsed = this.duration - this.timeLeft;
+    if (elapsed > 0 && elapsed % 30 === 0 && this.timeLeft > 0) {
+      this.dayNumber++;
+      this._pauseForDay();
+      return;
+    }
+
     if (this.timeLeft <= 0) {
       this._endGame();
     }
+  }
+
+  _pauseForDay() {
+    clearInterval(this.tickInterval);
+    clearInterval(this.timerInterval);
+    this.tickInterval = null;
+    this.timerInterval = null;
+    this.onDay?.(this.dayNumber, this.getLeaderboard());
+    setTimeout(() => {
+      if (this.state === "playing") {
+        this.tickInterval = setInterval(() => this._tick(), TICK_MS);
+        this.timerInterval = setInterval(() => this._timer(), 1000);
+      }
+    }, 3000);
   }
 
   _endGame() {

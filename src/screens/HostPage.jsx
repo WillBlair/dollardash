@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import confetti from "canvas-confetti";
 import { useSocket } from "../hooks/useSocket.js";
-import { STOCKS, STARTING_CASH, DEFAULT_DURATION } from "../../shared/constants.js";
+import { STOCKS, DEFAULT_DURATION } from "../../shared/constants.js";
 import BadgeChip from "../components/BadgeChip.jsx";
-import Leaderboard from "../components/Leaderboard.jsx";
+import BigChart from "../components/BigChart.jsx";
 import Timer from "../components/Timer.jsx";
 import NewsTicker from "../components/NewsTicker.jsx";
 import DurationPicker from "../components/DurationPicker.jsx";
 import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
+import DayTransitionScreen from "../components/DayTransitionScreen.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
 import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
 
@@ -22,11 +23,11 @@ export default function HostPage() {
   const [roomCode, setRoomCode] = useState("");
   const [players, setPlayers] = useState([]);
   const [market, setMarket] = useState(null);
-  const [leaderboard, setLeaderboard] = useState([]);
   const [timeLeft, setTimeLeft] = useState(DEFAULT_DURATION);
   const [duration, setDuration] = useState(DEFAULT_DURATION);
   const [results, setResults] = useState(null);
   const [newsEvents, setNewsEvents] = useState([]);
+  const [dayScreen, setDayScreen] = useState(null);
   const hostCreateDoneRef = useRef(false);
 
   useNewsAnnouncer(phase === "playing" ? newsEvents : [], phase === "playing");
@@ -53,9 +54,13 @@ export default function HostPage() {
       sound.startAmbient();
     });
 
+    socket.on("game:day", ({ dayNumber, leaderboard: lb }) => {
+      setDayScreen({ dayNumber, leaderboard: lb });
+    });
+
     socket.on("game:tick", (data) => {
+      setDayScreen(null);
       setMarket({ prices: data.prices, histories: data.histories, timeLeft: data.timeLeft });
-      setLeaderboard(data.leaderboard);
     });
 
     socket.on("game:news", (event) => {
@@ -76,6 +81,7 @@ export default function HostPage() {
     return () => {
       socket.off("lobby:update");
       socket.off("game:start");
+      socket.off("game:day");
       socket.off("game:tick");
       socket.off("game:news");
       socket.off("game:timer");
@@ -169,6 +175,12 @@ export default function HostPage() {
 
   // ─── Playing ──────────────────────────────────────────────
   if (phase === "playing") {
+    const histories = market?.histories || STOCKS.map((s) => [s.basePrice]);
+
+    if (dayScreen) {
+      return <DayTransitionScreen dayNumber={dayScreen.dayNumber} leaderboard={dayScreen.leaderboard} />;
+    }
+
     return (
       <div className="h-dvh max-h-dvh overflow-hidden flex flex-col px-4 py-3 gap-2 w-full max-w-none box-border">
         <UrgencyOverlay timeLeft={timeLeft} />
@@ -202,15 +214,16 @@ export default function HostPage() {
         </div>
 
         <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-4">
-          <div className="flex-[7] min-h-0 flex flex-col max-w-full lg:max-w-[70%]">
+          <div className="flex-[6] min-h-0 flex flex-col">
             <NewsTicker events={newsEvents} expanded />
           </div>
 
-          <div className="flex-[3] flex flex-col gap-2 min-h-0 min-w-0">
-            <div className="shrink-0 text-xs tracking-widest pt-1" style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}>
-              LEADERBOARD
-            </div>
-            <Leaderboard entries={leaderboard} />
+          <div className="flex-[4] min-h-0 grid grid-cols-2 gap-2 content-start">
+            {STOCKS.map((_, i) => (
+              <div key={i} className="min-h-0" style={{ height: "100%", maxHeight: "50%" }}>
+                <BigChart histories={histories} selectedIdx={i} compact />
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -134,6 +134,10 @@ io.on("connection", (socket) => {
       console.log(`[game:end] ${room.code}`);
     };
 
+    room.onDay = (dayNumber, leaderboard) => {
+      io.to(room.code).emit("game:day", { dayNumber, leaderboard });
+    };
+
     callback({ ok: true, code: room.code });
   });
 
@@ -153,6 +157,10 @@ io.on("connection", (socket) => {
       market: room.getMarketState(),
       duration: room.duration,
     });
+    // Emit Day 1 screen after clients have processed game:start
+    setTimeout(() => {
+      io.to(room.code).emit("game:day", { dayNumber: 1, leaderboard: room.getLeaderboard() });
+    }, 100);
     console.log(`[game:start] ${room.code} with ${room.players.size} players, ${room.duration}s`);
     callback({ ok: true });
   });
