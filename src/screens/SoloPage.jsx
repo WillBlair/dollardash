@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import confetti from "canvas-confetti";
-import { STOCKS, STARTING_CASH, DEFAULT_DURATION, TICK_MS, MAX_HISTORY, BADGES } from "../../shared/constants.js";
+import { STOCKS, STARTING_CASH, DEFAULT_DURATION, TICK_MS, MAX_HISTORY, BADGES, TRADER_TITLES } from "../../shared/constants.js";
 import { NewsEngine } from "../../shared/newsEngine.js";
 import BigChart from "../components/BigChart.jsx";
 import StockCard from "../components/StockCard.jsx";
@@ -322,13 +322,15 @@ export default function SoloPage() {
   // ─── Playing ──────────────────────────────────────────────
   if (phase === "playing") {
     return (
-      <div className="min-h-dvh flex flex-col px-6 py-3 gap-2 max-w-6xl mx-auto pb-28">
+      <div
+        className="h-dvh max-h-dvh overflow-hidden flex flex-col px-6 pt-3 pb-28 gap-2 max-w-6xl mx-auto min-h-0 box-border"
+      >
         <UrgencyOverlay timeLeft={timeLeft} />
         <FlashMessage message={flash?.msg} color={flash?.color} />
         <Mascot mood={mascotMood} latestEvent={mascotTrigger} />
 
         {/* Header bar */}
-        <div className="flex justify-between items-center flex-wrap gap-2">
+        <div className="shrink-0 flex justify-between items-center flex-wrap gap-2">
           <div className="flex items-center gap-3">
             <span className="text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
               DOLLAR DASH
@@ -337,10 +339,12 @@ export default function SoloPage() {
           </div>
         </div>
 
-        <Timer timeLeft={timeLeft} total={durationRef.current} />
+        <div className="shrink-0">
+          <Timer timeLeft={timeLeft} total={durationRef.current} />
+        </div>
 
         {/* Cash / P&L / Portfolio — large and prominent */}
-        <div className="flex justify-between items-end rounded-xl px-5 py-4" style={{ background: "rgba(255,255,255,0.04)" }}>
+        <div className="shrink-0 flex justify-between items-end rounded-xl px-5 py-4" style={{ background: "rgba(255,255,255,0.04)" }}>
           <div>
             <div className="text-[10px] tracking-wider mb-1" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>CASH</div>
             <div className="text-2xl sm:text-3xl font-bold tabular-nums" style={{ color: "#76FF03", fontFamily: "var(--font-mono)" }}>
@@ -355,12 +359,12 @@ export default function SoloPage() {
           </div>
         </div>
 
-        {/* Two-column: trading left, news right */}
-        <div className="flex flex-col lg:flex-row gap-3 flex-1">
-          <div className="flex-1 flex flex-col gap-2 min-w-0">
+        {/* Two-column: scrollable chart/stocks; trade bar pinned above safe bottom padding */}
+        <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-3">
+          <div className="flex-1 min-h-0 flex flex-col gap-2 min-w-0">
             <BigChart histories={histories} selectedIdx={selectedStock} />
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 shrink-0">
               {STOCKS.map((stock, i) => (
                 <StockCard
                   key={stock.symbol}
@@ -374,17 +378,21 @@ export default function SoloPage() {
               ))}
             </div>
 
-            <TradeControls
-              selectedStock={selectedStock}
-              price={prices[selectedStock]}
-              cash={cash}
-              onTrade={handleTrade}
-              disabled={false}
-            />
+            <div className="shrink-0">
+              <TradeControls
+                selectedStock={selectedStock}
+                price={prices[selectedStock]}
+                cash={cash}
+                onTrade={handleTrade}
+                disabled={false}
+              />
+            </div>
           </div>
 
-          {/* RIGHT: news feed */}
-          <div className="lg:w-80 xl:w-96 shrink-0 flex flex-col">
+          {/* RIGHT: news feed — capped on small screens so it doesn’t steal height from trading */}
+          <div
+            className="shrink-0 flex flex-col min-h-0 min-w-0 max-h-[min(42dvh,22rem)] lg:max-h-none lg:w-80 xl:w-96"
+          >
             <NewsTicker events={newsEvents} />
           </div>
         </div>
@@ -402,13 +410,10 @@ export default function SoloPage() {
 
   // ─── Results ──────────────────────────────────────────────
   if (phase === "results" && stats) {
-    const grade =
-      stats.finalValue >= STARTING_CASH * 2 ? "S" :
-      stats.finalValue >= STARTING_CASH * 1.5 ? "A" :
-      stats.finalValue >= STARTING_CASH * 1.2 ? "B" :
-      stats.finalValue >= STARTING_CASH ? "C" :
-      stats.finalValue >= STARTING_CASH * 0.7 ? "D" : "F";
-    const gradeColor = { S: "#FFD600", A: "#76FF03", B: "#00E5FF", C: "#fff", D: "#FF9100", F: "#FF3D71" };
+    let traderTitle = TRADER_TITLES[0];
+    for (const t of TRADER_TITLES) {
+      if (stats.returnPct >= t.minReturn) traderTitle = t;
+    }
     const earned = BADGES.filter((b) => {
       if (b.min !== undefined) return stats[b.key] >= b.min;
       if (b.max !== undefined) return stats[b.key] <= b.max;
@@ -420,11 +425,15 @@ export default function SoloPage() {
         <div className="text-sm mb-2 tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}>
           MARKET CLOSED
         </div>
+        <div className="text-5xl mb-1">{traderTitle.icon}</div>
         <div
-          className="text-7xl font-bold mb-2"
-          style={{ fontFamily: "var(--font-pixel)", color: gradeColor[grade], textShadow: `0 0 40px ${gradeColor[grade]}66` }}
+          className="text-3xl sm:text-4xl font-bold mb-1"
+          style={{ fontFamily: "var(--font-pixel)", color: traderTitle.color, textShadow: `0 0 40px ${traderTitle.color}66` }}
         >
-          {grade}
+          {traderTitle.title}
+        </div>
+        <div className="text-xs mb-4 tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#555" }}>
+          FINAL RANK
         </div>
         <div className="text-2xl font-bold mb-6" style={{ color: stats.returnPct >= 0 ? "#76FF03" : "#FF3D71" }}>
           {stats.returnPct >= 0 ? "+" : ""}{stats.returnPct}% return

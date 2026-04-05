@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { useSocket } from "../hooks/useSocket.js";
-import { STOCKS, STARTING_CASH, DEFAULT_DURATION, BADGES } from "../../shared/constants.js";
+import { STOCKS, STARTING_CASH, DEFAULT_DURATION, BADGES, TRADER_TITLES } from "../../shared/constants.js";
 import BadgeChip from "../components/BadgeChip.jsx";
 import StockCard from "../components/StockCard.jsx";
 import TradeControls from "../components/TradeControls.jsx";
@@ -231,12 +231,14 @@ export default function PlayerPage() {
     const histories = market?.histories || STOCKS.map((s) => [s.basePrice]);
 
     return (
-      <div className="min-h-dvh flex flex-col px-3 py-3 gap-2 max-w-6xl mx-auto pb-28">
+      <div
+        className="h-dvh max-h-dvh overflow-hidden flex flex-col px-3 pt-3 pb-28 gap-2 max-w-6xl mx-auto min-h-0 box-border"
+      >
         <UrgencyOverlay timeLeft={timeLeft} />
         <FlashMessage message={flash?.msg} color={flash?.color} />
         <Mascot mood={mascotMood} latestEvent={mascotTrigger} />
 
-        <div className="flex justify-between items-center">
+        <div className="shrink-0 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <span className="text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
               TRADING
@@ -245,10 +247,12 @@ export default function PlayerPage() {
           </div>
         </div>
 
-        <Timer timeLeft={timeLeft} total={duration} />
+        <div className="shrink-0">
+          <Timer timeLeft={timeLeft} total={duration} />
+        </div>
 
         {/* Cash / P&L — large and prominent */}
-        <div className="flex justify-between items-end rounded-xl px-5 py-4" style={{ background: "rgba(255,255,255,0.04)" }}>
+        <div className="shrink-0 flex justify-between items-end rounded-xl px-5 py-4" style={{ background: "rgba(255,255,255,0.04)" }}>
           <div>
             <div className="text-[10px] tracking-wider mb-1" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>CASH</div>
             <div className="text-2xl sm:text-3xl font-bold tabular-nums" style={{ color: "#76FF03", fontFamily: "var(--font-mono)" }}>
@@ -263,9 +267,9 @@ export default function PlayerPage() {
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-3 flex-1">
-          <div className="flex-1 flex flex-col gap-2 min-w-0">
-            <div className="grid grid-cols-2 gap-2">
+        <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-3">
+          <div className="flex-1 min-h-0 flex flex-col gap-2 min-w-0">
+            <div className="grid grid-cols-2 gap-2 shrink-0">
               {STOCKS.map((stock, i) => (
                 <StockCard
                   key={stock.symbol}
@@ -276,19 +280,23 @@ export default function PlayerPage() {
               ))}
             </div>
 
-            <TradeControls
-              selectedStock={selectedStock} price={prices[selectedStock]}
-              cash={cash} onTrade={handleTrade} disabled={false}
-            />
-
             {leaderboard.length > 0 && (
-              <div>
+              <div className="shrink-0">
                 <div className="text-xs mb-1" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>STANDINGS</div>
                 <Leaderboard entries={leaderboard.slice(0, 5)} highlightId={socket?.id} compact />
               </div>
             )}
+
+            <div className="shrink-0">
+              <TradeControls
+                selectedStock={selectedStock} price={prices[selectedStock]}
+                cash={cash} onTrade={handleTrade} disabled={false}
+              />
+            </div>
           </div>
-          <div className="lg:w-80 xl:w-96 shrink-0 flex flex-col">
+          <div
+            className="shrink-0 flex flex-col min-h-0 min-w-0 max-h-[min(42dvh,22rem)] lg:max-h-none lg:w-80 xl:w-96"
+          >
             <NewsTicker events={newsEvents} />
           </div>
         </div>
@@ -306,18 +314,25 @@ export default function PlayerPage() {
 
   // ─── Results ──────────────────────────────────────────────
   if (phase === "results" && myResult) {
-    const gradeColor = { S: "#FFD600", A: "#76FF03", B: "#00E5FF", C: "#fff", D: "#FF9100", F: "#FF3D71" };
+    let traderTitle = TRADER_TITLES[0];
+    for (const t of TRADER_TITLES) {
+      if (myResult.returnPct >= t.minReturn) traderTitle = t;
+    }
 
     return (
       <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12 text-center">
         <div className="text-sm mb-2 tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}>
           MARKET CLOSED
         </div>
+        <div className="text-5xl mb-1">{traderTitle.icon}</div>
         <div
-          className="text-7xl font-bold mb-2"
-          style={{ fontFamily: "var(--font-pixel)", color: gradeColor[myResult.grade] || "#fff", textShadow: `0 0 40px ${gradeColor[myResult.grade]}66` }}
+          className="text-3xl sm:text-4xl font-bold mb-1"
+          style={{ fontFamily: "var(--font-pixel)", color: traderTitle.color, textShadow: `0 0 40px ${traderTitle.color}66` }}
         >
-          {myResult.grade}
+          {traderTitle.title}
+        </div>
+        <div className="text-xs mb-4 tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#555" }}>
+          FINAL RANK
         </div>
         <div className="text-lg font-bold mb-1" style={{ color: "#aaa" }}>
           #{myResult.rank} of {results.length}
