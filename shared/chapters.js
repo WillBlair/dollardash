@@ -5,6 +5,8 @@ export const CHAPTERS = [
     id: 1,
     title: "First Paycheck",
     subtitle: "What is a stock?",
+    /** Shown behind story / learn / situation / minigame / reflect for this chapter only. */
+    storyBackdrop: "/story/ch1-office-bg.jpg",
     storyDialog: [
       {
         speaker: "narrator",
