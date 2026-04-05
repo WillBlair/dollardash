@@ -14,6 +14,11 @@ export const CHAPTERS = [
       { speaker: "dollar-guy", text: "Let's try it. I'll walk you through buying your very first stock." },
       { speaker: "dollar-guy", text: "Tap the BUY button to grab a share. Then watch the price move. When you're ready, sell it!" },
     ],
+    situationDialog: [
+      { speaker: "narrator", text: "Friday night. Your paycheck just dropped. The banking app is boring — but this investing thing? It's glowing on your phone like a video game continue screen." },
+      { speaker: "narrator", text: "Banana Inc. is right there: BNNA, the meme stock your group chat won't shut up about. One buy button between you and 'I actually did it.'" },
+      { speaker: "dollar-guy", text: "No lecture now — just you and the ticker. Make the trade." },
+    ],
     miniGame: {
       type: "first-buy",
       config: {
@@ -57,6 +62,11 @@ export const CHAPTERS = [
       { speaker: "dollar-guy", text: "Bullish 📈 means good news — things are looking UP. Like a bull charging forward." },
       { speaker: "dollar-guy", text: "Bearish 📉 means bad news — things are going DOWN. Like a bear swiping downward." },
       { speaker: "dollar-guy", text: "Let me test you. I'll show you some headlines — tell me if they're good news or bad news for the stock." },
+    ],
+    situationDialog: [
+      { speaker: "narrator", text: "Monday morning. Slack is quiet but Finance Twitter isn't — alerts stacking up like a slot machine: earnings, investigations, huge contracts." },
+      { speaker: "narrator", text: "Everyone else is guessing. You're going to read each line like it matters — because in a minute, it does." },
+      { speaker: "dollar-guy", text: "Headlines on deck. Bull or bear — trust your gut." },
     ],
     miniGame: {
       type: "headline-quiz",
@@ -102,6 +112,11 @@ export const CHAPTERS = [
     ],
     learnDialog: [
       { speaker: "dollar-guy", text: "Let me show you what I mean. Try splitting your money across these stocks and see what happens when a crash hits." },
+    ],
+    situationDialog: [
+      { speaker: "narrator", text: "Same desk, worse lighting. Somewhere out there a headline just hit and one ticker is already swinging — REKT, MOON, SAFE, BNNA all on one screen." },
+      { speaker: "narrator", text: "You've got a pretend hundred bucks. Split it now — because the market doesn't wait for you to feel brave." },
+      { speaker: "dollar-guy", text: "When you're ready, hit simulate. Watch what a crash does to one stock vs. a whole spread." },
     ],
     miniGame: {
       type: "portfolio-builder",

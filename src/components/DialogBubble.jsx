@@ -74,6 +74,14 @@ export default function DialogBubble({ text, speaker, onComplete, autoAdvance = 
             DOLLAR GUY
           </div>
         )}
+        {speaker === "narrator" && (
+          <div
+            className="text-xs font-bold mb-2 tracking-wider"
+            style={{ fontFamily: "var(--font-pixel)", color: "#FF9100", fontSize: "10px" }}
+          >
+            THE SITUATION
+          </div>
+        )}
         <div style={{ minHeight: "1.7em" }}>
           {displayedText}
           {isTyping && (

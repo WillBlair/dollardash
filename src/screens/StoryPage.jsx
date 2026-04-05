@@ -316,6 +316,23 @@ export default function StoryPage() {
         <DollarGuy
           key={`learn-${activeChapter.id}`}
           dialog={activeChapter.learnDialog}
+          onDialogComplete={() =>
+            setPhase(activeChapter.situationDialog?.length ? "situation" : "minigame")
+          }
+        />
+      </div>
+    );
+  }
+
+  if (phase === "situation" && activeChapter?.situationDialog?.length) {
+    return (
+      <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12">
+        <div className="text-xs tracking-wider mb-6" style={{ fontFamily: "var(--font-pixel)", color: "#FF9100" }}>
+          THE SITUATION
+        </div>
+        <DollarGuy
+          key={`situation-${activeChapter.id}`}
+          dialog={activeChapter.situationDialog}
           onDialogComplete={() => setPhase("minigame")}
         />
       </div>
