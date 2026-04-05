@@ -11,6 +11,7 @@ import NewsTicker from "../components/NewsTicker.jsx";
 import DurationPicker from "../components/DurationPicker.jsx";
 import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
 import DayTransitionScreen from "../components/DayTransitionScreen.jsx";
+import NewsToast from "../components/NewsToast.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
 import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
 
@@ -29,6 +30,7 @@ export default function HostPage() {
   const [newsEvents, setNewsEvents] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [dayScreen, setDayScreen] = useState(null);
+  const [dayWarning, setDayWarning] = useState(false);
   const hostCreateDoneRef = useRef(false);
 
   useNewsAnnouncer(phase === "playing" ? newsEvents : [], phase === "playing");
@@ -56,7 +58,13 @@ export default function HostPage() {
     });
 
     socket.on("game:day", ({ dayNumber, leaderboard: lb }) => {
+      setDayWarning(false);
       setDayScreen({ dayNumber, leaderboard: lb });
+    });
+
+    socket.on("game:dayWarning", () => {
+      setDayWarning(true);
+      setTimeout(() => setDayWarning(false), 5000);
     });
 
     socket.on("game:tick", (data) => {
@@ -84,6 +92,7 @@ export default function HostPage() {
       socket.off("lobby:update");
       socket.off("game:start");
       socket.off("game:day");
+      socket.off("game:dayWarning");
       socket.off("game:tick");
       socket.off("game:news");
       socket.off("game:timer");
@@ -186,6 +195,39 @@ export default function HostPage() {
     return (
       <div className="h-dvh max-h-dvh overflow-hidden flex flex-col px-4 py-3 gap-2 w-full max-w-none box-border">
         <UrgencyOverlay timeLeft={timeLeft} />
+        <NewsToast events={newsEvents} />
+
+        {/* Day-end flash overlay */}
+        {dayWarning && (
+          <div
+            className="pointer-events-none fixed inset-0 z-40"
+            style={{
+              boxShadow: "inset 0 0 140px 60px rgba(255,30,60,0.45)",
+              animation: "urgency-pulse 0.7s ease-in-out infinite",
+            }}
+          />
+        )}
+
+        {/* Day-end alert — bottom right */}
+        {dayWarning && (
+          <div
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl px-5 py-3"
+            style={{
+              background: "rgba(20,5,8,0.95)",
+              border: "2px solid #FF3D71",
+              boxShadow: "0 0 24px rgba(255,61,113,0.5)",
+              animation: "urgency-pulse 0.7s ease-in-out infinite",
+            }}
+          >
+            <span style={{ fontSize: 20 }}>⚠️</span>
+            <div>
+              <div className="text-xs font-bold tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#FF3D71" }}>
+                DAY ENDING
+              </div>
+              <div className="text-xs" style={{ color: "#aaa" }}>Next day in 5 seconds</div>
+            </div>
+          </div>
+        )}
 
         <div className="shrink-0 flex justify-between items-center flex-wrap gap-2">
           <div className="text-sm tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>

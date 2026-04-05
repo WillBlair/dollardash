@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import Leaderboard from "./Leaderboard.jsx";
-import { STOCKS } from "../../shared/constants.js";
 
-// Duration of the day transition pause on the server (ms)
+const TRANSITION_MS_DAY1 = 20000;
 const TRANSITION_MS = 10000;
-// Gif paths
-const MASCOT_GIF = "/output-onlinegiftools.gif";
+
 const DOLLAR_GUY_GIF = "/output-onlinegiftools%20(1).gif";
 
 const DAY_TITLE_STYLE = {
@@ -17,7 +15,89 @@ const DAY_TITLE_STYLE = {
   letterSpacing: "0.05em",
 };
 
-// ── Day 1 intro: stock descriptions ──────────────────────────────────────────
+const HOW_TO_STEPS = [
+  { icon: "📊", title: "Pick a stock", desc: "Tap any of the 4 stock cards to select it. Each stock has different risk and speed." },
+  { icon: "💰", title: "Buy shares", desc: "Use the quantity buttons to set how many shares, then press BUY. You start with $10,000." },
+  { icon: "📰", title: "Watch the news", desc: "Breaking news moves prices fast. Bullish news pumps a stock; bearish news tanks it." },
+  { icon: "💸", title: "Sell to cash out", desc: "Hit SELL when you're up to lock in profits. Prices can reverse at any moment." },
+  { icon: "🏆", title: "Highest portfolio wins", desc: "The player with the most total value (cash + shares) when time runs out wins." },
+];
+
+// ── Shared progress bar with Dollar Guy ──────────────────────────────────────
+function ProgressBar({ durationMs }) {
+  const [progress, setProgress] = useState(0);
+  const startRef = useRef(Date.now());
+
+  useEffect(() => {
+    startRef.current = Date.now();
+    const id = setInterval(() => {
+      const pct = Math.min((Date.now() - startRef.current) / durationMs, 1);
+      setProgress(pct);
+      if (pct >= 1) clearInterval(id);
+    }, 50);
+    return () => clearInterval(id);
+  }, [durationMs]);
+
+  const pct = Math.round(progress * 100);
+
+  return (
+    <div className="shrink-0 px-8 pb-8 pt-4">
+      <div
+        className="text-center text-xs mb-3 tracking-widest"
+        style={{ fontFamily: "var(--font-pixel)", color: "#555" }}
+      >
+        {pct < 100 ? "STARTING SOON..." : "LOADING..."}
+      </div>
+
+      <div className="relative" style={{ paddingTop: 60 }}>
+        {/* Dollar Guy */}
+        <div
+          className="absolute"
+          style={{
+            left: `clamp(0px, calc(${pct}% - 28px), calc(100% - 56px))`,
+            bottom: "100%",
+            transition: "left 0.05s linear",
+            marginBottom: 4,
+          }}
+        >
+          <img
+            src={DOLLAR_GUY_GIF}
+            alt="Dollar Guy"
+            style={{ height: 52, imageRendering: "pixelated", display: "block" }}
+          />
+        </div>
+
+        {/* Track */}
+        <div
+          className="relative h-5 rounded-full overflow-hidden"
+          style={{
+            background: "rgba(255,255,255,0.07)",
+            border: "1px solid rgba(255,214,0,0.2)",
+          }}
+        >
+          {/* Fill */}
+          <div
+            className="absolute inset-y-0 left-0 rounded-full"
+            style={{
+              width: `${pct}%`,
+              background: "linear-gradient(90deg, #FFD600 0%, #FF9100 100%)",
+              boxShadow: "0 0 12px rgba(255,214,0,0.5)",
+              transition: "width 0.05s linear",
+            }}
+          />
+          <div
+            className="absolute inset-0 flex items-center justify-center text-[10px] font-bold"
+            style={{ fontFamily: "var(--font-pixel)", color: pct > 48 ? "#0a0e1a" : "#FFD600" }}
+          >
+            {pct}%
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Day 1: how-to guide ───────────────────────────────────────────────────────
 function Day1Content() {
   return (
     <div className="flex flex-col gap-3 pt-2">
@@ -25,48 +105,24 @@ function Day1Content() {
         className="text-xs text-center tracking-widest mb-1"
         style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}
       >
-        TODAY'S STOCKS
+        HOW TO PLAY
       </div>
-      {STOCKS.map((stock) => (
+      {HOW_TO_STEPS.map((step, i) => (
         <div
-          key={stock.symbol}
+          key={i}
           className="rounded-xl px-4 py-3 flex items-start gap-3"
-          style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${stock.color}33` }}
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,214,0,0.12)",
+          }}
         >
-          <div className="shrink-0 text-center" style={{ width: 56 }}>
-            <div
-              className="text-lg font-bold"
-              style={{ fontFamily: "var(--font-pixel)", color: stock.color }}
-            >
-              {stock.symbol}
-            </div>
-            <div
-              className="text-xs font-bold mt-0.5 px-1 py-0.5 rounded"
-              style={{
-                background: `${stock.color}22`,
-                color: stock.color,
-                fontFamily: "var(--font-mono)",
-                fontSize: "0.6rem",
-                letterSpacing: "0.05em",
-              }}
-            >
-              {stock.risk}
-            </div>
-          </div>
+          <span className="text-2xl shrink-0 mt-0.5">{step.icon}</span>
           <div className="flex-1 min-w-0">
-            <div className="flex justify-between items-baseline mb-1">
-              <span className="text-sm font-semibold" style={{ color: "#fff" }}>
-                {stock.name}
-              </span>
-              <span
-                className="text-base font-bold tabular-nums ml-2 shrink-0"
-                style={{ fontFamily: "var(--font-mono)", color: stock.color }}
-              >
-                ${stock.basePrice.toFixed(2)}
-              </span>
+            <div className="text-sm font-bold mb-0.5" style={{ color: "#FFD600" }}>
+              {i + 1}. {step.title}
             </div>
             <p className="text-xs leading-relaxed" style={{ color: "#888" }}>
-              {stock.desc}
+              {step.desc}
             </p>
           </div>
         </div>
@@ -75,104 +131,26 @@ function Day1Content() {
   );
 }
 
-// ── Day N progress screen: leaderboard + walking Dollar Guy progress bar ──────
-function DayProgressContent({ leaderboard, highlightId }) {
-  const [progress, setProgress] = useState(0);
-  const startRef = useRef(Date.now());
-
-  useEffect(() => {
-    startRef.current = Date.now();
-    const id = setInterval(() => {
-      const pct = Math.min((Date.now() - startRef.current) / TRANSITION_MS, 1);
-      setProgress(pct);
-      if (pct >= 1) clearInterval(id);
-    }, 50);
-    return () => clearInterval(id);
-  }, []);
-
-  const pct = Math.round(progress * 100);
-
+// ── Day 2+: leaderboard ───────────────────────────────────────────────────────
+function DayLeaderboardContent({ leaderboard, highlightId }) {
   return (
-    <>
-      {/* Leaderboard */}
-      <div className="flex-1 min-h-0 overflow-auto px-6 pb-2">
-        <div className="max-w-lg mx-auto">
-          {leaderboard.length > 0 ? (
-            <Leaderboard entries={leaderboard} highlightId={highlightId} />
-          ) : (
-            <div className="text-center text-sm pt-6" style={{ color: "#444" }}>
-              No players yet
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Progress bar + Dollar Guy */}
-      <div className="shrink-0 px-8 pb-8 pt-2">
-        <div className="text-center text-xs mb-3 tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>
-          NEXT DAY STARTING...
-        </div>
-
-        {/* Bar container — extra top padding so gif floats above */}
-        <div className="relative" style={{ paddingTop: 56 }}>
-          {/* Dollar Guy walking across */}
-          <div
-            className="absolute"
-            style={{
-              left: `${pct}%`,
-              bottom: "100%",
-              transform: "translateX(-50%)",
-              transition: "left 0.05s linear",
-              marginBottom: 4,
-            }}
-          >
-            <img
-              src={DOLLAR_GUY_GIF}
-              alt="Dollar Guy"
-              style={{
-                height: 52,
-                imageRendering: "pixelated",
-                display: "block",
-              }}
-            />
+    <div className="flex-1 min-h-0 overflow-auto px-6 pb-2">
+      <div className="max-w-lg mx-auto">
+        {leaderboard.length > 0 ? (
+          <Leaderboard entries={leaderboard} highlightId={highlightId} />
+        ) : (
+          <div className="text-center text-sm pt-6" style={{ color: "#444" }}>
+            No players yet
           </div>
-
-          {/* Track */}
-          <div
-            className="relative h-5 rounded-full overflow-hidden"
-            style={{
-              background: "rgba(255,255,255,0.07)",
-              border: "1px solid rgba(255,214,0,0.2)",
-            }}
-          >
-            {/* Fill */}
-            <div
-              className="absolute inset-y-0 left-0 rounded-full"
-              style={{
-                width: `${pct}%`,
-                background: "linear-gradient(90deg, #FFD600 0%, #FF9100 100%)",
-                boxShadow: "0 0 12px rgba(255,214,0,0.5)",
-                transition: "width 0.05s linear",
-              }}
-            />
-            {/* Percent label */}
-            <div
-              className="absolute inset-0 flex items-center justify-center text-[10px] font-bold"
-              style={{ fontFamily: "var(--font-pixel)", color: pct > 48 ? "#0a0e1a" : "#FFD600" }}
-            >
-              {pct}%
-            </div>
-          </div>
-        </div>
+        )}
       </div>
-    </>
+    </div>
   );
 }
 
-// ── Main export ──────────────────────────────────────────────────────────────
+// ── Main export ───────────────────────────────────────────────────────────────
 export default function DayTransitionScreen({ dayNumber, leaderboard, highlightId }) {
   const isDay1 = dayNumber === 1;
-  // For Day 2+ the title shows the completed day (e.g. dayNumber=2 → "DAY 1")
   const displayDay = isDay1 ? 1 : dayNumber - 1;
 
   return (
@@ -185,33 +163,19 @@ export default function DayTransitionScreen({ dayNumber, leaderboard, highlightI
         <div style={DAY_TITLE_STYLE}>DAY {displayDay}</div>
       </div>
 
+      {/* Content fills remaining vertical space */}
       {isDay1 ? (
-        <>
-          {/* Stock info fills remaining space */}
-          <div className="flex-1 min-h-0 overflow-auto px-6 pb-2">
-            <div className="max-w-lg mx-auto">
-              <Day1Content />
-            </div>
+        <div className="flex-1 min-h-0 overflow-auto px-6 pb-2">
+          <div className="max-w-lg mx-auto">
+            <Day1Content />
           </div>
-
-          {/* Mascot gif at bottom */}
-          <div className="shrink-0 flex items-center justify-center" style={{ height: "28%" }}>
-            <img
-              src={MASCOT_GIF}
-              alt="Dollar Dash Mascot"
-              style={{
-                maxHeight: "100%",
-                maxWidth: "min(260px, 80vw)",
-                objectFit: "contain",
-                imageRendering: "pixelated",
-              }}
-            />
-          </div>
-        </>
+        </div>
       ) : (
-        // Day 2+ — leaderboard + walking progress bar
-        <DayProgressContent leaderboard={leaderboard} highlightId={highlightId} />
+        <DayLeaderboardContent leaderboard={leaderboard} highlightId={highlightId} />
       )}
+
+      {/* Progress bar — always shown, duration differs */}
+      <ProgressBar durationMs={isDay1 ? TRANSITION_MS_DAY1 : TRANSITION_MS} />
     </div>
   );
 }

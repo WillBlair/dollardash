@@ -13,6 +13,7 @@ import NewsTicker from "../components/NewsTicker.jsx";
 import TitleBadge from "../components/TitleBadge.jsx";
 import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
 import DayTransitionScreen from "../components/DayTransitionScreen.jsx";
+import NewsToast from "../components/NewsToast.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
 
 export default function PlayerPage() {
@@ -39,6 +40,7 @@ export default function PlayerPage() {
   const [myResult, setMyResult] = useState(null);
   const [newsEvents, setNewsEvents] = useState([]);
   const [dayScreen, setDayScreen] = useState(null);
+  const [dayWarning, setDayWarning] = useState(false);
 
   useEffect(() => {
     if (!socket) return;
@@ -54,7 +56,13 @@ export default function PlayerPage() {
     });
 
     socket.on("game:day", ({ dayNumber, leaderboard: lb }) => {
+      setDayWarning(false);
       setDayScreen({ dayNumber, leaderboard: lb });
+    });
+
+    socket.on("game:dayWarning", () => {
+      setDayWarning(true);
+      setTimeout(() => setDayWarning(false), 5000);
     });
 
     socket.on("game:tick", (data) => {
@@ -98,6 +106,7 @@ export default function PlayerPage() {
     return () => {
       socket.off("game:start");
       socket.off("game:day");
+      socket.off("game:dayWarning");
       socket.off("game:tick");
       socket.off("game:news");
       socket.off("game:timer");
@@ -225,7 +234,37 @@ export default function PlayerPage() {
     return (
       <div className="min-h-dvh flex flex-col px-3 py-3 gap-2 max-w-6xl mx-auto pb-28">
         <UrgencyOverlay timeLeft={timeLeft} />
+        <NewsToast events={newsEvents} />
         <FlashMessage message={flash?.msg} color={flash?.color} />
+
+        {dayWarning && (
+          <div
+            className="pointer-events-none fixed inset-0 z-40"
+            style={{
+              boxShadow: "inset 0 0 140px 60px rgba(255,30,60,0.45)",
+              animation: "urgency-pulse 0.7s ease-in-out infinite",
+            }}
+          />
+        )}
+        {dayWarning && (
+          <div
+            className="fixed bottom-6 right-4 z-50 flex items-center gap-3 rounded-xl px-4 py-3"
+            style={{
+              background: "rgba(20,5,8,0.95)",
+              border: "2px solid #FF3D71",
+              boxShadow: "0 0 24px rgba(255,61,113,0.5)",
+              animation: "urgency-pulse 0.7s ease-in-out infinite",
+            }}
+          >
+            <span style={{ fontSize: 18 }}>⚠️</span>
+            <div>
+              <div className="text-xs font-bold tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#FF3D71" }}>
+                DAY ENDING
+              </div>
+              <div className="text-xs" style={{ color: "#aaa" }}>Next day in 5s</div>
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">

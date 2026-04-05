@@ -35,14 +35,15 @@ export class GameRoom {
     this.onEnd = null;
     this.onNews = null;
     this.onDay = null;
+    this.onDayWarning = null;
     this.dayNumber = 1;
   }
 
   setDuration(seconds) {
-    const allowed = [60, 180, 300];
-    if (allowed.includes(seconds)) {
-      this.duration = seconds;
-      this.timeLeft = seconds;
+    const s = parseInt(seconds, 10);
+    if (!isNaN(s) && s >= 30 && s <= 1800) {
+      this.duration = s;
+      this.timeLeft = s;
     }
   }
 
@@ -143,6 +144,12 @@ export class GameRoom {
     this.onTimer?.();
 
     const elapsed = this.duration - this.timeLeft;
+
+    // Warn 5 seconds before each day ends
+    if (elapsed > 0 && elapsed % 30 === 25 && this.timeLeft > 0) {
+      this.onDayWarning?.();
+    }
+
     if (elapsed > 0 && elapsed % 30 === 0 && this.timeLeft > 0) {
       this.dayNumber++;
       this._pauseForDay();
