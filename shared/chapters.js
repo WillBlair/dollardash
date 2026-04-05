@@ -24,6 +24,7 @@ export const CHAPTERS = [
       },
     },
     gameplay: {
+      skipGameplay: true,
       availableStocks: [0],
       durationSeconds: 60,
       objective: {
@@ -32,11 +33,7 @@ export const CHAPTERS = [
         check: (stats) => stats.totalTrades >= 2 && stats.returnPct > 0,
       },
       hintLevel: "heavy",
-      hints: [
-        { trigger: "price-up-5", text: "Price is going up! Might be a good time to sell.", position: "trade-controls" },
-        { trigger: "no-trades-10s", text: "Don't be shy — tap a stock and hit BUY!", position: "stock-card" },
-        { trigger: "holding-profit", text: "You're in the green! Try selling to lock in your profit.", position: "trade-controls" },
-      ],
+      hints: [],
       scriptedEvents: [],
     },
     reflectDialog: [
@@ -56,7 +53,10 @@ export const CHAPTERS = [
       { speaker: "dollar-guy", text: "If you can read the headlines and act fast, you've got an edge over everyone else." },
     ],
     learnDialog: [
-      { speaker: "dollar-guy", text: "Let me test you. I'll show you some headlines — tell me if they're good or bad for the stock." },
+      { speaker: "dollar-guy", text: "On Wall Street, people use two words a lot: BULLISH and BEARISH." },
+      { speaker: "dollar-guy", text: "Bullish 📈 means good news — things are looking UP. Like a bull charging forward." },
+      { speaker: "dollar-guy", text: "Bearish 📉 means bad news — things are going DOWN. Like a bear swiping downward." },
+      { speaker: "dollar-guy", text: "Let me test you. I'll show you some headlines — tell me if they're good news or bad news for the stock." },
     ],
     miniGame: {
       type: "headline-quiz",

@@ -47,7 +47,7 @@ export default function HeadlineQuizGame({ config, onComplete }) {
             <div key={i} className="rounded-lg p-3 text-xs" style={{ background: a.correct ? "rgba(118,255,3,0.1)" : "rgba(255,61,113,0.1)", border: `1px solid ${a.correct ? "#76FF0333" : "#FF3D7133"}` }}>
               <div style={{ color: "#ddd" }}>{a.text}</div>
               <div className="mt-1" style={{ color: a.correct ? "#76FF03" : "#FF3D71" }}>
-                {a.correct ? "✓" : "✗"} {a.answer === "bullish" ? "📈 Bullish" : "📉 Bearish"}
+                {a.correct ? "✓" : "✗"} {a.answer === "bullish" ? "📈 Good News (Bullish)" : "📉 Bad News (Bearish)"}
               </div>
             </div>
           ))}
@@ -93,17 +93,19 @@ export default function HeadlineQuizGame({ config, onComplete }) {
         <div className="flex gap-3 w-full">
           <button
             onClick={() => handleAnswer("bullish")}
-            className="flex-1 rounded-xl py-4 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
+            className="flex-1 rounded-xl py-4 font-bold cursor-pointer border-none tracking-wider transition-transform hover:scale-105 flex flex-col items-center gap-1"
             style={{ fontFamily: "var(--font-pixel)", background: "#76FF03", color: "#0a0e1a" }}
           >
-            📈 BULLISH
+            <span className="text-base">📈 GOOD</span>
+            <span className="text-[8px] opacity-70">Bullish</span>
           </button>
           <button
             onClick={() => handleAnswer("bearish")}
-            className="flex-1 rounded-xl py-4 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
+            className="flex-1 rounded-xl py-4 font-bold cursor-pointer border-none tracking-wider transition-transform hover:scale-105 flex flex-col items-center gap-1"
             style={{ fontFamily: "var(--font-pixel)", background: "#FF3D71", color: "#fff" }}
           >
-            📉 BEARISH
+            <span className="text-base">📉 BAD</span>
+            <span className="text-[8px] opacity-70">Bearish</span>
           </button>
         </div>
       )}

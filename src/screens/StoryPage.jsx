@@ -324,7 +324,13 @@ export default function StoryPage() {
       <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12">
         <InteractiveLesson
           miniGame={activeChapter.miniGame}
-          onComplete={() => startPlayPhase()}
+          onComplete={() => {
+            if (activeChapter.gameplay.skipGameplay) {
+              setPhase("reflect");
+            } else {
+              startPlayPhase();
+            }
+          }}
         />
       </div>
     );
