@@ -77,6 +77,30 @@ body {
   animation: count-pulse 0.3s ease-out;
 }
 
+@keyframes news-live-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.news-live-dot {
+  animation: news-live-blink 1.1s ease-in-out infinite;
+}
+
+.news-crt-overlay {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.14) 2px,
+    rgba(0, 0, 0, 0.14) 3px
+  );
+}
+
 @keyframes voice-wave {
   0%, 100% { height: 20%; }
   50% { height: 100%; }
@@ -210,6 +234,11 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .news-live-dot {
+    animation: none;
+    opacity: 0.85;
+  }
+
   .home-money-fly {
     animation-name: edge-fly-ltr;
     animation-duration: 52s;

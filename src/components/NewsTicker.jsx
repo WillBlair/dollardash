@@ -1,11 +1,6 @@
 import { useEffect, useRef } from "react";
 import { STOCKS } from "../../shared/constants.js";
-
-const SENTIMENT_STYLES = {
-  bullish: { bg: "rgba(118,255,3,0.1)", border: "#76FF03", color: "#76FF03", icon: "📈", label: "BULLISH" },
-  bearish: { bg: "rgba(255,61,113,0.1)", border: "#FF3D71", color: "#FF3D71", icon: "📉", label: "BEARISH" },
-  neutral: { bg: "rgba(255,255,255,0.05)", border: "#666", color: "#aaa", icon: "📰", label: "NEWS" },
-};
+import { NEWS_SENTIMENT_STYLES } from "./newsTheme.js";
 
 export default function NewsTicker({ events }) {
   const containerRef = useRef(null);
@@ -20,16 +15,25 @@ export default function NewsTicker({ events }) {
     return (
       <div className="flex h-full min-h-0 flex-1 flex-col">
         <div
-          className="text-xs mb-2 shrink-0 tracking-widest"
-          style={{ fontFamily: "var(--font-pixel)", color: "#555" }}
+          className="text-[10px] mb-2 shrink-0 tracking-[0.18em] flex items-center gap-2"
+          style={{ fontFamily: "var(--font-pixel)", color: "#5a6578" }}
         >
-          MARKET NEWS
+          <span aria-hidden>{"\u250c"}</span>
+          <span>MARKET WIRE</span>
+          <span aria-hidden>{"\u2510"}</span>
         </div>
         <div
-          className="flex min-h-0 flex-1 items-center justify-center rounded-xl text-sm"
-          style={{ background: "rgba(255,255,255,0.02)", color: "#333", minHeight: 96 }}
+          className="news-ticker-frame flex min-h-0 flex-1 items-center justify-center px-3 py-4"
+          style={{
+            background: "linear-gradient(180deg, rgba(6,10,18,0.9) 0%, rgba(8,14,24,0.95) 100%)",
+            border: "3px double rgba(90, 101, 120, 0.45)",
+            boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.5)",
+            minHeight: 96,
+          }}
         >
-          Waiting for breaking news...
+          <span className="text-xs tracking-wide text-center" style={{ color: "#4a5568", fontFamily: "var(--font-mono)" }}>
+            Awaiting tickertape...
+          </span>
         </div>
       </div>
     );
@@ -40,49 +44,84 @@ export default function NewsTicker({ events }) {
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col min-w-0">
       <div
-        className="text-xs mb-2 shrink-0 tracking-widest"
-        style={{ fontFamily: "var(--font-pixel)", color: "#555" }}
+        className="text-[10px] mb-2 shrink-0 tracking-[0.18em] flex items-center gap-2"
+        style={{ fontFamily: "var(--font-pixel)", color: "#7a8498" }}
       >
-        MARKET NEWS
+        <span aria-hidden className="text-[#FFD600]">{"\u25c6"}</span>
+        <span>MARKET WIRE</span>
+        <span className="text-[9px] tracking-widest ml-auto opacity-70">TELETEXT</span>
       </div>
       <div
         ref={containerRef}
-        className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto"
+        className="news-ticker-frame flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-1.5 py-2"
+        style={{
+          background: "linear-gradient(180deg, rgba(5,9,16,0.92) 0%, rgba(7,12,22,0.98) 100%)",
+          border: "3px double rgba(255, 214, 0, 0.22)",
+          boxShadow: "inset 0 0 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04)",
+        }}
       >
         {displayed.map((event, i) => {
-          const s = SENTIMENT_STYLES[event.sentiment] || SENTIMENT_STYLES.neutral;
+          const s = NEWS_SENTIMENT_STYLES[event.sentiment] || NEWS_SENTIMENT_STYLES.neutral;
           const stockColor = event.stockIdx >= 0 ? STOCKS[event.stockIdx]?.color : "#FFD600";
           const isLatest = i === displayed.length - 1;
 
           return (
             <div
               key={`${event.headline}-${event.timestamp}`}
-              className="rounded-xl px-4 py-3 transition-all"
+              className="relative overflow-hidden px-3 py-2.5 transition-all"
               style={{
-                background: isLatest ? s.bg : "rgba(255,255,255,0.02)",
-                borderLeft: `4px solid ${isLatest ? s.border : "rgba(255,255,255,0.08)"}`,
-                opacity: isLatest ? 1 : 0.5,
+                background: isLatest
+                  ? `linear-gradient(90deg, ${s.bg} 0%, rgba(5,8,14,0.65) 100%)`
+                  : "rgba(8,12,20,0.5)",
+                border: `2px solid ${isLatest ? s.border : "rgba(80,90,110,0.35)"}`,
+                opacity: isLatest ? 1 : 0.52,
+                boxShadow: isLatest
+                  ? `0 0 10px ${s.glow}, inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.25)`
+                  : "none",
                 animation: isLatest ? "slide-up 0.4s ease-out" : undefined,
               }}
             >
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="text-lg">{s.icon}</span>
+              {isLatest && (
+                <div
+                  className="absolute inset-0 pointer-events-none news-crt-overlay opacity-[0.07] mix-blend-overlay"
+                  aria-hidden
+                />
+              )}
+              <div className="relative flex items-center gap-2 mb-1.5 flex-wrap">
                 <span
-                  className="text-xs font-bold px-2 py-0.5 rounded-md"
-                  style={{ background: `${stockColor}22`, color: stockColor }}
+                  className="text-[9px] font-bold tabular-nums px-1.5 py-0.5 border"
+                  style={{
+                    fontFamily: "var(--font-pixel)",
+                    borderColor: stockColor,
+                    color: stockColor,
+                    background: `${stockColor}14`,
+                  }}
                 >
                   {event.symbol}
                 </span>
                 <span
-                  className="text-xs font-bold tracking-wider"
-                  style={{ color: s.color }}
+                  className="text-[8px] font-bold tracking-[0.2em]"
+                  style={{ fontFamily: "var(--font-pixel)", color: s.accent }}
                 >
-                  {s.label}
+                  {s.icon} {s.label}
                 </span>
+                {isLatest && (
+                  <span
+                    className="ml-auto flex items-center gap-1 text-[7px] tracking-[0.25em]"
+                    style={{ fontFamily: "var(--font-pixel)", color: "#5a6578" }}
+                  >
+                    <span className="news-live-dot inline-block h-1.5 w-1.5 rounded-full" style={{ background: s.accent }} />
+                    LIVE
+                  </span>
+                )}
               </div>
               <div
-                className="text-sm leading-relaxed font-medium"
-                style={{ color: isLatest ? "#fff" : "#777" }}
+                className="relative text-[13px] leading-snug font-semibold tracking-wide"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  color: isLatest ? s.color : "#5c6578",
+                  textShadow: isLatest ? `0 0 6px ${s.glow}` : "none",
+                }}
               >
                 {event.headline}
               </div>
