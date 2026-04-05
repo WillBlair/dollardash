@@ -296,6 +296,7 @@ export default function StoryPage() {
           CHAPTER {activeChapter.id}: {activeChapter.title.toUpperCase()}
         </div>
         <DollarGuy
+          key={`story-${activeChapter.id}`}
           dialog={activeChapter.storyDialog}
           onDialogComplete={() => setPhase("learn")}
         />
@@ -310,6 +311,7 @@ export default function StoryPage() {
           {activeChapter.subtitle.toUpperCase()}
         </div>
         <DollarGuy
+          key={`learn-${activeChapter.id}`}
           dialog={activeChapter.learnDialog}
           onDialogComplete={() => setPhase("minigame")}
         />
@@ -430,6 +432,7 @@ export default function StoryPage() {
         </div>
 
         <DollarGuy
+          key={`reflect-${activeChapter.id}`}
           dialog={activeChapter.reflectDialog}
           onDialogComplete={handleChapterComplete}
           size="small"
