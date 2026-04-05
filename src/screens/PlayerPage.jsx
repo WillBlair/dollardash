@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { useSocket } from "../hooks/useSocket.js";
 import { STOCKS, STARTING_CASH, DEFAULT_DURATION, TRADER_TITLES } from "../../shared/constants.js";
-import BadgeChip from "../components/BadgeChip.jsx";
 import StockCard from "../components/StockCard.jsx";
 import TradeControls from "../components/TradeControls.jsx";
 import FlashMessage from "../components/FlashMessage.jsx";
@@ -34,7 +33,6 @@ export default function PlayerPage() {
   const [portfolioValue, setPortfolioValue] = useState(STARTING_CASH);
   const [timeLeft, setTimeLeft] = useState(DEFAULT_DURATION);
   const [duration, setDuration] = useState(DEFAULT_DURATION);
-  const [leaderboard, setLeaderboard] = useState([]);
   const [selectedStock, setSelectedStock] = useState(0);
   const [flash, setFlash] = useState(null);
   const [results, setResults] = useState(null);
@@ -62,7 +60,6 @@ export default function PlayerPage() {
     socket.on("game:tick", (data) => {
       setDayScreen(null);
       setMarket({ prices: data.prices, histories: data.histories, timeLeft: data.timeLeft });
-      setLeaderboard(data.leaderboard);
       const me = data.leaderboard.find((e) => e.id === socket.id);
       if (me) setPortfolioValue(me.value);
     });
@@ -316,11 +313,21 @@ export default function PlayerPage() {
           </div>
         </div>
         {myResult.badges?.length > 0 && (
-          <div className="mb-6">
-            <div className="text-xs mb-2" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>BADGES</div>
-            <div className="flex gap-2 flex-wrap justify-center">
+          <div className="mb-6 w-full max-w-sm">
+            <div className="text-xs mb-3" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>BADGES EARNED</div>
+            <div className="flex flex-col gap-2">
               {myResult.badges.map((b) => (
-                <BadgeChip key={b.id} badge={b} />
+                <div
+                  key={b.id}
+                  className="flex items-center gap-3 rounded-xl px-4 py-3"
+                  style={{ background: "rgba(255,214,0,0.07)", border: "1px solid rgba(255,214,0,0.18)" }}
+                >
+                  <span className="text-2xl shrink-0">{b.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-bold" style={{ color: "#FFD600" }}>{b.label}</div>
+                    <div className="text-xs mt-0.5 leading-snug" style={{ color: "#888" }}>{b.desc}</div>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
