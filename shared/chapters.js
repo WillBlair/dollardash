@@ -15,12 +15,21 @@ export const CHAPTERS = [
     storyDialog: [
       {
         speaker: "dollar-guy",
-        text: "Welcome! I'm Dollar Guy, your personal guide to the world of money. Ready to make your first trade?",
+        text: "Welcome! I'm Dollar Guy. I'm going to help you learn all about stocks, markets, and how to make your money work for you.",
         scene: { icon: "🧾", headline: "DEMO", detail: "Chapter 1 · speed run", accent: "#76FF03" },
       },
       {
         speaker: "dollar-guy",
-        text: "A stock is simply a tiny slice of ownership in a company. Let's do a practice run. Buy a slice, wait for the price to go up, and sell it to lock in your profit!",
+        text: "We'll start with the absolute basics. You've probably heard people talking about buying stocks before.",
+      },
+      {
+        speaker: "dollar-guy",
+        text: "A stock is really just a tiny slice of ownership in a real company. When the company does well, your slice becomes more valuable.",
+      },
+      {
+        speaker: "dollar-guy",
+        text: "Let's do a quick practice run. You're going to buy a slice, wait for the price to go up, and sell it to lock in your profit. Let's go!",
+        scene: { icon: "🎯", headline: "YOUR FIRST TRADE", detail: "Buy, hold, and sell", accent: "#00E5FF" },
       },
     ],
     learnDialog: [],
