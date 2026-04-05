@@ -9,9 +9,11 @@ import TradeControls from "../components/TradeControls.jsx";
 import FlashMessage from "../components/FlashMessage.jsx";
 import Timer from "../components/Timer.jsx";
 import Leaderboard from "../components/Leaderboard.jsx";
+import BigChart from "../components/BigChart.jsx";
 import NewsTicker from "../components/NewsTicker.jsx";
 import TitleBadge from "../components/TitleBadge.jsx";
 import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
+import DayTransitionScreen from "../components/DayTransitionScreen.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
 import VoiceAgent from "../components/VoiceAgent.jsx";
 
@@ -39,6 +41,7 @@ export default function PlayerPage() {
   const [results, setResults] = useState(null);
   const [myResult, setMyResult] = useState(null);
   const [newsEvents, setNewsEvents] = useState([]);
+  const [dayScreen, setDayScreen] = useState(null);
 
   useEffect(() => {
     if (!socket) return;
@@ -53,7 +56,12 @@ export default function PlayerPage() {
       sound.startAmbient();
     });
 
+    socket.on("game:day", ({ dayNumber, leaderboard: lb }) => {
+      setDayScreen({ dayNumber, leaderboard: lb });
+    });
+
     socket.on("game:tick", (data) => {
+      setDayScreen(null);
       setMarket({ prices: data.prices, histories: data.histories, timeLeft: data.timeLeft });
       setLeaderboard(data.leaderboard);
       const me = data.leaderboard.find((e) => e.id === socket.id);
@@ -93,6 +101,7 @@ export default function PlayerPage() {
 
     return () => {
       socket.off("game:start");
+      socket.off("game:day");
       socket.off("game:tick");
       socket.off("game:news");
       socket.off("game:timer");
@@ -213,6 +222,10 @@ export default function PlayerPage() {
     const prices = market?.prices || STOCKS.map((s) => s.basePrice);
     const histories = market?.histories || STOCKS.map((s) => [s.basePrice]);
 
+    if (dayScreen) {
+      return <DayTransitionScreen dayNumber={dayScreen.dayNumber} leaderboard={dayScreen.leaderboard} highlightId={socket?.id} />;
+    }
+
     return (
       <div className="min-h-dvh flex flex-col px-3 py-3 gap-2 max-w-6xl mx-auto pb-28">
         <UrgencyOverlay timeLeft={timeLeft} />
@@ -250,17 +263,14 @@ export default function PlayerPage() {
               ))}
             </div>
 
+            <div className="rounded-lg overflow-hidden" style={{ minHeight: 140 }}>
+              <BigChart histories={histories} selectedIdx={selectedStock} compact />
+            </div>
+
             <TradeControls
               selectedStock={selectedStock} price={prices[selectedStock]}
               cash={cash} onTrade={handleTrade} disabled={false}
             />
-
-            {leaderboard.length > 0 && (
-              <div>
-                <div className="text-xs mb-1" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>STANDINGS</div>
-                <Leaderboard entries={leaderboard.slice(0, 5)} highlightId={socket?.id} compact />
-              </div>
-            )}
           </div>
           <div className="hidden lg:flex lg:w-80 xl:w-96 shrink-0 flex-col min-h-0">
             <NewsTicker events={newsEvents} />
