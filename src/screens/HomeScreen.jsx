@@ -88,11 +88,24 @@ export default function HomeScreen() {
               <span className="text-base select-none opacity-90 pb-0.5" aria-hidden>💸</span>
             </div>
 
-            <p className="text-sm max-w-md leading-relaxed mb-6" style={{ color: "#aaa" }}>
-              Learn the basics in one guided story—with Dollar Guy from paycheck to portfolio
+            <p className="text-sm max-w-md leading-relaxed mb-4" style={{ color: "#aaa" }}>
+              Learn to trade through Dollar Guy's story
               <br />
               — then compete with friends.
             </p>
+
+            <div className="w-full max-w-[min(100%,280px)] mx-auto mb-6 flex justify-center">
+              <img
+                src={publicAsset("output-onlinegiftools.gif")}
+                alt="Dollar Dash"
+                className="w-full h-auto max-h-[min(40vh,220px)] object-contain"
+                style={{
+                  filter: "drop-shadow(0 0 12px rgba(255,214,0,0.15))",
+                }}
+                decoding="async"
+                loading="eager"
+              />
+            </div>
 
             <div className="flex flex-wrap gap-2 justify-center mb-8">
               {STOCKS.map((s) => (
