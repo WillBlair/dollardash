@@ -10,6 +10,7 @@ import Leaderboard from "../components/Leaderboard.jsx";
 import Timer from "../components/Timer.jsx";
 import NewsTicker from "../components/NewsTicker.jsx";
 import DurationPicker from "../components/DurationPicker.jsx";
+import Mascot from "../components/Mascot.jsx";
 import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
 import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
@@ -29,6 +30,8 @@ export default function HostPage() {
   const [results, setResults] = useState(null);
   const [selectedStock, setSelectedStock] = useState(0);
   const [newsEvents, setNewsEvents] = useState([]);
+  const [mascotMood, setMascotMood] = useState("idle");
+  const [mascotTrigger, setMascotTrigger] = useState(0);
   const hostCreateDoneRef = useRef(false);
 
   useNewsAnnouncer(phase === "playing" ? newsEvents : [], phase === "playing");
@@ -63,6 +66,8 @@ export default function HostPage() {
     socket.on("game:news", (event) => {
       setNewsEvents((prev) => [...prev.slice(-9), event]);
       sound.news();
+      setMascotMood(event.sentiment === "bullish" ? "bullish" : "bearish");
+      setMascotTrigger((n) => n + 1);
     });
 
     socket.on("game:timer", ({ timeLeft: t }) => setTimeLeft(t));
@@ -172,8 +177,9 @@ export default function HostPage() {
   // ─── Playing ──────────────────────────────────────────────
   if (phase === "playing") {
     return (
-      <div className="min-h-dvh flex flex-col px-3 py-2 gap-2 max-w-6xl mx-auto pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:px-4 lg:py-3 lg:gap-3">
+      <div className="min-h-dvh flex flex-col px-4 py-3 gap-3 max-w-6xl mx-auto pb-28">
         <UrgencyOverlay timeLeft={timeLeft} />
+        <Mascot mood={mascotMood} latestEvent={mascotTrigger} />
 
         <div className="flex justify-between items-center flex-wrap gap-2">
           <div className="text-sm tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
@@ -210,7 +216,7 @@ export default function HostPage() {
             </div>
           </div>
 
-          <div className="lg:w-80 xl:w-96 shrink-0 flex flex-col gap-2 lg:gap-3 min-h-0 max-lg:max-h-[min(40dvh,18rem)] max-lg:overflow-y-auto">
+          <div className="lg:w-80 xl:w-96 shrink-0 flex flex-col gap-3">
             <NewsTicker events={newsEvents} />
             <div>
               <div className="text-xs mb-2 tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#aaa" }}>
@@ -280,10 +286,9 @@ export default function HostPage() {
           <div className="mb-8 text-center">
             <div className="text-xs mb-2" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>WINNER BADGES</div>
             <div className="flex gap-2 flex-wrap justify-center">
-              {winner.badges.map((b) => {
-                const full = BADGES.find((x) => x.id === b.id) || b;
-                return <BadgeChip key={b.id} badge={{ ...b, desc: full.desc, threshold: full.threshold }} />;
-              })}
+              {winner.badges.map((b) => (
+                <BadgeChip key={b.id} badge={b} />
+              ))}
             </div>
           </div>
         )}

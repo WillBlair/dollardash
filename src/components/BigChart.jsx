@@ -7,9 +7,7 @@ export default function BigChart({ histories, selectedIdx }) {
   const stock = STOCKS[selectedIdx];
   const history = histories?.[selectedIdx];
   if (!history || history.length < 2) {
-    return (
-      <div className="w-full shrink-0 min-h-[100px] max-h-[24vh] lg:flex-1 lg:min-h-[200px] lg:max-h-none" />
-    );
+    return <div style={{ width: "100%", aspectRatio: `${W}/${H}` }} />;
   }
 
   const min = Math.min(...history) * 0.98;
@@ -48,32 +46,28 @@ export default function BigChart({ histories, selectedIdx }) {
   });
 
   return (
-    <div className="w-full shrink-0 min-h-[100px] max-h-[24vh] lg:flex-1 lg:min-h-[200px] lg:max-h-none">
-      <svg
-        width="100%"
-        height="100%"
-        viewBox={`0 0 ${W} ${H}`}
-        preserveAspectRatio="none"
-        className="block rounded-lg"
-        style={{ background: "rgba(0,0,0,0.3)" }}
-      >
-        {gridLines}
-        <polyline
-          points={points}
-          fill="none"
-          stroke={stock.color}
-          strokeWidth="2.5"
-          strokeLinejoin="round"
-          opacity="0.9"
-        />
-        <circle cx={lastX} cy={lastY} r="4" fill={stock.color} />
-        <text x="8" y="20" fill={stock.color} fontSize="14" fontWeight="700" fontFamily="var(--font-pixel)">
-          {stock.symbol}
-        </text>
-        <text x="8" y="36" fill="rgba(255,255,255,0.5)" fontSize="10" fontFamily="var(--font-mono)">
-          {stock.name}
-        </text>
-      </svg>
-    </div>
+    <svg
+      width="100%"
+      viewBox={`0 0 ${W} ${H}`}
+      className="block rounded-lg"
+      style={{ background: "rgba(0,0,0,0.3)" }}
+    >
+      {gridLines}
+      <polyline
+        points={points}
+        fill="none"
+        stroke={stock.color}
+        strokeWidth="2.5"
+        strokeLinejoin="round"
+        opacity="0.9"
+      />
+      <circle cx={lastX} cy={lastY} r="4" fill={stock.color} />
+      <text x="8" y="20" fill={stock.color} fontSize="14" fontWeight="700" fontFamily="var(--font-pixel)">
+        {stock.symbol}
+      </text>
+      <text x="8" y="36" fill="rgba(255,255,255,0.5)" fontSize="10" fontFamily="var(--font-mono)">
+        {stock.name}
+      </text>
+    </svg>
   );
 }

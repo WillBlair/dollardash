@@ -12,14 +12,13 @@ export default function MiniChart({ history, color, width = 120, height = 28 }) 
     .join(" ");
 
   return (
-    <svg width={width} height={height} className="block max-w-full" style={{ opacity: 0.92 }}>
+    <svg width={width} height={height} className="block">
       <polyline
         points={points}
         fill="none"
         stroke={color}
-        strokeWidth="1.75"
-        strokeLinejoin="miter"
-        strokeLinecap="square"
+        strokeWidth="2"
+        strokeLinejoin="round"
       />
     </svg>
   );

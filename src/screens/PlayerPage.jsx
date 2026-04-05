@@ -11,9 +11,11 @@ import Timer from "../components/Timer.jsx";
 import Leaderboard from "../components/Leaderboard.jsx";
 import NewsTicker from "../components/NewsTicker.jsx";
 import TitleBadge from "../components/TitleBadge.jsx";
+import Mascot from "../components/Mascot.jsx";
 import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
 import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
+import VoiceAgent from "../components/VoiceAgent.jsx";
 
 export default function PlayerPage() {
   const { code: urlCode } = useParams();
@@ -39,6 +41,8 @@ export default function PlayerPage() {
   const [results, setResults] = useState(null);
   const [myResult, setMyResult] = useState(null);
   const [newsEvents, setNewsEvents] = useState([]);
+  const [mascotMood, setMascotMood] = useState("idle");
+  const [mascotTrigger, setMascotTrigger] = useState(0);
 
   useNewsAnnouncer(phase === "playing" ? newsEvents : [], phase === "playing");
 
@@ -65,6 +69,8 @@ export default function PlayerPage() {
     socket.on("game:news", (event) => {
       setNewsEvents((prev) => [...prev.slice(-9), event]);
       sound.news();
+      setMascotMood(event.sentiment === "bullish" ? "bullish" : "bearish");
+      setMascotTrigger((n) => n + 1);
     });
 
     socket.on("game:timer", ({ timeLeft: t }) => setTimeLeft(t));
@@ -127,8 +133,9 @@ export default function PlayerPage() {
           setPortfolioValue(res.portfolioValue);
           const color = type === "buy" ? "#76FF03" : "#FFD600";
           showFlash(`${type === "buy" ? "BOUGHT" : "SOLD"} ${qty} ${res.symbol}`, color);
-          if (type === "buy") sound.buy();
-          else sound.sell();
+          if (type === "buy") { sound.buy(); setMascotMood("buy"); }
+          else { sound.sell(); setMascotMood("sell"); }
+          setMascotTrigger((n) => n + 1);
         } else {
           showFlash(res.error || "Trade failed", "#FF3D71");
           sound.error();
@@ -144,6 +151,14 @@ export default function PlayerPage() {
   };
 
   const pnl = portfolioValue - STARTING_CASH;
+
+  // Mascot P&L mood
+  useEffect(() => {
+    if (phase !== "playing") return;
+    const pnlPct = ((portfolioValue - STARTING_CASH) / STARTING_CASH) * 100;
+    if (pnlPct > 10) setMascotMood("winning");
+    else if (pnlPct < -10) setMascotMood("losing");
+  }, [phase, portfolioValue]);
 
   // ─── Join Screen ──────────────────────────────────────────
   if (phase === "join") {
@@ -216,100 +231,67 @@ export default function PlayerPage() {
     const histories = market?.histories || STOCKS.map((s) => [s.basePrice]);
 
     return (
-      <div
-        className="h-dvh max-h-dvh overflow-hidden flex flex-col px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] max-lg:gap-1.5 gap-2 max-w-6xl mx-auto min-h-0 box-border lg:pt-3"
-      >
+      <div className="min-h-dvh flex flex-col px-3 py-3 gap-2 max-w-6xl mx-auto pb-28">
         <UrgencyOverlay timeLeft={timeLeft} />
         <FlashMessage message={flash?.msg} color={flash?.color} />
+        <Mascot mood={mascotMood} latestEvent={mascotTrigger} />
 
-        <div className="shrink-0 flex flex-col max-lg:gap-1 gap-1.5">
-          <div className="flex items-center gap-2 min-w-0">
-            <span
-              className="text-[10px] lg:text-xs tracking-wider truncate"
-              style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
-            >
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <span className="text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
               TRADING
             </span>
             <TitleBadge portfolioValue={portfolioValue} />
           </div>
-          <Timer timeLeft={timeLeft} total={duration} />
+          <span className="font-bold text-sm" style={{ color: pnl >= 0 ? "#76FF03" : "#FF3D71" }}>
+            P&L: {pnl >= 0 ? "+" : ""}${pnl.toFixed(2)}
+          </span>
         </div>
 
-        <div
-          className="shrink-0 flex justify-between items-end rounded-lg lg:rounded-xl px-3 py-2 lg:px-5 lg:py-4"
-          style={{ background: "rgba(255,255,255,0.04)" }}
-        >
-          <div>
-            <div
-              className="text-[9px] lg:text-[10px] tracking-wider mb-0.5 lg:mb-1"
-              style={{ fontFamily: "var(--font-pixel)", color: "#666" }}
-            >
-              CASH
-            </div>
-            <div
-              className="text-lg lg:text-2xl xl:text-3xl font-bold tabular-nums leading-tight"
-              style={{ color: "#76FF03", fontFamily: "var(--font-mono)" }}
-            >
-              ${cash.toFixed(2)}
-            </div>
-          </div>
-          <div className="text-right">
-            <div
-              className="text-[9px] lg:text-[10px] tracking-wider mb-0.5 lg:mb-1"
-              style={{ fontFamily: "var(--font-pixel)", color: "#666" }}
-            >
-              P&L
-            </div>
-            <div
-              className="text-lg lg:text-2xl xl:text-3xl font-bold tabular-nums leading-tight"
-              style={{ color: pnl >= 0 ? "#76FF03" : "#FF3D71", fontFamily: "var(--font-mono)" }}
-            >
-              {pnl >= 0 ? "+" : ""}${pnl.toFixed(2)}
-            </div>
-          </div>
+        <Timer timeLeft={timeLeft} total={duration} />
+
+        <div className="flex justify-between items-center rounded-lg px-4 py-2.5 text-sm" style={{ background: "rgba(255,255,255,0.04)" }}>
+          <span>💵 <b style={{ color: "#76FF03" }}>${cash.toFixed(2)}</b></span>
+          <span>📊 <b style={{ color: "#00E5FF" }}>${portfolioValue.toFixed(2)}</b></span>
         </div>
 
-        <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-2 lg:gap-3 min-h-0">
-          <div className="flex-1 min-h-0 flex flex-col gap-1.5 lg:gap-2 min-w-0 overflow-y-auto lg:overflow-visible">
-            <div className="grid grid-cols-2 gap-1.5 lg:gap-2 shrink-0">
+        <div className="flex flex-col lg:flex-row gap-3 flex-1">
+          <div className="flex-1 flex flex-col gap-2 min-w-0">
+            <div className="grid grid-cols-2 gap-2">
               {STOCKS.map((stock, i) => (
                 <StockCard
                   key={stock.symbol}
-                  index={i}
-                  price={prices[i]}
-                  history={histories[i]}
-                  holdings={holdings[i] || 0}
-                  selected={selectedStock === i}
+                  index={i} price={prices[i]} history={histories[i]}
+                  holdings={holdings[i] || 0} selected={selectedStock === i}
                   onSelect={setSelectedStock}
                 />
               ))}
             </div>
 
+            <TradeControls
+              selectedStock={selectedStock} price={prices[selectedStock]}
+              cash={cash} onTrade={handleTrade} disabled={false}
+            />
+
             {leaderboard.length > 0 && (
-              <div className="shrink-0 max-lg:max-h-[5rem] max-lg:overflow-y-auto lg:max-h-none">
-                <div className="text-[10px] lg:text-xs mb-0.5 lg:mb-1" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>
-                  STANDINGS
-                </div>
+              <div>
+                <div className="text-xs mb-1" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>STANDINGS</div>
                 <Leaderboard entries={leaderboard.slice(0, 5)} highlightId={socket?.id} compact />
               </div>
             )}
-
-            <div className="shrink-0 pb-0.5">
-              <TradeControls
-                selectedStock={selectedStock}
-                price={prices[selectedStock]}
-                cash={cash}
-                heldQty={holdings[selectedStock] || 0}
-                onTrade={handleTrade}
-                disabled={false}
-              />
-            </div>
           </div>
-
-          <div className="shrink-0 flex flex-col min-h-0 min-w-0 max-h-[min(22dvh,11rem)] lg:max-h-none lg:w-80 xl:w-96 lg:shrink-0">
+          <div className="lg:w-80 xl:w-96 shrink-0 flex flex-col">
             <NewsTicker events={newsEvents} />
           </div>
         </div>
+
+        <VoiceAgent
+          onTrade={handleTrade}
+          cash={cash}
+          holdings={holdings}
+          prices={market?.prices || STOCKS.map((s) => s.basePrice)}
+          onSelectStock={setSelectedStock}
+        />
       </div>
     );
   }
@@ -333,9 +315,6 @@ export default function PlayerPage() {
         >
           {traderTitle.title}
         </div>
-        <div className="text-xs mb-4 tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#555" }}>
-          FINAL RANK
-        </div>
         <div className="text-lg font-bold mb-1" style={{ color: "#aaa" }}>
           #{myResult.rank} of {results.length}
         </div>
@@ -356,10 +335,9 @@ export default function PlayerPage() {
           <div className="mb-6">
             <div className="text-xs mb-2" style={{ fontFamily: "var(--font-pixel)", color: "#666" }}>BADGES</div>
             <div className="flex gap-2 flex-wrap justify-center">
-              {myResult.badges.map((b) => {
-                const full = BADGES.find((x) => x.id === b.id) || b;
-                return <BadgeChip key={b.id} badge={{ ...b, desc: full.desc, threshold: full.threshold }} />;
-              })}
+              {myResult.badges.map((b) => (
+                <BadgeChip key={b.id} badge={b} />
+              ))}
             </div>
           </div>
         )}

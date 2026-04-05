@@ -12,16 +12,11 @@ import NewsTicker from "../components/NewsTicker.jsx";
 import DurationPicker from "../components/DurationPicker.jsx";
 import TitleBadge from "../components/TitleBadge.jsx";
 import BadgeChip from "../components/BadgeChip.jsx";
+import Mascot from "../components/Mascot.jsx";
 import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
 import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
-import ArcadeTitle from "../components/ArcadeTitle.jsx";
-
-function publicAsset(filename) {
-  const base = import.meta.env.BASE_URL.replace(/\/$/, "") || "";
-  const name = filename.replace(/^\//, "");
-  return base ? `${base}/${name}` : `/${name}`;
-}
+import VoiceAgent from "../components/VoiceAgent.jsx";
 
 function getPortfolioValue(cash, holdings, prices) {
   let val = cash;
@@ -45,6 +40,9 @@ export default function SoloPage() {
   const [flash, setFlash] = useState(null);
   const [stats, setStats] = useState(null);
   const [newsEvents, setNewsEvents] = useState([]);
+  const [mascotMood, setMascotMood] = useState("idle");
+  const [mascotTrigger, setMascotTrigger] = useState(0);
+
   useNewsAnnouncer(phase === "playing" ? newsEvents : [], phase === "playing");
 
   const gameRef = useRef(null);
@@ -67,6 +65,7 @@ export default function SoloPage() {
     setFlash(null);
     setStats(null);
     setNewsEvents([]);
+    setMascotMood("idle");
     newsRef.current = new NewsEngine();
     prevPricesRef.current = [...initPrices];
     gameRef.current = {
@@ -149,6 +148,8 @@ export default function SoloPage() {
       if (newEvent) {
         setNewsEvents((prev) => [...prev.slice(-9), newEvent]);
         sound.news();
+        setMascotMood(newEvent.sentiment === "bullish" ? "bullish" : "bearish");
+        setMascotTrigger((n) => n + 1);
       }
 
       const g = gameRef.current;
@@ -181,6 +182,8 @@ export default function SoloPage() {
         if (!g.holdTicks[stockIdx]) g.holdTicks[stockIdx] = 0;
         showFlash(`BOUGHT ${qty} ${STOCKS[stockIdx].symbol}`, "#76FF03");
         sound.buy();
+        setMascotMood("buy");
+        setMascotTrigger((n) => n + 1);
       } else {
         const held = holdings[stockIdx] || 0;
         if (held < qty) { showFlash("NOT ENOUGH SHARES", "#FF3D71"); sound.error(); return; }
@@ -192,6 +195,8 @@ export default function SoloPage() {
         g.cash = newCash; g.holdings = newHoldings; g.trades++;
         showFlash(`SOLD ${qty} ${STOCKS[stockIdx].symbol}`, "#FFD600");
         sound.sell();
+        setMascotMood("sell");
+        setMascotTrigger((n) => n + 1);
       }
     },
     [cash, holdings, prices, sound],
@@ -205,96 +210,73 @@ export default function SoloPage() {
   const portfolioValue = getPortfolioValue(cash, holdings, prices);
   const pnl = portfolioValue - STARTING_CASH;
 
-  // ─── Menu — same hero shell as HomeScreen (no max-w-lg; chips full width, CTAs max-w-sm) ───
+  // Update mascot based on P&L periodically
+  useEffect(() => {
+    if (phase !== "playing") return;
+    const pnlPct = ((portfolioValue - STARTING_CASH) / STARTING_CASH) * 100;
+    if (pnlPct > 10) setMascotMood("winning");
+    else if (pnlPct < -10) setMascotMood("losing");
+  }, [phase, portfolioValue]);
+
+  // ─── Menu ───────────────────────────────────────────────────
   if (phase === "menu") {
     return (
-      <div className="relative isolate min-h-dvh">
-        <div className="relative z-20">
-          <section className="min-h-dvh flex flex-col px-6">
-            <div
-              className="flex-1 flex flex-col items-center justify-center text-center min-h-0
-                pt-[clamp(3rem,12vh,6rem)] pb-4"
-            >
-              <h1 className="mb-2 mt-0 text-center font-normal">
-                <ArcadeTitle>DOLLAR DASH</ArcadeTitle>
-              </h1>
-              <div
-                className="text-[10px] sm:text-xs mb-1 tracking-widest -mt-1"
-                style={{ fontFamily: "var(--font-pixel)", color: "#76FF03" }}
-              >
-                SOLO MODE
-              </div>
-
-              <div className="flex items-end justify-center gap-1.5 my-1.5">
-                <span className="text-base select-none opacity-90 pb-0.5" aria-hidden>💰</span>
-                <img
-                  src={publicAsset("rocket-to-the-moon.gif")}
-                  alt=""
-                  width={30}
-                  height={30}
-                  className="shrink-0 w-auto"
-                  style={{
-                    width: "30px",
-                    maxWidth: "30px",
-                    height: "auto",
-                    imageRendering: "pixelated",
-                    filter: "drop-shadow(0 0 4px rgba(255,214,0,0.18))",
-                  }}
-                  decoding="async"
-                />
-                <span className="text-base select-none opacity-90 pb-0.5" aria-hidden>💸</span>
-              </div>
-
-              <p className="text-sm max-w-md leading-relaxed mb-6" style={{ color: "#aaa" }}>
-                You have <span className="font-bold" style={{ color: "#76FF03" }}>$10,000</span>.
-                <br />
-                Watch the news. React fast. Don’t get REKT.
-              </p>
-
-              <div className="flex flex-wrap gap-2 justify-center mb-8 w-full">
-                {STOCKS.map((s) => (
-                  <div
-                    key={s.symbol}
-                    className="rounded-lg px-3 py-2 text-xs"
-                    style={{
-                      background: "rgba(255,255,255,0.05)",
-                      border: `1px solid ${s.color}33`,
-                      fontFamily: "var(--font-mono)",
-                    }}
-                  >
-                    <span className="font-bold" style={{ color: s.color }}>{s.symbol}</span>
-                    <span className="ml-2" style={{ color: "#555" }}>
-                      {s.volatility > 0.04 ? "⚡ Volatile" : s.volatility > 0.02 ? "⚡ Medium" : "🛡️ Steady"}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex flex-col gap-3 w-full max-w-sm">
-                <DurationPicker value={duration} onChange={setDuration} />
-                <button
-                  onClick={startGame}
-                  className="w-full rounded-xl py-4 px-6 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
-                  style={{
-                    fontFamily: "var(--font-pixel)",
-                    background: "#76FF03",
-                    color: "#0a0e1a",
-                    boxShadow: "0 0 30px rgba(118,255,3,0.25)",
-                  }}
-                >
-                  START TRADING
-                </button>
-                <button
-                  onClick={() => navigate("/")}
-                  className="text-xs border-none bg-transparent cursor-pointer py-2"
-                  style={{ color: "#444" }}
-                >
-                  ← Back to home
-                </button>
-              </div>
-            </div>
-          </section>
+      <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12 text-center">
+        <div
+          className="mb-2"
+          style={{
+            fontFamily: "var(--font-pixel)",
+            fontSize: "clamp(20px, 5vw, 36px)",
+            color: "#FFD600",
+            lineHeight: 1.5,
+            textShadow: "0 0 30px rgba(255,214,0,0.25)",
+          }}
+        >
+          DOLLAR DASH
         </div>
+        <div className="text-sm mb-1" style={{ fontFamily: "var(--font-pixel)", color: "#76FF03" }}>
+          SOLO MODE
+        </div>
+        <div className="text-4xl my-3">💰📈</div>
+        <div className="text-sm max-w-md leading-relaxed mb-6" style={{ color: "#aaa" }}>
+          You have <span className="font-bold" style={{ color: "#76FF03" }}>$10,000</span>.
+          <br />
+          Watch the news. React fast. Don't get REKT.
+        </div>
+
+        <div className="mb-6">
+          <DurationPicker value={duration} onChange={setDuration} />
+        </div>
+
+        <div className="flex flex-wrap gap-2 justify-center mb-8">
+          {STOCKS.map((s) => (
+            <div
+              key={s.symbol}
+              className="rounded-lg px-3 py-2 text-xs"
+              style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${s.color}33`, fontFamily: "var(--font-mono)" }}
+            >
+              <span className="font-bold" style={{ color: s.color }}>{s.symbol}</span>
+              <span className="ml-2" style={{ color: "#666" }}>
+                {s.volatility > 0.04 ? "🔥 High Risk" : s.volatility > 0.02 ? "⚡ Medium" : "🛡️ Safe"}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={startGame}
+          className="rounded-xl py-4 px-12 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
+          style={{ fontFamily: "var(--font-pixel)", background: "#76FF03", color: "#0a0e1a", boxShadow: "0 0 30px rgba(118,255,3,0.25)" }}
+        >
+          START TRADING
+        </button>
+        <button
+          onClick={() => navigate("/")}
+          className="mt-6 text-xs border-none bg-transparent cursor-pointer"
+          style={{ color: "#444" }}
+        >
+          ← Back to home
+        </button>
       </div>
     );
   }
@@ -302,66 +284,38 @@ export default function SoloPage() {
   // ─── Playing ──────────────────────────────────────────────
   if (phase === "playing") {
     return (
-      <div
-        className="h-dvh max-h-dvh overflow-hidden flex flex-col px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] max-lg:gap-1.5 gap-2 lg:px-6 lg:pt-3 max-w-6xl mx-auto min-h-0 box-border"
-      >
+      <div className="min-h-dvh flex flex-col px-3 py-3 gap-2 max-w-6xl mx-auto pb-28">
         <UrgencyOverlay timeLeft={timeLeft} />
         <FlashMessage message={flash?.msg} color={flash?.color} />
+        <Mascot mood={mascotMood} latestEvent={mascotTrigger} />
 
-        <div className="shrink-0 flex flex-col max-lg:gap-1 gap-1.5">
-          <div className="flex justify-between items-center gap-2 flex-wrap min-h-0">
-            <div className="flex items-center gap-2 min-w-0">
-              <span
-                className="text-[10px] lg:text-xs tracking-wider truncate"
-                style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
-              >
-                DOLLAR DASH
-              </span>
-              <TitleBadge portfolioValue={portfolioValue} />
-            </div>
+        {/* Header bar */}
+        <div className="flex justify-between items-center flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
+              DOLLAR DASH
+            </span>
+            <TitleBadge portfolioValue={portfolioValue} />
           </div>
-          <Timer timeLeft={timeLeft} total={durationRef.current} />
+          <span className="font-bold text-sm" style={{ color: pnl >= 0 ? "#76FF03" : "#FF3D71" }}>
+            P&L: {pnl >= 0 ? "+" : ""}${pnl.toFixed(2)}
+          </span>
         </div>
 
-        <div
-          className="shrink-0 flex justify-between items-end rounded-lg lg:rounded-xl px-3 py-2 lg:px-5 lg:py-4"
-          style={{ background: "rgba(255,255,255,0.04)" }}
-        >
-          <div>
-            <div
-              className="text-[9px] lg:text-[10px] tracking-wider mb-0.5 lg:mb-1"
-              style={{ fontFamily: "var(--font-pixel)", color: "#666" }}
-            >
-              CASH
-            </div>
-            <div
-              className="text-lg lg:text-2xl xl:text-3xl font-bold tabular-nums leading-tight"
-              style={{ color: "#76FF03", fontFamily: "var(--font-mono)" }}
-            >
-              ${cash.toFixed(2)}
-            </div>
-          </div>
-          <div className="text-right">
-            <div
-              className="text-[9px] lg:text-[10px] tracking-wider mb-0.5 lg:mb-1"
-              style={{ fontFamily: "var(--font-pixel)", color: "#666" }}
-            >
-              P&L
-            </div>
-            <div
-              className="text-lg lg:text-2xl xl:text-3xl font-bold tabular-nums leading-tight"
-              style={{ color: pnl >= 0 ? "#76FF03" : "#FF3D71", fontFamily: "var(--font-mono)" }}
-            >
-              {pnl >= 0 ? "+" : ""}${pnl.toFixed(2)}
-            </div>
-          </div>
+        <Timer timeLeft={timeLeft} total={durationRef.current} />
+
+        {/* Cash / Portfolio */}
+        <div className="flex justify-between items-center rounded-lg px-4 py-2.5 text-sm" style={{ background: "rgba(255,255,255,0.04)" }}>
+          <span>💵 <b style={{ color: "#76FF03" }}>${cash.toFixed(2)}</b></span>
+          <span>📊 <b style={{ color: "#00E5FF" }}>${portfolioValue.toFixed(2)}</b></span>
         </div>
 
-        <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-2 lg:gap-3 min-h-0">
-          <div className="flex-1 min-h-0 flex flex-col gap-1.5 lg:gap-2 min-w-0 overflow-y-auto lg:overflow-visible">
+        {/* Two-column: trading left, news right */}
+        <div className="flex flex-col lg:flex-row gap-3 flex-1">
+          <div className="flex-1 flex flex-col gap-2 min-w-0">
             <BigChart histories={histories} selectedIdx={selectedStock} />
 
-            <div className="grid grid-cols-2 gap-1.5 lg:gap-2 shrink-0">
+            <div className="grid grid-cols-2 gap-2">
               {STOCKS.map((stock, i) => (
                 <StockCard
                   key={stock.symbol}
@@ -375,22 +329,28 @@ export default function SoloPage() {
               ))}
             </div>
 
-            <div className="shrink-0 pb-0.5">
-              <TradeControls
-                selectedStock={selectedStock}
-                price={prices[selectedStock]}
-                cash={cash}
-                heldQty={holdings[selectedStock] || 0}
-                onTrade={handleTrade}
-                disabled={false}
-              />
-            </div>
+            <TradeControls
+              selectedStock={selectedStock}
+              price={prices[selectedStock]}
+              cash={cash}
+              onTrade={handleTrade}
+              disabled={false}
+            />
           </div>
 
-          <div className="shrink-0 flex flex-col min-h-0 min-w-0 max-h-[min(22dvh,11rem)] lg:max-h-none lg:w-80 xl:w-96 lg:shrink-0">
+          {/* RIGHT: news feed */}
+          <div className="lg:w-80 xl:w-96 shrink-0 flex flex-col">
             <NewsTicker events={newsEvents} />
           </div>
         </div>
+
+        <VoiceAgent
+          onTrade={handleTrade}
+          cash={cash}
+          holdings={holdings}
+          prices={prices}
+          onSelectStock={setSelectedStock}
+        />
       </div>
     );
   }
