@@ -12,7 +12,6 @@ import NewsTicker from "../components/NewsTicker.jsx";
 import DurationPicker from "../components/DurationPicker.jsx";
 import TitleBadge from "../components/TitleBadge.jsx";
 import BadgeChip from "../components/BadgeChip.jsx";
-import Mascot from "../components/Mascot.jsx";
 import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
 import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
@@ -40,8 +39,6 @@ export default function SoloPage() {
   const [flash, setFlash] = useState(null);
   const [stats, setStats] = useState(null);
   const [newsEvents, setNewsEvents] = useState([]);
-  const [mascotMood, setMascotMood] = useState("idle");
-  const [mascotTrigger, setMascotTrigger] = useState(0);
 
   useNewsAnnouncer(phase === "playing" ? newsEvents : [], phase === "playing");
 
@@ -65,7 +62,6 @@ export default function SoloPage() {
     setFlash(null);
     setStats(null);
     setNewsEvents([]);
-    setMascotMood("idle");
     newsRef.current = new NewsEngine();
     prevPricesRef.current = [...initPrices];
     gameRef.current = {
@@ -148,8 +144,6 @@ export default function SoloPage() {
       if (newEvent) {
         setNewsEvents((prev) => [...prev.slice(-9), newEvent]);
         sound.news();
-        setMascotMood(newEvent.sentiment === "bullish" ? "bullish" : "bearish");
-        setMascotTrigger((n) => n + 1);
       }
 
       const g = gameRef.current;
@@ -182,8 +176,6 @@ export default function SoloPage() {
         if (!g.holdTicks[stockIdx]) g.holdTicks[stockIdx] = 0;
         showFlash(`BOUGHT ${qty} ${STOCKS[stockIdx].symbol}`, "#76FF03");
         sound.buy();
-        setMascotMood("buy");
-        setMascotTrigger((n) => n + 1);
       } else {
         const held = holdings[stockIdx] || 0;
         if (held < qty) { showFlash("NOT ENOUGH SHARES", "#FF3D71"); sound.error(); return; }
@@ -195,8 +187,6 @@ export default function SoloPage() {
         g.cash = newCash; g.holdings = newHoldings; g.trades++;
         showFlash(`SOLD ${qty} ${STOCKS[stockIdx].symbol}`, "#FFD600");
         sound.sell();
-        setMascotMood("sell");
-        setMascotTrigger((n) => n + 1);
       }
     },
     [cash, holdings, prices, sound],
@@ -209,14 +199,6 @@ export default function SoloPage() {
 
   const portfolioValue = getPortfolioValue(cash, holdings, prices);
   const pnl = portfolioValue - STARTING_CASH;
-
-  // Update mascot based on P&L periodically
-  useEffect(() => {
-    if (phase !== "playing") return;
-    const pnlPct = ((portfolioValue - STARTING_CASH) / STARTING_CASH) * 100;
-    if (pnlPct > 10) setMascotMood("winning");
-    else if (pnlPct < -10) setMascotMood("losing");
-  }, [phase, portfolioValue]);
 
   // ─── Menu ───────────────────────────────────────────────────
   if (phase === "menu") {
@@ -287,7 +269,6 @@ export default function SoloPage() {
       <div className="min-h-dvh flex flex-col px-3 py-3 gap-2 max-w-6xl mx-auto pb-28">
         <UrgencyOverlay timeLeft={timeLeft} />
         <FlashMessage message={flash?.msg} color={flash?.color} />
-        <Mascot mood={mascotMood} latestEvent={mascotTrigger} />
 
         {/* Header bar */}
         <div className="flex justify-between items-center flex-wrap gap-2">

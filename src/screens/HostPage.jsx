@@ -3,14 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import confetti from "canvas-confetti";
 import { useSocket } from "../hooks/useSocket.js";
-import { STOCKS, STARTING_CASH, DEFAULT_DURATION, BADGES } from "../../shared/constants.js";
+import { STOCKS, STARTING_CASH, DEFAULT_DURATION } from "../../shared/constants.js";
 import BadgeChip from "../components/BadgeChip.jsx";
 import BigChart from "../components/BigChart.jsx";
 import Leaderboard from "../components/Leaderboard.jsx";
 import Timer from "../components/Timer.jsx";
 import NewsTicker from "../components/NewsTicker.jsx";
 import DurationPicker from "../components/DurationPicker.jsx";
-import Mascot from "../components/Mascot.jsx";
 import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
 import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
@@ -30,8 +29,6 @@ export default function HostPage() {
   const [results, setResults] = useState(null);
   const [selectedStock, setSelectedStock] = useState(0);
   const [newsEvents, setNewsEvents] = useState([]);
-  const [mascotMood, setMascotMood] = useState("idle");
-  const [mascotTrigger, setMascotTrigger] = useState(0);
   const hostCreateDoneRef = useRef(false);
 
   useNewsAnnouncer(phase === "playing" ? newsEvents : [], phase === "playing");
@@ -66,8 +63,6 @@ export default function HostPage() {
     socket.on("game:news", (event) => {
       setNewsEvents((prev) => [...prev.slice(-9), event]);
       sound.news();
-      setMascotMood(event.sentiment === "bullish" ? "bullish" : "bearish");
-      setMascotTrigger((n) => n + 1);
     });
 
     socket.on("game:timer", ({ timeLeft: t }) => setTimeLeft(t));
@@ -179,7 +174,6 @@ export default function HostPage() {
     return (
       <div className="min-h-dvh flex flex-col px-4 py-3 gap-3 max-w-6xl mx-auto pb-28">
         <UrgencyOverlay timeLeft={timeLeft} />
-        <Mascot mood={mascotMood} latestEvent={mascotTrigger} />
 
         <div className="flex justify-between items-center flex-wrap gap-2">
           <div className="text-sm tracking-widest" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>

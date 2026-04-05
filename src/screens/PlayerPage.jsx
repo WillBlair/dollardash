@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { useSocket } from "../hooks/useSocket.js";
-import { STOCKS, STARTING_CASH, DEFAULT_DURATION, BADGES, TRADER_TITLES } from "../../shared/constants.js";
+import { STOCKS, STARTING_CASH, DEFAULT_DURATION, TRADER_TITLES } from "../../shared/constants.js";
 import BadgeChip from "../components/BadgeChip.jsx";
 import StockCard from "../components/StockCard.jsx";
 import TradeControls from "../components/TradeControls.jsx";
@@ -11,7 +11,6 @@ import Timer from "../components/Timer.jsx";
 import Leaderboard from "../components/Leaderboard.jsx";
 import NewsTicker from "../components/NewsTicker.jsx";
 import TitleBadge from "../components/TitleBadge.jsx";
-import Mascot from "../components/Mascot.jsx";
 import UrgencyOverlay from "../components/UrgencyOverlay.jsx";
 import useSoundEngine from "../hooks/useSoundEngine.js";
 import { useNewsAnnouncer } from "../hooks/useNewsAnnouncer.js";
@@ -41,8 +40,6 @@ export default function PlayerPage() {
   const [results, setResults] = useState(null);
   const [myResult, setMyResult] = useState(null);
   const [newsEvents, setNewsEvents] = useState([]);
-  const [mascotMood, setMascotMood] = useState("idle");
-  const [mascotTrigger, setMascotTrigger] = useState(0);
 
   useNewsAnnouncer(phase === "playing" ? newsEvents : [], phase === "playing");
 
@@ -69,8 +66,6 @@ export default function PlayerPage() {
     socket.on("game:news", (event) => {
       setNewsEvents((prev) => [...prev.slice(-9), event]);
       sound.news();
-      setMascotMood(event.sentiment === "bullish" ? "bullish" : "bearish");
-      setMascotTrigger((n) => n + 1);
     });
 
     socket.on("game:timer", ({ timeLeft: t }) => setTimeLeft(t));
@@ -133,9 +128,8 @@ export default function PlayerPage() {
           setPortfolioValue(res.portfolioValue);
           const color = type === "buy" ? "#76FF03" : "#FFD600";
           showFlash(`${type === "buy" ? "BOUGHT" : "SOLD"} ${qty} ${res.symbol}`, color);
-          if (type === "buy") { sound.buy(); setMascotMood("buy"); }
-          else { sound.sell(); setMascotMood("sell"); }
-          setMascotTrigger((n) => n + 1);
+          if (type === "buy") sound.buy();
+          else sound.sell();
         } else {
           showFlash(res.error || "Trade failed", "#FF3D71");
           sound.error();
@@ -151,14 +145,6 @@ export default function PlayerPage() {
   };
 
   const pnl = portfolioValue - STARTING_CASH;
-
-  // Mascot P&L mood
-  useEffect(() => {
-    if (phase !== "playing") return;
-    const pnlPct = ((portfolioValue - STARTING_CASH) / STARTING_CASH) * 100;
-    if (pnlPct > 10) setMascotMood("winning");
-    else if (pnlPct < -10) setMascotMood("losing");
-  }, [phase, portfolioValue]);
 
   // ─── Join Screen ──────────────────────────────────────────
   if (phase === "join") {
@@ -234,7 +220,6 @@ export default function PlayerPage() {
       <div className="min-h-dvh flex flex-col px-3 py-3 gap-2 max-w-6xl mx-auto pb-28">
         <UrgencyOverlay timeLeft={timeLeft} />
         <FlashMessage message={flash?.msg} color={flash?.color} />
-        <Mascot mood={mascotMood} latestEvent={mascotTrigger} />
 
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -280,7 +265,7 @@ export default function PlayerPage() {
               </div>
             )}
           </div>
-          <div className="lg:w-80 xl:w-96 shrink-0 flex flex-col">
+          <div className="hidden lg:flex lg:w-80 xl:w-96 shrink-0 flex-col min-h-0">
             <NewsTicker events={newsEvents} />
           </div>
         </div>
