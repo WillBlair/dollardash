@@ -5,6 +5,7 @@ import { STOCKS, STARTING_CASH, TICK_MS, MAX_HISTORY } from "../../shared/consta
 import { CHAPTERS } from "../../shared/chapters.js";
 import { NewsEngine } from "../../shared/newsEngine.js";
 import DollarGuy from "../components/DollarGuy.jsx";
+import StoryPhaseShell from "../components/StoryPhaseShell.jsx";
 import InteractiveLesson from "../components/InteractiveLesson.jsx";
 import ChapterSelect from "../components/ChapterSelect.jsx";
 import ObjectiveTracker from "../components/ObjectiveTracker.jsx";
@@ -95,7 +96,7 @@ export default function StoryPage() {
     setNewsEvents([]);
     setObjectiveMet(false);
     setActiveHint(null);
-    newsRef.current = new NewsEngine();
+    newsRef.current = new NewsEngine(cfg.newsEngineOptions ?? {});
     scriptedEventsRef.current = [...(cfg.scriptedEvents || [])];
 
     gameRef.current = {
@@ -294,48 +295,99 @@ export default function StoryPage() {
 
   if (phase === "story" && activeChapter) {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12">
-        <div className="text-xs tracking-wider mb-6" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
-          CHAPTER {activeChapter.id}: {activeChapter.title.toUpperCase()}
+      <StoryPhaseShell backdropUrl={activeChapter.storyBackdrop}>
+        <div className="min-h-dvh flex w-full flex-col justify-center px-4 py-10 sm:px-6 md:px-8">
+          <div
+            className="mx-auto mb-5 w-full max-w-[52rem] text-center text-xs tracking-wider"
+            style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
+          >
+            CHAPTER {activeChapter.id}: {activeChapter.title.toUpperCase()}
+          </div>
+          <div className="mx-auto w-full max-w-[52rem]">
+            <DollarGuy
+              key={`story-${activeChapter.id}`}
+              dialog={activeChapter.storyDialog}
+              typingSpeed={activeChapter.dialogTypingSpeed ?? 22}
+              onDialogComplete={() =>
+                setPhase(
+                  activeChapter.learnDialog?.length
+                    ? "learn"
+                    : activeChapter.situationDialog?.length
+                      ? "situation"
+                      : "minigame",
+                )
+              }
+            />
+          </div>
         </div>
-        <DollarGuy
-          key={`story-${activeChapter.id}`}
-          dialog={activeChapter.storyDialog}
-          onDialogComplete={() => setPhase("learn")}
-        />
-      </div>
+      </StoryPhaseShell>
     );
   }
 
   if (phase === "learn" && activeChapter) {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12">
-        <div className="text-xs tracking-wider mb-6" style={{ fontFamily: "var(--font-pixel)", color: "#00E5FF" }}>
-          {activeChapter.subtitle.toUpperCase()}
+      <StoryPhaseShell backdropUrl={activeChapter.storyBackdrop}>
+        <div className="min-h-dvh flex w-full flex-col justify-center px-4 py-10 sm:px-6 md:px-8">
+          <div
+            className="mx-auto mb-5 w-full max-w-[52rem] text-center text-xs tracking-wider"
+            style={{ fontFamily: "var(--font-pixel)", color: "#00E5FF" }}
+          >
+            {activeChapter.subtitle.toUpperCase()}
+          </div>
+          <div className="mx-auto w-full max-w-[52rem]">
+            <DollarGuy
+              key={`learn-${activeChapter.id}`}
+              dialog={activeChapter.learnDialog}
+              typingSpeed={activeChapter.dialogTypingSpeed ?? 22}
+              onDialogComplete={() =>
+                setPhase(activeChapter.situationDialog?.length ? "situation" : "minigame")
+              }
+            />
+          </div>
         </div>
-        <DollarGuy
-          key={`learn-${activeChapter.id}`}
-          dialog={activeChapter.learnDialog}
-          onDialogComplete={() => setPhase("minigame")}
-        />
-      </div>
+      </StoryPhaseShell>
+    );
+  }
+
+  if (phase === "situation" && activeChapter?.situationDialog?.length) {
+    return (
+      <StoryPhaseShell backdropUrl={activeChapter.storyBackdrop}>
+        <div className="min-h-dvh flex w-full flex-col justify-center px-4 py-10 sm:px-6 md:px-8">
+          <div
+            className="mx-auto mb-5 w-full max-w-[52rem] text-center text-xs tracking-wider"
+            style={{ fontFamily: "var(--font-pixel)", color: "#FF9100" }}
+          >
+            THE SITUATION
+          </div>
+          <div className="mx-auto w-full max-w-[52rem]">
+            <DollarGuy
+              key={`situation-${activeChapter.id}`}
+              dialog={activeChapter.situationDialog}
+              typingSpeed={activeChapter.dialogTypingSpeed ?? 22}
+              onDialogComplete={() => setPhase("minigame")}
+            />
+          </div>
+        </div>
+      </StoryPhaseShell>
     );
   }
 
   if (phase === "minigame" && activeChapter) {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12">
-        <InteractiveLesson
-          miniGame={activeChapter.miniGame}
-          onComplete={() => {
-            if (activeChapter.gameplay.skipGameplay) {
-              setPhase("reflect");
-            } else {
-              startPlayPhase();
-            }
-          }}
-        />
-      </div>
+      <StoryPhaseShell backdropUrl={activeChapter.storyBackdrop}>
+        <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12">
+          <InteractiveLesson
+            miniGame={activeChapter.miniGame}
+            onComplete={() => {
+              if (activeChapter.gameplay.skipGameplay) {
+                setPhase("reflect");
+              } else {
+                startPlayPhase();
+              }
+            }}
+          />
+        </div>
+      </StoryPhaseShell>
     );
   }
 
@@ -411,41 +463,46 @@ export default function StoryPage() {
     const returnPct = ((fv - STARTING_CASH) / STARTING_CASH) * 100;
 
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-12 text-center">
-        <div className="text-xs tracking-wider mb-2" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
-          CHAPTER {activeChapter.id} COMPLETE
-        </div>
+      <StoryPhaseShell backdropUrl={activeChapter.storyBackdrop}>
+        <div className="min-h-dvh flex w-full flex-col justify-center px-4 py-10 text-center sm:px-6 md:px-8">
+          <div className="mx-auto mb-2 w-full max-w-[52rem] text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
+            CHAPTER {activeChapter.id} COMPLETE
+          </div>
 
-        <div className="text-4xl mb-3">{skipped || objectiveMet ? "🎉" : "📝"}</div>
+          <div className="text-4xl mb-3">{skipped || objectiveMet ? "🎉" : "📝"}</div>
 
-        {!skipped && (
-          <div className="rounded-xl p-4 mb-6 w-full max-w-xs" style={{ background: objectiveMet ? "rgba(118,255,3,0.08)" : "rgba(255,214,0,0.08)", border: `1px solid ${objectiveMet ? "#76FF0333" : "#FFD60033"}` }}>
-            <div className="text-xs mb-1" style={{ fontFamily: "var(--font-pixel)", color: objectiveMet ? "#76FF03" : "#FFD600", fontSize: "10px" }}>
-              {objectiveMet ? "OBJECTIVE MET ✓" : "OBJECTIVE NOT MET"}
+          {!skipped && (
+            <div className="mx-auto rounded-xl p-4 mb-6 w-full max-w-xs" style={{ background: objectiveMet ? "rgba(118,255,3,0.08)" : "rgba(255,214,0,0.08)", border: `1px solid ${objectiveMet ? "#76FF0333" : "#FFD60033"}` }}>
+              <div className="text-xs mb-1" style={{ fontFamily: "var(--font-pixel)", color: objectiveMet ? "#76FF03" : "#FFD600", fontSize: "10px" }}>
+                {objectiveMet ? "OBJECTIVE MET ✓" : "OBJECTIVE NOT MET"}
+              </div>
+              <div className="text-xs" style={{ color: "#aaa" }}>{activeChapter.gameplay.objective.text}</div>
+              <div className="text-lg font-bold mt-2" style={{ color: returnPct >= 0 ? "#76FF03" : "#FF3D71" }}>
+                {returnPct >= 0 ? "+" : ""}{returnPct.toFixed(1)}% return
+              </div>
             </div>
-            <div className="text-xs" style={{ color: "#aaa" }}>{activeChapter.gameplay.objective.text}</div>
-            <div className="text-lg font-bold mt-2" style={{ color: returnPct >= 0 ? "#76FF03" : "#FF3D71" }}>
-              {returnPct >= 0 ? "+" : ""}{returnPct.toFixed(1)}% return
+          )}
+
+          <div className="mx-auto mb-6 w-full max-w-[52rem]">
+            <div className="flex items-center gap-2 mb-2 justify-center">
+              <span className="text-xl">{activeChapter.badge.icon}</span>
+              <span className="text-xs font-bold" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
+                {activeChapter.badge.label.toUpperCase()}
+              </span>
             </div>
           </div>
-        )}
 
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-2 justify-center">
-            <span className="text-xl">{activeChapter.badge.icon}</span>
-            <span className="text-xs font-bold" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
-              {activeChapter.badge.label.toUpperCase()}
-            </span>
+          <div className="mx-auto w-full max-w-[52rem]">
+            <DollarGuy
+              key={`reflect-${activeChapter.id}`}
+              dialog={activeChapter.reflectDialog}
+              typingSpeed={activeChapter.dialogTypingSpeed ?? 22}
+              onDialogComplete={handleChapterComplete}
+              size="small"
+            />
           </div>
         </div>
-
-        <DollarGuy
-          key={`reflect-${activeChapter.id}`}
-          dialog={activeChapter.reflectDialog}
-          onDialogComplete={handleChapterComplete}
-          size="small"
-        />
-      </div>
+      </StoryPhaseShell>
     );
   }
 

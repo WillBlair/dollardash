@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
-export default function DialogBubble({ text, speaker, onComplete, autoAdvance = false, typingSpeed = 30 }) {
+export default function DialogBubble({ text, onComplete, autoAdvance = false, typingSpeed = 22, header = null }) {
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   const intervalRef = useRef(null);
@@ -52,28 +52,21 @@ export default function DialogBubble({ text, speaker, onComplete, autoAdvance = 
 
   return (
     <div className="w-full flex flex-col gap-3">
+      {header}
       <button
         ref={btnRef}
         onClick={handleAdvance}
         onKeyDown={handleKeyDown}
         className="w-full text-left rounded-2xl p-5 cursor-pointer border-2 transition-all relative"
         style={{
-          background: "rgba(255,255,255,0.06)",
-          borderColor: "rgba(255,214,0,0.3)",
+          backgroundColor: "#141c2e",
+          borderColor: "rgba(255, 214, 0, 0.55)",
           fontFamily: "var(--font-mono)",
           fontSize: "clamp(13px, 2.5vw, 15px)",
           lineHeight: 1.7,
           color: "#e0e0e0",
         }}
       >
-        {speaker === "dollar-guy" && (
-          <div
-            className="text-xs font-bold mb-2 tracking-wider"
-            style={{ fontFamily: "var(--font-pixel)", color: "#FFD600", fontSize: "10px" }}
-          >
-            DOLLAR GUY
-          </div>
-        )}
         <div style={{ minHeight: "1.7em" }}>
           {displayedText}
           {isTyping && (

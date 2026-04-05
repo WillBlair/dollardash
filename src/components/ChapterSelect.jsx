@@ -6,8 +6,8 @@ export default function ChapterSelect({ progress, onSelect, onBack }) {
       <div className="text-xl mb-1" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600", textShadow: "0 0 30px rgba(255,214,0,0.25)" }}>
         STORY MODE
       </div>
-      <div className="text-sm mb-8" style={{ color: "#888" }}>
-        Dollar Guy's Guide to Finance
+      <div className="text-sm mb-8 max-w-md mx-auto" style={{ color: "#888" }}>
+        Six lessons with Dollar Guy—trading, news, diversification, compounding, budgeting, and core vocab.
       </div>
 
       <div className="flex flex-col gap-4 w-full max-w-md">

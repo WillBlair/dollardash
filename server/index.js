@@ -31,7 +31,7 @@ app.post("/api/tts", async (req, res) => {
     return res.status(503).json({ error: "TTS not configured" });
   }
 
-  const text = String(req.body?.text ?? "").trim().slice(0, 300);
+  const text = String(req.body?.text ?? "").trim().slice(0, 2000);
   if (!text) {
     return res.status(400).json({ error: "text required" });
   }

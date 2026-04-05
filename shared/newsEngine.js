@@ -9,7 +9,9 @@ import { STOCKS, NEWS_EVENTS, TICK_MS } from "./constants.js";
  * Active modifiers decay and expire after their duration.
  */
 export class NewsEngine {
-  constructor() {
+  /** @param {object} [options] See `bullishPickProbability` on gameplay config (story chapters). */
+  constructor(options = {}) {
+    this.options = options;
     this.activeModifiers = [];
     this.firedEvents = [];
     this.usedIndices = new Set();
@@ -88,15 +90,26 @@ export class NewsEngine {
   }
 
   _pickEvent() {
-    const available = NEWS_EVENTS.filter((_, i) => !this.usedIndices.has(i));
+    const available = NEWS_EVENTS.map((ev, i) => ({ ev, i })).filter(({ i }) => !this.usedIndices.has(i));
+
     if (available.length === 0) {
       this.usedIndices.clear();
       return this._pickEvent();
     }
-    const pool = available.length;
-    const globalIdx = NEWS_EVENTS.indexOf(available[Math.floor(Math.random() * pool)]);
-    this.usedIndices.add(globalIdx);
-    return NEWS_EVENTS[globalIdx];
+
+    const p = this.options.bullishPickProbability;
+    if (typeof p === "number" && p >= 0 && p <= 1) {
+      const wantBullish = Math.random() < p;
+      const sentimentMatch = available.filter(({ ev }) => (wantBullish ? ev.sentiment === "bullish" : ev.sentiment === "bearish"));
+      const pool = sentimentMatch.length > 0 ? sentimentMatch : available;
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      this.usedIndices.add(pick.i);
+      return pick.ev;
+    }
+
+    const pick = available[Math.floor(Math.random() * available.length)];
+    this.usedIndices.add(pick.i);
+    return pick.ev;
   }
 
   _randomTickBetween(minTicks, maxTicks) {
