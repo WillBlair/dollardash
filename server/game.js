@@ -26,6 +26,7 @@ export class GameRoom {
     this.histories = STOCKS.map((s) => [s.basePrice]);
     this.duration = DEFAULT_DURATION;
     this.timeLeft = DEFAULT_DURATION;
+    this.demand = STOCKS.map(() => 0);
     this.newsEngine = null;
     this.tickInterval = null;
     this.timerInterval = null;
@@ -78,6 +79,7 @@ export class GameRoom {
     this.timeLeft = this.duration;
     this.prices = STOCKS.map((s) => s.basePrice);
     this.histories = STOCKS.map((s) => [s.basePrice]);
+    this.demand = STOCKS.map(() => 0);
     this.newsEngine = new NewsEngine();
 
     for (const player of this.players.values()) {
@@ -99,7 +101,17 @@ export class GameRoom {
   _tick() {
     const newEvent = this.newsEngine.tick();
 
-    this.prices = this.prices.map((p, i) => this.newsEngine.generatePrice(p, i));
+    this.prices = this.prices.map((p, i) => {
+      const newsPrice = this.newsEngine.generatePrice(p, i);
+      // Inject player sentiment/demand drift
+      const demandDrift = this.demand[i] * 0.00015;
+      
+      this.demand[i] *= 0.80; // decay 20% momentum per tick
+      if (Math.abs(this.demand[i]) < 0.1) this.demand[i] = 0;
+      
+      return Math.max(0.01, parseFloat((newsPrice * (1 + demandDrift)).toFixed(2)));
+    });
+
     this.histories = this.histories.map((h, i) => {
       const next = [...h, this.prices[i]];
       return next.length > MAX_HISTORY ? next.slice(-MAX_HISTORY) : next;
@@ -153,6 +165,10 @@ export class GameRoom {
       const posVal = player.holdings[stockIdx] * price;
       player.stats.biggestPosition = Math.max(player.stats.biggestPosition, posVal);
       if (!player.stats.holdTicks[stockIdx]) player.stats.holdTicks[stockIdx] = 0;
+
+      // Affect market demand
+      this.demand[stockIdx] += qty;
+
       return { ok: true, action: "buy", symbol: STOCKS[stockIdx].symbol, qty, price, cash: player.cash };
     }
 
@@ -166,6 +182,10 @@ export class GameRoom {
         delete player.stats.holdTicks[stockIdx];
       }
       player.stats.totalTrades++;
+
+      // Affect market demand
+      this.demand[stockIdx] -= qty;
+
       return { ok: true, action: "sell", symbol: STOCKS[stockIdx].symbol, qty, price, cash: player.cash };
     }
 
