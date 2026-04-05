@@ -10,10 +10,10 @@ export const STARTING_CASH = 10_000;
 export const MAX_HISTORY = 200;
 
 export const STOCKS = [
-  { symbol: "NXT", name: "NextGen Tech", color: "#00E5FF", volatility: 0.045, drift: 0.002, basePrice: 120, risk: "HIGH RISK", desc: "Artificial intelligence and semiconductor manufacturer. Supplies chips to data centers, autonomous vehicles, and defense systems. Moves on tech breakthroughs, chip shortages, and government contracts." },
-  { symbol: "ECO", name: "EcoPower Solar", color: "#76FF03", volatility: 0.035, drift: 0.001, basePrice: 42, risk: "MED RISK", desc: "Designs and installs commercial solar farms and residential panels. Revenue depends heavily on government subsidies, tax credits, and energy policy. Competes directly with fossil fuel pricing." },
-  { symbol: "CART", name: "FreshCart Retail", color: "#FFD600", volatility: 0.02, drift: 0.0005, basePrice: 75, risk: "LOW-MED", desc: "National grocery and household goods chain with 2,400+ stores. Performance tracks consumer spending, inflation reports, and supply chain health. A defensive pick — people always need groceries." },
-  { symbol: "SAFE", name: "SafeHaven Bonds", color: "#FF9100", volatility: 0.008, drift: 0.0002, basePrice: 95, risk: "LOW RISK", desc: "U.S. Treasury bond fund backed by the federal government. Moves with interest rate decisions and inflation data. Investors buy bonds when the stock market feels risky — a place to protect your cash." },
+  { symbol: "NXT", name: "NextGen Tech", color: "#00E5FF", volatility: 0.045, drift: 0.002, basePrice: 120, risk: "HIGH RISK", desc: "AI & chip maker. Moves on tech breakthroughs, chip shortages, and defense contracts." },
+  { symbol: "ECO", name: "EcoPower Solar", color: "#76FF03", volatility: 0.035, drift: 0.001, basePrice: 42, risk: "MED RISK", desc: "Solar energy installer. Driven by government subsidies, tax credits, and oil prices." },
+  { symbol: "CART", name: "FreshCart Retail", color: "#FFD600", volatility: 0.02, drift: 0.0005, basePrice: 75, risk: "LOW-MED", desc: "National grocery chain. Tracks consumer spending, inflation, and supply chains." },
+  { symbol: "SAFE", name: "SafeHaven Bonds", color: "#FF9100", volatility: 0.008, drift: 0.0002, basePrice: 95, risk: "LOW RISK", desc: "U.S. Treasury bonds. A safe place to park cash when the market gets scary." },
 ];
 
 export const BADGES = [
