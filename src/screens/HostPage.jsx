@@ -169,6 +169,9 @@ export default function HostPage() {
             >
               START GAME
             </button>
+            {phase === "lobby" && (
+              <audio src="/The Son of Flynn (From TRON_ LegacyScore).mp3" autoPlay loop />
+            )}
           </>
         )}
       </div>
