@@ -4,7 +4,7 @@ import { STOCKS } from "../../shared/constants.js";
 import ArcadeTitle from "../components/ArcadeTitle.jsx";
 
 /** Looped on the landing page; fades out when leaving via Story / Host / Join. */
-const HOME_LOOP_MP3 = "final selected.mp3";
+const HOME_LOOP_MP3 = "home_loop.mp3";
 const HOME_LOOP_VOLUME = 0.72;
 const LEAVE_FADE_MS = 750;
 
