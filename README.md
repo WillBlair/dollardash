@@ -81,8 +81,8 @@ This starts both the Express/Socket.io server and the Vite dev server concurrent
 
 | Service | URL |
 |---------|-----|
-| Game (Vite) | http://localhost:5173 |
-| Server (Express) | http://localhost:3001 |
+| Game | https://dollardash.onrender.com |
+| Server | https://dollardash.onrender.com (same origin) |
 
 ### Build for production
 
