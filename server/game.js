@@ -97,13 +97,13 @@ export class GameRoom {
       };
     }
 
-    // Start trading after 3-second Day 1 transition
+    // Start trading after 20-second Day 1 intro screen
     setTimeout(() => {
       if (this.state === "playing") {
         this.tickInterval = setInterval(() => this._tick(), TICK_MS);
         this.timerInterval = setInterval(() => this._timer(), 1000);
       }
-    }, 3200);
+    }, 20000);
   }
 
   _tick() {
@@ -165,7 +165,7 @@ export class GameRoom {
         this.tickInterval = setInterval(() => this._tick(), TICK_MS);
         this.timerInterval = setInterval(() => this._timer(), 1000);
       }
-    }, 3000);
+    }, 10000);
   }
 
   _endGame() {
