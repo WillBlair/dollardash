@@ -89,9 +89,9 @@ export default function HomeScreen() {
             </div>
 
             <p className="text-sm max-w-md leading-relaxed mb-6" style={{ color: "#aaa" }}>
-              A real-time stock trading game.
+              Learn to trade through Dollar Guy's story
               <br />
-              Play solo or compete with friends. Highest portfolio wins.
+              — then compete with friends.
             </p>
 
             <div className="flex flex-wrap gap-2 justify-center mb-8">
@@ -117,7 +117,7 @@ export default function HomeScreen() {
 
             <div className="flex flex-col gap-3 w-full max-w-sm">
               <button
-                onClick={() => navigate("/solo")}
+                onClick={() => navigate("/story")}
                 className="w-full rounded-xl py-4 px-6 font-bold text-lg cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
                 style={{
                   fontFamily: "var(--font-pixel)",
@@ -126,7 +126,7 @@ export default function HomeScreen() {
                   boxShadow: "0 0 30px rgba(118,255,3,0.25)",
                 }}
               >
-                SOLO PLAY
+                STORY MODE
               </button>
               <div className="flex gap-3">
                 <button
@@ -157,7 +157,7 @@ export default function HomeScreen() {
             </div>
 
             <p className="text-xs mt-6 mb-2 max-w-md" style={{ color: "#444" }}>
-              Solo mode works offline. Multiplayer needs a server.
+              Story mode teaches the basics. Multiplayer lets you compete.
             </p>
           </div>
 
