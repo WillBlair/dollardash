@@ -58,15 +58,15 @@ export default function HeadlineQuizGame({ config, onComplete }) {
     return (
       <div className="flex flex-col items-center gap-4 w-full max-w-sm mx-auto animate-slide-up">
         <div className="text-4xl mb-2">{allCorrect ? "🎯" : "📊"}</div>
-        <div className="text-xl font-bold" style={{ fontFamily: "var(--font-pixel)", color: allCorrect ? "#76FF03" : "#FFD600" }}>
+        <div className="text-xl font-bold" style={{ fontFamily: "var(--font-pixel)", color: allCorrect ? "#76FF03" : "#FFD600", textShadow: "2px 2px 0 #000" }}>
           {score}/{config.headlines.length} CORRECT
         </div>
-        <div className="text-sm text-center" style={{ color: "#aaa" }}>
+        <div className="text-sm text-center" style={{ color: "#aaa", textShadow: "1px 1px 0 #000" }}>
           {allCorrect ? config.successText : config.partialText}
         </div>
         <div className="w-full flex flex-col gap-2 mt-2">
           {answers.map((a, i) => (
-            <div key={i} className="rounded-lg p-3 text-xs" style={{ background: "rgba(0,0,0,0.5)", border: `1px solid ${a.correct ? "#76FF03" : "#FF3D71"}` }}>
+            <div key={i} className="rounded-lg p-3 text-xs" style={{ background: "rgba(10,14,26,0.95)", border: `1px solid ${a.correct ? "#76FF03" : "#FF3D71"}` }}>
               <div style={{ color: "#ddd" }}>{a.text}</div>
               <div className="mt-1" style={{ color: a.correct ? "#76FF03" : "#FF3D71" }}>
                 {a.correct ? "✓" : "✗"} {a.answer === "bullish" ? "📈 Good News (Bullish)" : "📉 Bad News (Bearish)"}
@@ -89,7 +89,7 @@ export default function HeadlineQuizGame({ config, onComplete }) {
 
   return (
     <div className="flex flex-col items-center gap-5 w-full max-w-sm mx-auto">
-      <div className="text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}>
+      <div className="text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FFD600", textShadow: "1px 1px 0 #000" }}>
         MINI-GAME: READ THE HEADLINES
       </div>
 
@@ -100,7 +100,7 @@ export default function HeadlineQuizGame({ config, onComplete }) {
       </div>
 
       {!feedback && (
-        <div className="rounded-xl p-5 w-full text-center animate-slide-up" style={{ background: "rgba(0,0,0,0.5)", border: "1px solid rgba(255,255,255,0.2)" }}>
+        <div className="rounded-xl p-5 w-full text-center animate-slide-up" style={{ background: "rgba(10,14,26,0.95)", border: "1px solid rgba(255,255,255,0.2)" }}>
           <div className="text-xs mb-3" style={{ color: "#888" }}>
             About: <span className="font-bold" style={{ color: "#FFD600" }}>{headline.stock}</span>
           </div>
@@ -112,7 +112,7 @@ export default function HeadlineQuizGame({ config, onComplete }) {
 
       {feedback && (
         <div className="flex flex-col items-center gap-3 w-full animate-slide-up">
-          <div className="rounded-xl p-5 w-full text-center" style={{ background: "rgba(0,0,0,0.5)", border: `2px solid ${feedback.correct ? "#76FF03" : "#FF3D71"}` }}>
+          <div className="rounded-xl p-5 w-full text-center" style={{ background: "rgba(10,14,26,0.95)", border: `2px solid ${feedback.correct ? "#76FF03" : "#FF3D71"}` }}>
             <div className="text-2xl mb-2">{feedback.correct ? "✅" : "❌"}</div>
             <div className="text-sm font-bold mb-1" style={{ color: feedback.correct ? "#76FF03" : "#FF3D71" }}>
               {feedback.correct ? "Correct!" : "Not quite!"}
