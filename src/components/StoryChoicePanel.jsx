@@ -1,35 +1,52 @@
-/** Branch buttons for story decision steps — large tap targets, comic tone. */
+/** Story choice list — narrow column, aligned text, readable tap targets. */
 export default function StoryChoicePanel({ options, onPick, disabled }) {
   return (
-    <div className="flex w-full flex-col gap-2.5">
+    <div className="w-full max-w-md flex flex-col gap-2">
       <div
-        className="text-[10px] font-bold tracking-wider mb-1"
-        style={{ fontFamily: "var(--font-pixel)", color: "#FF9100" }}
+        className="text-[10px] font-bold tracking-wider"
+        style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
       >
-        PICK YOUR MOVE
+        CHOOSE ONE
       </div>
-      {options.map((opt, i) => (
-        <button
-          key={i}
-          type="button"
-          disabled={disabled}
-          onClick={() => onPick(i)}
-          className="w-full text-left rounded-xl px-4 py-3.5 cursor-pointer border-2 transition-all hover:scale-[1.02] active:scale-[0.99] disabled:opacity-45 disabled:pointer-events-none disabled:hover:scale-100"
-          style={{
-            borderColor: "rgba(255, 214, 0, 0.5)",
-            backgroundColor: "#161d2c",
-            fontFamily: "var(--font-mono)",
-            fontSize: "clamp(12px, 2.8vw, 14px)",
-            lineHeight: 1.45,
-            color: "#f0f0f0",
-          }}
-        >
-          <span className="mr-2" aria-hidden>
-            {opt.emoji ?? "➜"}
-          </span>
-          {opt.label}
-        </button>
-      ))}
+      <ul className="m-0 p-0 list-none flex flex-col gap-2">
+        {options.map((opt, i) => (
+          <li key={i}>
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => onPick(i)}
+              className="flex w-full gap-3 text-left rounded-xl border-2 px-3 py-3 sm:px-3.5 sm:py-3 cursor-pointer transition-colors hover:border-[#FFD60099] disabled:opacity-45 disabled:pointer-events-none disabled:hover:border-[rgba(255,214,0,0.45)]"
+              style={{
+                borderColor: "rgba(255, 214, 0, 0.45)",
+                backgroundColor: "#161d2c",
+              }}
+            >
+              <span
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold"
+                style={{ background: "rgba(255, 214, 0, 0.14)", fontFamily: "var(--font-pixel)", color: "#FFD600" }}
+                aria-hidden
+              >
+                {i + 1}
+              </span>
+              <span
+                className="min-w-0 flex-1 text-sm leading-snug sm:text-[15px] sm:leading-snug"
+                style={{ fontFamily: "var(--font-mono)", color: "#f0f0f0" }}
+              >
+                {opt.emoji ? (
+                  <>
+                    <span className="mr-1.5 inline-block text-base translate-y-px" aria-hidden>
+                      {opt.emoji}
+                    </span>
+                    {opt.label}
+                  </>
+                ) : (
+                  opt.label
+                )}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

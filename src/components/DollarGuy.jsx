@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect } from "react";
 import DialogBubble from "./DialogBubble.jsx";
 import SituationCard from "./SituationCard.jsx";
 import StoryChoicePanel from "./StoryChoicePanel.jsx";
+import DollarGuySpeakerCue from "./DollarGuySpeakerCue.jsx";
+import { useStoryNarrator } from "../hooks/useStoryNarrator.js";
 
 function toSteps(dialog) {
   return dialog.map((item) =>
@@ -12,25 +14,45 @@ function toSteps(dialog) {
 /** Served from /public/story — story-mode mascot art. */
 const DOLLAR_GUY_SRC = "/story/dollar-guy.png";
 
-function DollarGuyPortrait({ size }) {
+const voiceEnabledDefault = import.meta.env.VITE_STORY_VOICE_ENABLED !== "false";
+
+function DollarGuyPortrait({ size, isSpeaking }) {
   const isLarge = size === "large";
   return (
-    <img
-      src={DOLLAR_GUY_SRC}
-      alt="Dollar Guy"
-      className={
-        isLarge
-          ? "h-32 sm:h-36 w-auto max-w-[12rem] sm:max-w-[14rem] object-contain drop-shadow-[0_8px_24px_rgba(0,0,0,0.45)] shrink-0 select-none"
-          : "h-16 sm:h-[4.5rem] w-auto max-w-[7rem] object-contain drop-shadow-md shrink-0 select-none"
-      }
-      draggable={false}
-    />
+    <div className="flex flex-col items-center gap-2 shrink-0 self-end">
+      <div
+        className={`rounded-2xl p-1.5 transition-all duration-300 ${
+          isSpeaking
+            ? "bg-[rgba(255,214,0,0.14)] shadow-[0_0_40px_rgba(255,214,0,0.38)] ring-2 ring-[#FFD60055]"
+            : "ring-2 ring-transparent"
+        }`}
+      >
+        <img
+          src={DOLLAR_GUY_SRC}
+          alt="Dollar Guy"
+          className={
+            isLarge
+              ? "h-[16rem] sm:h-[20rem] md:h-[24rem] lg:h-[28rem] w-auto max-w-[min(52vw,28rem)] object-contain object-bottom drop-shadow-[0_16px_40px_rgba(0,0,0,0.55)] select-none"
+              : "h-40 sm:h-48 md:h-52 w-auto max-w-[min(44vw,20rem)] object-contain object-bottom drop-shadow-[0_10px_28px_rgba(0,0,0,0.45)] select-none"
+          }
+          draggable={false}
+        />
+      </div>
+      <span
+        className="text-[8px] font-bold tracking-widest text-center leading-snug max-w-[12rem]"
+        style={{ fontFamily: "var(--font-pixel)", color: "#FFD600" }}
+      >
+        DOLLAR GUY · YOUR GUIDE
+      </span>
+    </div>
   );
 }
 
-export default function DollarGuy({ dialog, onDialogComplete, size = "large" }) {
+export default function DollarGuy({ dialog, onDialogComplete, size = "large", voiceEnabled = voiceEnabledDefault }) {
   const [steps, setSteps] = useState(() => toSteps(dialog));
   const [lineIndex, setLineIndex] = useState(0);
+
+  const { speak, stop, isSpeaking } = useStoryNarrator(voiceEnabled);
 
   useEffect(() => {
     setSteps(toSteps(dialog));
@@ -38,6 +60,15 @@ export default function DollarGuy({ dialog, onDialogComplete, size = "large" }) 
   }, [dialog]);
 
   const step = steps[lineIndex];
+
+  useEffect(() => {
+    if (!voiceEnabled) return;
+    const s = steps[lineIndex];
+    if (!s) return;
+    const text = s.kind === "line" ? s.line.text : s.prompt;
+    speak(text);
+    return () => stop();
+  }, [steps, lineIndex, voiceEnabled, speak, stop]);
 
   const handleAdvance = useCallback(() => {
     if (!step || step.kind === "choice") return;
@@ -69,35 +100,44 @@ export default function DollarGuy({ dialog, onDialogComplete, size = "large" }) 
       ? `L${lineIndex}-${step.line.text?.slice(0, 24) ?? ""}`
       : `C${lineIndex}`;
 
-  const rootMax = step.kind === "choice" ? "max-w-5xl" : "max-w-lg";
+  const rootMax = "max-w-6xl";
+
+  const speakerCue = <DollarGuySpeakerCue isSpeaking={isSpeaking} />;
 
   return (
-    <div className={`flex flex-col items-center gap-4 w-full ${rootMax} mx-auto px-1 animate-slide-up`}>
-      <DollarGuyPortrait size={size} />
+    <div className={`flex w-full flex-col gap-4 ${rootMax} mx-auto px-2 sm:px-4 animate-slide-up`}>
+      <div className="flex w-full flex-row items-end gap-4 sm:gap-6 md:gap-8">
+        <DollarGuyPortrait size={size} isSpeaking={isSpeaking} />
 
-      <div className="w-full">
-        {step.kind === "line" && (
-          <>
-            {step.line.scene && (
-              <SituationCard
-                icon={step.line.scene.icon}
-                headline={step.line.scene.headline}
-                accent={step.line.scene.accent ?? "#00E5FF"}
-              >
-                {step.line.scene.detail && (
-                  <div className="text-xs mt-1" style={{ color: "#aaa" }}>
-                    {step.line.scene.detail}
-                  </div>
-                )}
-              </SituationCard>
-            )}
-            <DialogBubble key={bubbleKey} text={step.line.text} onComplete={handleAdvance} />
-          </>
-        )}
+        <div
+          className={`min-w-0 flex flex-col gap-3 pb-1 ${step.kind === "choice" ? "w-full max-w-lg flex-1" : "flex-1 w-full max-w-xl"}`}
+        >
+          {step.kind === "line" && (
+            <>
+              {step.line.scene && (
+                <SituationCard
+                  icon={step.line.scene.icon}
+                  headline={step.line.scene.headline}
+                  accent={step.line.scene.accent ?? "#00E5FF"}
+                >
+                  {step.line.scene.detail && (
+                    <div className="text-xs mt-1" style={{ color: "#aaa" }}>
+                      {step.line.scene.detail}
+                    </div>
+                  )}
+                </SituationCard>
+              )}
+              <DialogBubble
+                key={bubbleKey}
+                text={step.line.text}
+                header={speakerCue}
+                onComplete={handleAdvance}
+              />
+            </>
+          )}
 
-        {step.kind === "choice" && (
-          <div className="flex w-full flex-col gap-4 md:flex-row md:items-start md:gap-5">
-            <div className="flex min-w-0 flex-1 flex-col gap-3">
+          {step.kind === "choice" && (
+            <div className="flex w-full flex-col gap-3">
               {step.scene && (
                 <SituationCard
                   icon={step.scene.icon}
@@ -111,32 +151,40 @@ export default function DollarGuy({ dialog, onDialogComplete, size = "large" }) 
                   )}
                 </SituationCard>
               )}
+              {speakerCue}
               <div
-                className="rounded-2xl border-2 p-4 w-full"
+                className="rounded-xl border-2 px-3.5 py-3 w-full relative"
                 style={{
                   borderColor: "rgba(255, 214, 0, 0.45)",
                   backgroundColor: "#141c2e",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.45)",
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.35)",
                 }}
               >
+                <div
+                  className="pointer-events-none absolute left-0 top-6 -translate-x-1.5 sm:-translate-x-2 w-0 h-0 border-y-[7px] border-y-transparent border-r-[9px] sm:border-r-[10px]"
+                  style={{ borderRightColor: "#141c2e" }}
+                  aria-hidden
+                />
+                <div
+                  className="pointer-events-none absolute left-0 top-[calc(1.5rem-2px)] -translate-x-[calc(0.375rem+2px)] sm:-translate-x-[calc(0.5rem+2px)] w-0 h-0 border-y-[9px] border-y-transparent border-r-[11px]"
+                  style={{ borderRightColor: "rgba(255, 214, 0, 0.45)" }}
+                  aria-hidden
+                />
                 <p
-                  className="m-0"
+                  className="m-0 text-sm sm:text-[15px] relative"
                   style={{
                     fontFamily: "var(--font-mono)",
-                    fontSize: "clamp(13px, 2.5vw, 15px)",
-                    lineHeight: 1.65,
+                    lineHeight: 1.55,
                     color: "#e8e8e8",
                   }}
                 >
                   {step.prompt}
                 </p>
               </div>
-            </div>
-            <div className="w-full shrink-0 md:w-[min(20.5rem,34vw)] md:max-w-sm">
               <StoryChoicePanel options={step.options} onPick={handlePick} />
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <div className="flex gap-1.5 flex-wrap justify-center max-w-full">

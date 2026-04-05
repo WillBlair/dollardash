@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
-export default function DialogBubble({ text, onComplete, autoAdvance = false, typingSpeed = 22 }) {
+export default function DialogBubble({ text, onComplete, autoAdvance = false, typingSpeed = 22, header = null }) {
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   const intervalRef = useRef(null);
@@ -52,6 +52,7 @@ export default function DialogBubble({ text, onComplete, autoAdvance = false, ty
 
   return (
     <div className="w-full flex flex-col gap-3">
+      {header}
       <button
         ref={btnRef}
         onClick={handleAdvance}

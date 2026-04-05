@@ -17,7 +17,7 @@ export default function SituationCard({ icon, headline, accent = "#00E5FF", chil
         </span>
         <div className="min-w-0 flex-1">
           <div
-            className="text-[10px] font-bold tracking-widest mb-0.5 truncate"
+            className="text-[10px] font-bold tracking-widest mb-0.5 break-words leading-tight"
             style={{ fontFamily: "var(--font-pixel)", color: accent }}
           >
             {headline}
