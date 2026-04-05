@@ -2,13 +2,13 @@ import { useState, useCallback } from "react";
 
 export default function PortfolioBuilderGame({ config, onComplete }) {
   const [allocations, setAllocations] = useState(config.stocks.map(() => Math.floor(config.budget / config.stocks.length)));
-  const [phase, setPhase] = useState("allocate");
   const [crashResult, setCrashResult] = useState(null);
 
-  const total = allocations.reduce((sum, a) => sum + a, 0);
-  const remaining = config.budget - total;
+  const remaining = config.budget - allocations.reduce((sum, a) => sum + a, 0);
 
-  const handleSlider = (idx, value) => {
+  const handleSlider = (idx, raw) => {
+    const value = Number(raw);
+    if (!Number.isFinite(value)) return;
     const newAlloc = [...allocations];
     const oldVal = newAlloc[idx];
     const diff = value - oldVal;
@@ -18,6 +18,8 @@ export default function PortfolioBuilderGame({ config, onComplete }) {
   };
 
   const handleSimulate = () => {
+    if (remaining !== 0) return;
+
     const crashIdx = config.crashStockIdx;
     const results = allocations.map((amount, i) => {
       if (i === crashIdx) {
@@ -31,7 +33,6 @@ export default function PortfolioBuilderGame({ config, onComplete }) {
     const diversified = allocations.filter((a) => a > 0).length >= 3;
 
     setCrashResult({ results, totalBefore, totalAfter, diversified });
-    setPhase("result");
   };
 
   const handleContinue = useCallback(() => {
@@ -45,7 +46,7 @@ export default function PortfolioBuilderGame({ config, onComplete }) {
     }
   }, [handleContinue]);
 
-  if (phase === "result" && crashResult) {
+  if (crashResult) {
     return (
       <div className="flex flex-col items-center gap-4 w-full max-w-sm mx-auto animate-slide-up">
         <div className="text-xs tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "#FF3D71" }}>
@@ -78,6 +79,7 @@ export default function PortfolioBuilderGame({ config, onComplete }) {
         </div>
 
         <button
+          type="button"
           autoFocus
           onClick={handleContinue}
           onKeyDown={handleContinueKey}
@@ -114,7 +116,8 @@ export default function PortfolioBuilderGame({ config, onComplete }) {
               min={0}
               max={config.budget}
               value={allocations[i]}
-              onChange={(e) => handleSlider(i, parseInt(e.target.value))}
+              onChange={(e) => handleSlider(i, e.target.value)}
+              onInput={(e) => handleSlider(i, e.target.value)}
               className="w-full h-2 rounded-full appearance-none cursor-pointer"
               style={{ accentColor: stock.color, background: "rgba(255,255,255,0.1)" }}
             />
@@ -123,14 +126,15 @@ export default function PortfolioBuilderGame({ config, onComplete }) {
       </div>
 
       <button
+        type="button"
         onClick={handleSimulate}
-        disabled={total === 0}
-        className="rounded-xl py-4 px-12 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105"
+        disabled={remaining !== 0}
+        className="rounded-xl py-4 px-12 font-bold text-base cursor-pointer border-none tracking-wider transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         style={{
           fontFamily: "var(--font-pixel)",
-          background: total > 0 ? "#FFD600" : "#333",
+          background: remaining === 0 ? "#FFD600" : "#333",
           color: "#0a0e1a",
-          opacity: total > 0 ? 1 : 0.5,
+          opacity: remaining === 0 ? 1 : 0.5,
         }}
       >
         SIMULATE CRASH 💥
