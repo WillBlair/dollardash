@@ -95,7 +95,7 @@ export default function StoryPage() {
     setNewsEvents([]);
     setObjectiveMet(false);
     setActiveHint(null);
-    newsRef.current = new NewsEngine();
+    newsRef.current = new NewsEngine(cfg.newsEngineOptions ?? {});
     scriptedEventsRef.current = [...(cfg.scriptedEvents || [])];
 
     gameRef.current = {

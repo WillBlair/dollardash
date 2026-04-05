@@ -138,6 +138,7 @@ export const CHAPTERS = [
     gameplay: {
       availableStocks: [0, 1, 2, 3],
       durationSeconds: 45,
+      newsEngineOptions: { bullishPickProbability: 0.78 },
       objective: {
         id: "diversified",
         text: "End the round holding shares in at least 3 different stocks",
@@ -146,10 +147,17 @@ export const CHAPTERS = [
       hintLevel: "moderate",
       hints: [
         { trigger: "single-stock-15s", text: "You're only in one stock. Remember what happened to Steve!", position: "stock-card" },
-        { trigger: "crash-event", text: "Market crash! If you diversified, you'll be fine.", position: "center" },
+        { trigger: "crash-event", text: "Bumpy stretch! If you diversified, you'll be fine.", position: "center" },
       ],
       scriptedEvents: [
-        { atSecond: 20, stockIdx: -1, headline: "BREAKING: Major bank collapses — markets in panic", sentiment: "bearish", driftMod: -0.05, durationSec: 10 },
+        {
+          atSecond: 20,
+          stockIdx: -1,
+          headline: "MARKET BRIEF: Profit-taking after a strong run — volatility ticks up",
+          sentiment: "bearish",
+          driftMod: -0.028,
+          durationSec: 8,
+        },
       ],
     },
     reflectDialog: [
